@@ -1,0 +1,243 @@
+
+{
+  "navLinks": [
+    { "path": "/contact-us", "label": "Contact Us" },
+       { "path": "/about-us", "label": " About Us" },
+
+    { "path": "/shop", "label": "Shop" },
+    { "path": "/", "label": "Categories", "hasDropdown": true },
+    { "path": "/", "label": "Home" }
+  ],
+  "categoriesSubLinks": [
+    { "path": "/categoryProducts", "label": "Spiritual" },
+    { "path": "/categoryProducts", "label": "Energy" },
+    { "path": "/categoryProducts", "label": "Spiritual Healing" },
+    { "path": "/categoryProducts", "label": "Life Coach" }
+  ],
+  "footerText": "All rights reserved",
+  "hero": {
+    "title1": "Everything you need from courses, sessions",
+    "title2": "and memorization in one safe and reliable platform",
+    "description": "An integrated platform for learning, spiritual and energy healing, combining courses, live sessions, spiritual store, and memorization, in a safe and reliable experience that supports your journey.",
+    "button": "Discover More"
+  },
+  "features": {
+    "title": "Rawhany Features",
+    "subtitle": "Your journey is easier with Rawhany",
+    "cards": {
+      "session": "Live and trusted sessions",
+      "courses": "Diverse courses",
+      "store": "Integrated store",
+      "live": "Live streaming and permanent archive",
+      "verify": "Account verification",
+      "safe": "Safe and easy-to-use experience"
+    }
+  },
+  "courses": {
+    "smallTitle": "Rawhany Courses",
+    "bigTitle": "Spirituality",
+    "currency": "EGP",
+    "videos": "tutorial videos",
+    "files": "files",
+    "items": {
+      "course1": { "name": "Course 31", "instructor": "Ahmed Ibrahim" },
+      "course2": { "name": "Course 32", "instructor": "Mahmoud Galal" },
+      "course3": { "name": "Course 33", "instructor": "Shafie" },
+      "course4": { "name": "Course 64", "instructor": "Ibrahim Mostafa" },
+      "course5": { "name": "Course 326", "instructor": "Diaa Ali" }
+    }
+  
+  
+  },
+  
+  "ContactUs": {
+    "title": "Contact Us",
+    "breadcrumb": "Home",
+    "current": "Contact Us",
+    "address": "Address",
+    "email": "Email",
+    "workingHours": "Working Hours",
+    "enterAddress": "Enter the address to display on the map",
+    "customRequest": "Submit a Custom Request",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "phone": "Phone Number",
+    "subject": "Subject",
+    "message": "Enter your message",
+    "sendRequest": "Send Request"
+  }
+,
+
+  "shop": "Shop",
+  "home": "Home",
+  "show_products": "Showing {{count}} products",
+  "product_name": "Rosary with 99 beads engraved with the names of Allah",
+  "product_desc": "Vase and bead forming materials",
+  "currency": "EGP",
+  "search": "Search ...",
+  "sort_by": "Sort by",
+  "sort_low_high": "Price: Low to High",
+  "sort_high_low": "Price: High to Low",
+  "sort_latest": "Latest",
+  "sort_best": "Best Seller",
+  "categories": "Product Categories",
+  "category_1": "Spirituality",
+  "category_2": "Energy",
+  "category_3": "Spiritual Healing",
+  "category_4": "Energy Healing",
+  "category_5": "Life Coach",
+  "category_6": "Quran Memorization",
+  "filter_products": "Filter Products",
+  "apply_filters": "Apply Filters",
+  "howwork": {
+    "subtitle": "How to use Rawhany",
+    "title": "How does it work?",
+    "step1": {
+      "title": "Browse the platform",
+      "desc": "You can easily explore Rawhany platform sections and services and quickly access the required content."
+    },
+    "step2": {
+      "title": "Choose your service",
+      "desc": "Select the course, session, or product that suits your needs and add it to your cart."
+    },
+    "step3": {
+      "title": "Enjoy your experience",
+      "desc": "Complete your order and enjoy a unique and safe experience with Rawhany."
+    }
+  },
+  "AboutUs": {
+    "subtitle": "How to use Rawhany",
+    "title": "How does it work?",
+    "step1": {
+      "title": "Browse the platform",
+      "desc": "You can easily explore Rawhany platform sections and services and quickly access the required content."
+    },
+    "step2": {
+      "title": "Choose your service",
+      "desc": "Select the course, session, or product that suits your needs and add it to your cart."
+    },
+    "step3": {
+      "title": "Enjoy your experience",
+      "desc": "Complete your order and enjoy a unique and safe experience with Rawhany."
+    }
+    
+  }
+  
+  ,
+  "footer": {
+    "description": "Our practical academy aims to prepare trainees with practical and applied skills that qualify them for the labor market through advanced training programs and an interactive educational experience.",
+    "quickLinks": {
+      "title": "Quick Links",
+      "links": ["Home", "Channels", "About Us", "Contact Us"]
+    },
+    "myAccount": {
+      "title": "My Account",
+      "links": ["Contact Us", "Privacy Policy", "Terms and Conditions"]
+    },
+    "socialMedia": {
+      "title": "Social Media",
+      "platforms": ["Facebook", "LinkedIn", "Twitter", "Behance", "YouTube"]
+    },
+    "copyright": "Copyright © 2025. All rights reserved. Powered by ",
+    "poweredBy": "Baramge Tek",
+    "support": {
+      "title": "Get Support",
+      "email": "info@mail.com"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "phone": "905.3002.557"
+    }
+  },
+"productDetails": {
+    "details": "Details",
+    "aboutBrand": "About the Brand",
+    "reviews": "Reviews",
+    "leaveReview": "Leave a Review",
+    "yourName": "Your Name",
+    "yourEmail": "Your Email",
+    "yourComment": "Write your comment",
+    "submitComment": "Submit Comment",
+    "productDescription": "Product details go here... This can be a long description of the product.",
+    "brandInfo": "Information about the brand goes here...",
+    "reviewExample": {
+      "name": "Ahmed Mohamed",
+      "comment": "Great comment, the product is excellent!"
+    }
+  },
+
+  "checkout": {
+    "promoCode": "Promo Code",
+    "usePromo": "Use promo code here",
+    "apply": "Apply",
+    "subtotal": "Subtotal",
+    "currency": "EGP",
+    "shipping": "Shipping",
+    "shippingBy": "Shipping by",
+    "storePickup": "Store Pickup",
+    "shipTo": "Ship to",
+    "city": "Cairo",
+    "changeAddress": "Change Address",
+    "total": "Total",
+    "totalAmount": "260.00 EGP",
+    "proceedPayment": "Proceed to Payment"
+  }
+,
+  "cart": {
+    "title": "Cart",
+    "breadcrumb": "Home"
+  }
+,
+  "categoryProducts": {
+    "title": "Spirituality",
+    "breadcrumbHome": "Home",
+    "breadcrumbCurrent": "Spirituality"
+  },
+  "contactList": {
+    "title": "Trainer List",
+    "searchPlaceholder": "Search...",
+    "trainerName": "Trainer Name",
+    "trainerStatus": "Spirituality",
+    "pagination": {
+      "next": "Next",
+      "prev": "Previous"
+    }
+  }
+,
+ "commentForm": {
+    "title": "Leave your comment",
+    "email": "Your email",
+    "name": "Your name",
+    "comment": "Write your comment",
+    "submit": "Submit Comment"
+  }
+,
+"product": {
+    "alt": "Product image",
+    "rating": "(2 customer reviews)",
+    "title": "Rosary with 99 beads engraved with Allah’s names and Prophet Muhammad (PBUH)",
+    "price": "5,000.00 EGP",
+    "tax": "Prices include VAT",
+    "brand": "Fizdel",
+    "addToCart": "Add to Cart"
+  }
+,
+  "details": {
+    "store": "Store",
+    "breadcrumb_home": "Home",
+    "product_details": "Product Details",
+    "title": "Details",
+    "about_brand": "About the Brand",
+    "brand_description": "A company specialized in a unique brand, focusing on the design and production of marine textiles, crafted with premium materials and accessories...",
+    "reviews": "Reviews",
+    "testimonial1": "I’ve used their services multiple times and I’m completely satisfied with the results. Excellent and fast service with very reasonable prices. Highly recommended for products and solving any issues.",
+    "testimonial2": "A feeling of calm and tranquility 💛",
+    "point1": "Information about the style",
+    "point2": "An extraordinary design, renewed with artistic and advanced effects of various patterns.",
+    "point3": "Superior quality guaranteed with high standards and durable materials.",
+    "point4": "Proven performance with multiple black color options to suit different styles.",
+    "point5": "Versatile uses for activities and events; can also be applied in offices or reading areas."
+  }
+}
+
+

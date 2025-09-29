@@ -1,0 +1,15 @@
+[dir = "ltr"] .hero  h1 {
+    text-align: left;
+}
+
+[dir = "rtl"] .hero h1 {
+    text-align: right;
+}
+
+[dir = "ltr"] .hero  p{
+    text-align: left;
+}
+
+[dir = "rtl"] .hero p {
+    text-align: right;
+}
