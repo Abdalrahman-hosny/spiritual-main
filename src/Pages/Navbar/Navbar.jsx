@@ -1,11 +1,9 @@
-// src/components/Navbar.jsx
 import React, { useState } from 'react';
 import { FaRegCircleUser, FaBars, FaGlobe } from 'react-icons/fa6';
 import { FaShoppingBag, FaTimes } from 'react-icons/fa';
 import logo from "../../assets/navbarlogo.png";
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
 
 export default function Navbar({ bg }) {
   const location = useLocation();
@@ -14,7 +12,6 @@ export default function Navbar({ bg }) {
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
-
   const isRTL = i18n.language === 'ar';
 
   const toggleMobileMenu = () => {
@@ -41,7 +38,7 @@ export default function Navbar({ bg }) {
         className={`${isMobile ? 'w-7 h-7' : 'w-9 xl:w-10 h-9 xl:h-10'} bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200`}
         aria-label="Select Language"
       >
-        <FaGlobe className={`${isMobile ? 'text-[12px]' : 'text-[15px] xl:text-[18px]'} text-purple-500 `} />
+        <FaGlobe className={`${isMobile ? 'text-[12px]' : 'text-[15px] xl:text-[18px]'} text-purple-500`} />
       </button>
       {isLanguageDropdownOpen && (
         <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-32 bg-white shadow-xl rounded-lg border border-gray-100 transition-all duration-200 z-50`}>
@@ -72,10 +69,9 @@ export default function Navbar({ bg }) {
     <div className={`${bg}`}>
       <nav className={`w-[95%] z-50 lg:w-[90%] xl:w-[85%] 2xl:w-[80%] mx-auto flex items-center justify-between px-2 sm:px-4 py-3 sm:py-4 ${isRTL ? 'rtl' : 'ltr'}`}>
         {/* Desktop Navigation */}
-        <div className={`hidden lg:flex items-center space-x-3 xl:space-x-4 ${isRTL ? 'rtl:space-x-reverse' : ''}`}>
+        <div className={`hidden lg:flex items-center ${isRTL ? 'space-x-reverse gap-3' : 'gap-3'}`}>
           {/* Language selector */}
           <LanguageDropdown />
-
           {/* Contact icon */}
           <Link to={"/cart"} className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
             <FaShoppingBag className="text-[15px] xl:text-[18px] text-purple-500" />
@@ -84,7 +80,7 @@ export default function Navbar({ bg }) {
             <FaRegCircleUser className="text-[15px] xl:text-[18px] text-purple-500" />
           </Link>
           {/* Navigation links - Desktop */}
-          <div className="flex mx-3 xl:mx-6 gap-2 lg:gap-3 xl:gap-5 bg-white  rounded-full py-2 lg:py-3 px-3 lg:px-6 xl:px-8 text-black shadow-lg">
+          <div className="flex mx-3 xl:mx-6 gap-2 lg:gap-3 xl:gap-5 bg-white rounded-full py-2 lg:py-3 px-3 lg:px-6 xl:px-8 text-black shadow-lg">
             {t('navLinks', { returnObjects: true }).map((link) =>
               link.hasDropdown ? (
                 <div
@@ -107,7 +103,6 @@ export default function Navbar({ bg }) {
                   >
                     {link.label}
                   </Link>}
-
                   {/* Desktop Dropdown */}
                   <div className={`absolute top-full ${isRTL ? 'right-0' : 'left-0'} mt-1 w-44 bg-white shadow-xl rounded-lg border border-gray-100 transition-all duration-200 z-50
                     ${isDesktopDropdownOpen
@@ -144,15 +139,19 @@ export default function Navbar({ bg }) {
             )}
           </div>
         </div>
+
         {/* Tablet Navigation (md to lg) */}
-        <div className={`hidden md:flex lg:hidden items-center space-x-2 ${isRTL ? 'rtl:space-x-reverse' : ''}`}>
+        <div className={`hidden md:flex lg:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown />
+          <div className="mx-2"></div> {/* إضافة مسافة بين الأيقونات */}
           <Link to={"/login"} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
             <FaRegCircleUser className="text-[14px] text-purple-500" />
           </Link>
-          <Link to={"/cart"} className="w-8 cursor-pointer xl:w-10 h-8 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
-            <FaShoppingBag className="text-[14px] xl:text-[18px] text-purple-500" />
+          <div className="mx-2"></div> {/* إضافة مسافة بين الأيقونات */}
+          <Link to={"/cart"} className="w-8 cursor-pointer h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
+            <FaShoppingBag className="text-[14px] text-purple-500" />
           </Link>
+          <div className="mx-2"></div> {/* إضافة مسافة بين الأيقونات */}
           <button
             onClick={toggleMobileMenu}
             className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200"
@@ -165,15 +164,19 @@ export default function Navbar({ bg }) {
             )}
           </button>
         </div>
+
         {/* Mobile Navigation (below md) */}
-        <div className={`flex md:hidden items-center space-x-2 ${isRTL ? 'rtl:space-x-reverse' : ''}`}>
+        <div className={`flex md:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown isMobile={true} />
-          <Link to={"/cart"} className="w-7 h-7 cursor-pointer xl:w-10 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
-            <FaShoppingBag className="text-[12px] xl:text-[18px] text-purple-500" />
+          <div className="mx-1"></div> {/* إضافة مسافة بين الأيقونات */}
+          <Link to={"/cart"} className="w-7 h-7 cursor-pointer bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
+            <FaShoppingBag className="text-[12px] text-purple-500" />
           </Link>
+          <div className="mx-1"></div> {/* إضافة مسافة بين الأيقونات */}
           <Link to={"/login"} className="w-7 h-7 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
             <FaRegCircleUser className="text-[12px] text-purple-500" />
           </Link>
+          <div className="mx-1"></div> {/* إضافة مسافة بين الأيقونات */}
           <button
             onClick={toggleMobileMenu}
             className="w-7 h-7 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200"
@@ -186,6 +189,7 @@ export default function Navbar({ bg }) {
             )}
           </button>
         </div>
+
         {/* Logo - Responsive sizing */}
         <div className="flex items-center">
           <img
@@ -195,11 +199,12 @@ export default function Navbar({ bg }) {
           />
         </div>
       </nav>
+
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/40" onClick={toggleMobileMenu}>
           <div
-            className={`absolute top-0 ${isRTL ? 'right-0' : 'left-0'} w-full bg-white shadow-2xl max-h-screen overflow-y-auto`}
+            className={`absolute top-0 ${isRTL ? 'right-0' : 'left-0'} w-full sm:w-80 bg-white shadow-2xl max-h-screen overflow-y-auto`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Mobile Menu Header */}
