@@ -139,7 +139,7 @@
       "platforms": ["Facebook", "LinkedIn", "Twitter", "Behance", "YouTube"]
     },
     "copyright": "Copyright © 2025. All rights reserved. Powered by ",
-    "poweredBy": "Baramge Tek",
+    "poweredBy": "brmja Tech",
     "support": {
       "title": "Get Support",
       "email": "info@mail.com"
@@ -238,6 +238,128 @@
     "point4": "Proven performance with multiple black color options to suit different styles.",
     "point5": "Versatile uses for activities and events; can also be applied in offices or reading areas."
   }
+,
+
+
+  "course": {
+    "title": "Course",
+    "breadcrumb": "Home / Courses / Course Details",
+    "aboutCourse": "About the Course",
+    "files": "Files",
+    "includes": "Course Includes:",
+    "time": "Time",
+    "duration": "Live Duration",
+    "lectures": "Number of Lectures",
+    "price": "500 EGP",
+    "subscribe": "Subscribe",
+    "details": "Course Details"
+  }
+,
+ "checkout": {
+    "payment": "Payment",
+    "home": "Home",
+    "orderSummary": "Order Summary",
+    "product": "Product #{{number}} with trial discount up to 99%",
+    "price": "120.00 EGP",
+    "total": "Total",
+    "totalPrice": "800.00 EGP",
+    "delivery": "Delivery",
+    "enterAddress": "Enter Address",
+    "finalTotal": "Final Total",
+    "finalPrice": "650.00 EGP",
+    "confirm": "Confirm",
+    "contactInfo": "Contact Information",
+    "mobile": "Mobile Number",
+    "secondaryMobile": "Secondary Mobile Number",
+    "shippingAddress": "Shipping Address",
+    "country": "Country",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "address": "Address",
+    "paymentOptions": "Payment Options",
+    "cashOnDelivery": "Cash on Delivery",
+    "visa": "Visa"
+  }
+,
+"trainerProfile": {
+    "header": {
+      "title": "Trainer Details",
+      "home": "Home",
+      "cart": "Cart",
+      "profile": "Trainer Details"
+    },
+    "tabs": {
+      "profile": "Profile",
+      "courses": "Courses",
+      "products": "Special Products"
+    },
+    "trainerName": "Trainer Name",
+    "specialty": "Spirituality",
+    "bio1": "Trainer Ahmed is a coach and consultant in the field of spirituality and mindfulness. He realized early on the importance of helping individuals improve their quality of life and reach deeper levels of inner peace.",
+    "bio2": "He began his journey by exploring the sciences of spirituality and meditation, obtaining specialized diplomas in conscious breathing techniques, mindfulness, and internal energy management. Throughout his career, he has conducted numerous courses and training sessions that have made him an expert in helping people relieve stress and achieve mental and psychological balance between their personal and professional lives.",
+    "bio3": "Ahmed believes that the human spirit needs continuous healing energy and requires a lot of satisfaction and activation of inner self-ability.",
+    "productName": "Tasbeeh with 99 beads engraved with Allah's names",
+    "productDescription": "Materials for forming beads",
+    "currency": "EGP",
+    "courseName": "Course Name",
+    "instructor1": "Ahmed Ibrahim",
+    "instructor2": "Mahmoud Galal",
+    "instructor3": "Shafei",
+    "instructor4": "Ibrahim Mustafa",
+    "instructor5": "Diaa Ali",
+    "videos": "Videos",
+    "files": "Files",
+    "courseLogoAlt": "Course Logo",
+    "instructorAlt": "Trainer Image",
+    "plantAlt": "Decorative Plant"
+  }
+,
+"course": {
+    "title": "Course Details",
+    "breadcrumb": "Home / Courses / Course Details",
+    "includes": "Course Includes:",
+    "time": "Schedule",
+    "files": "Files",
+    "duration": "Duration",
+    "lectures": "Lectures",
+    "currency": "EGP",
+    "subscribe": "Subscribe",
+    "share": "Share",
+    "previewAlt": "Course Preview",
+    "instructorAlt": "Instructor Image",
+    "instructor": "Instructor",
+    "instructorName": "Instructor Name",
+    "category": "Category",
+    "categoryName": "Spirituality",
+    "courseName": "Course Name",
+    "aboutCourse": "About Course",
+    "bio1": "Instructor Ahmed is a coach and consultant in the field of spirituality and mindfulness. He realized early on the importance of helping individuals improve their quality of life and reach deeper levels of inner peace.",
+    "bio2": "He began his journey by exploring the sciences of spirituality and meditation, obtaining specialized diplomas in conscious breathing techniques, mindfulness, and internal energy management. Throughout his career, he has conducted numerous courses and training sessions that have made him an expert in helping people relieve stress and achieve mental and psychological balance between their personal and professional lives.",
+    "bio3": "Ahmed believes that the human spirit needs continuous healing energy and requires a lot of satisfaction and activation of inner self-ability.",
+    "fileName": "PDF Name",
+    "pdfAlt": "PDF File",
+    "download": "Download",
+    "relatedCourses": "Related Courses",
+    "plantAlt": "Decorative Plant"
+  }
+,  "AboutUs": {
+    "subtitle": "Get to Know Us",
+    "title": "About Us",
+    "courses": {
+      "title": "Religious Courses",
+      "desc": "We offer specialized courses in Islamic jurisprudence, Quranic interpretation, and Hadith, taught by certified instructors."
+    },
+    "healing": {
+      "title": "Spiritual Healing",
+      "desc": "Healing programs based on the Quran and Sunnah to address anxiety, stress, and depression."
+    },
+    "products": {
+      "title": "Religious Supplies",
+      "desc": "We sell high-quality Islamic books, prayer beads, incense, and perfumes."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "desc": "We strive to provide comprehensive religious services that contribute to building a balanced and aware Muslim community."
+    }
+  }
 }
-
-

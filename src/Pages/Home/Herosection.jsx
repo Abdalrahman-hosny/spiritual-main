@@ -1,11 +1,14 @@
 // src/components/Herosection.jsx
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom'; // استيراد useNavigate
 import plant from "../../assets/Moon.png";
-import './home.css'
+import './home.css';
+
 export default function Herosection() {
   const { t, i18n } = useTranslation();
   const [isLoaded, setIsLoaded] = useState(false);
+  const navigate = useNavigate(); // استخدام useNavigate للتنقل
 
   useEffect(() => {
     setIsLoaded(true);
@@ -85,6 +88,7 @@ export default function Herosection() {
               {t('hero.description')}
             </p>
             <button
+              onClick={() => navigate('/about-us')} // هنا: عند الضغط، ينقل إلى /about-us
               className={`bg-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-500 transform hover:scale-105 hover:bg-purple-700 shadow-2xl hover:shadow-purple-500/25 relative overflow-hidden group ${
                 isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
               }`}
@@ -95,7 +99,7 @@ export default function Herosection() {
             </button>
           </div>
         </div>
-        {/* Planet (مكان ثابت كما طلبت) */}
+        {/* Planet */}
         <div
           className={`absolute -bottom-4 left-0 transform -translate-x-1/3 translate-y-1/3 sm:-translate-x-1/4 sm:translate-y-1/4 md:-translate-x-1/5 md:translate-y-1/5 lg:-translate-x-1/3 lg:translate-y-1/3 transition-all duration-1500 ease-out ${
             isLoaded ? 'translate-x-[-33.333333%] opacity-100' : 'translate-x-[-50%] opacity-0'

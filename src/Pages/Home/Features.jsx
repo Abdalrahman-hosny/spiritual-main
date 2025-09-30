@@ -1,11 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next"; //  استدعاء الترجمة
+import { useTranslation } from "react-i18next";
 import logo from "../../assets/featurelogo.png";
 
 export default function Features() {
-  const { t } = useTranslation(); // 
-
+  const { t } = useTranslation();
   return (
     <div className="pt-24">
       <div className="text-center">
@@ -16,13 +15,11 @@ export default function Features() {
           {t("features.subtitle")}
         </p>
       </div>
-
       <CardsGrid />
     </div>
   );
 }
 
-// بيانات الكروت (المفاتيح بدل النصوص)
 const cards = [
   { key: "features.cards.session" },
   { key: "features.cards.courses" },
@@ -43,11 +40,19 @@ const cardVariants = {
       ease: "easeOut",
     },
   }),
+  hover: {
+    scale: 1.03,
+    borderColor: "#8B5CF6", // لون بنفسجي
+    boxShadow: "0 10px 20px rgba(139, 92, 246, 0.2)",
+    transition: {
+      duration: 0.3,
+      ease: "easeInOut",
+    },
+  },
 };
 
 const CardsGrid = () => {
-  const { t } = useTranslation(); // 👈 برضه هنا
-
+  const { t } = useTranslation();
   return (
     <div className="w-[80%] mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
@@ -59,9 +64,15 @@ const CardsGrid = () => {
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
             variants={cardVariants}
-            className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 text-center shadow-md"
+            whileHover="hover"
+            className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 text-center shadow-sm"
           >
-            <img src={logo} alt="logo" className="w-16 h-16 mb-4" />
+            <motion.img
+              src={logo}
+              alt="logo"
+              className="w-16 h-16 mb-4"
+              whileHover={{ opacity: 0.8 }}
+            />
             <p className="font-[Montserrat-Arabic] font-bold text-[20px] leading-[28.8px] tracking-[0] text-center align-middle">
               {t(card.key)}
             </p>

@@ -6,6 +6,7 @@ import logo from "../../assets/navbarlogo.png";
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+
 export default function Navbar({ bg }) {
   const location = useLocation();
   const { t, i18n } = useTranslation();
@@ -83,7 +84,7 @@ export default function Navbar({ bg }) {
             <FaRegCircleUser className="text-[15px] xl:text-[18px] text-purple-500" />
           </Link>
           {/* Navigation links - Desktop */}
-          <div className="flex mx-3 xl:mx-6 gap-2 lg:gap-3 xl:gap-5 bg-white rounded-full py-2 lg:py-3 px-3 lg:px-6 xl:px-8 text-black shadow-lg">
+          <div className="flex mx-3 xl:mx-6 gap-2 lg:gap-3 xl:gap-5 bg-white  rounded-full py-2 lg:py-3 px-3 lg:px-6 xl:px-8 text-black shadow-lg">
             {t('navLinks', { returnObjects: true }).map((link) =>
               link.hasDropdown ? (
                 <div
