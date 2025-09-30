@@ -16,6 +16,7 @@ import CategoryProducts from './Pages/CategoryProducts/CategoryProducts'
 import TrainerProfile from './Pages/TrainerProfile/TrainerProfile'
 import CourseDetails from './Pages/CourseDetails/CourseDetails'
 import ContactUs from './Pages/ContactUs/ContactUs'
+import OTPPage from './Pages/OTP/Otp'
 import i18n from './locales/i18n'
 
 
@@ -45,6 +46,7 @@ function App() {
           <Route path='/courseDetails/:id'  element={<CourseDetails />} />
           <Route path='/contact-us'  element={<ContactUs />} />
           <Route path='/about-us' element={<AboutUs />} />
+           <Route path="/verify-otp" element={<OTPPage />} />
 
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
