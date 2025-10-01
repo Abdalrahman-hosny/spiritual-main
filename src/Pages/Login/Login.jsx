@@ -1,12 +1,8 @@
-
-
-
 import React, { useEffect, useState } from 'react';
-import { Lock, Mail, Eye, EyeOff, CheckCircle, ChevronDown } from 'lucide-react';
-
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import image  from "../../assets/loginimg.png"
+import image from "../../assets/loginimg.png";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,25 +13,6 @@ export default function Login() {
     email: '',
     password: ''
   });
-  
- const [phoneNumber, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState({ code: '+20', flag: '🇪🇬' });
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-
-  const countries = [
-    { code: '+20', name: 'Egypt', flag: '🇪🇬' },
-    { code: '+966', name: 'Saudi Arabia', flag: '🇸🇦' },
-    { code: '+971', name: 'UAE', flag: '🇦🇪' },
-    { code: '+965', name: 'Kuwait', flag: '🇰🇼' },
-    { code: '+973', name: 'Bahrain', flag: '🇧🇭' },
-    { code: '+974', name: 'Qatar', flag: '🇶🇦' },
-  ];
-
-  const handleSubmit = () => {
-    console.log('Phone:', selectedCountry.code + phoneNumber);
-    console.log('Password:', password);
-  };
 
   const navigate = useNavigate();
 
@@ -44,21 +21,21 @@ export default function Login() {
 
   const validateForm = () => {
     const errors = {};
-    
+
     // Email validation
     if (!loginForm.email.trim()) {
-      errors.email = 'Email is required';
+      errors.email = 'البريد الإلكتروني مطلوب';
     } else if (!emailRegex.test(loginForm.email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = 'الرجاء إدخال بريد إلكتروني صحيح';
     }
-    
+
     // Password validation
     if (!loginForm.password.trim()) {
-      errors.password = 'Password is required';
+      errors.password = 'كلمة المرور مطلوبة';
     } else if (loginForm.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
     }
-    
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -69,7 +46,7 @@ export default function Login() {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear specific field error when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
@@ -77,7 +54,7 @@ export default function Login() {
         [name]: ''
       }));
     }
-    
+
     // Clear general login error
     if (loginError) {
       setLoginError('');
@@ -86,7 +63,7 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+
     // Validate form before submitting
     if (!validateForm()) {
       return;
@@ -97,77 +74,63 @@ export default function Login() {
     setFieldErrors({});
 
     try {
-      // const response = await axios.post(
-      //   "https://api.crunchy-friedchicken.com/auth/login",
-      //   {
-      //     email: loginForm.email.trim(),
-      //     password: loginForm.password
-      //   },
-      //   {
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     }
-      //   }
-      // );
-console.log({response});
+      const response = await axios.post(
+        "https://ecommerce.routemisr.com/api/v1/auth/signin",
+        {
+          email: loginForm.email.trim(),
+          password: loginForm.password
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
 
-      // Check if response is successful
-      // if (response.status === 200 && response.data) {
-      
-      //     sessionStorage.setItem("token", response.data.authorization.token);
-      //      navigate("/dashboard");
-          
-      //     // Optional: Store user data if needed
-      //     sessionStorage.setItem("user", JSON.stringify(response.data.result));
-          
-          
-        
-       
-      // } else {
-      //   // Handle non-200 responses
-      //   console.log({res:response.data?.message});
-        
-      //   setLoginError(response.data?.message || 'Login failed. Please try again.');
-      // }
+      // Check if response is successful and contains a token
+      if (response.data.token) {
+        sessionStorage.setItem("token", response.data.token);
+        navigate("/");
+
+        // Optional: Store user data if needed
+        if (response.data.user) {
+          sessionStorage.setItem("user", JSON.stringify(response.data.user));
+        }
+      } else {
+        setLoginError('لم يتم استقبال بيانات تسجيل الدخول. الرجاء المحاولة مرة أخرى.');
+      }
     } catch (error) {
       console.log('Login error:', error);
-      
+
       // Handle different types of errors
       if (error.response) {
-        // Server responded with error status
         const { status, data } = error.response;
-
-        console.log({data});
-        
-        
         switch (status) {
           case 400:
-            setLoginError(data?.message || 'Invalid email or password');
+            setLoginError(data?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
             break;
           case 401:
-            setLoginError(data?.message ||'Invalid email or password');
+            setLoginError(data?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
             break;
           case 403:
-            setLoginError(data?.message ||'Access denied. Please contact support.');
+            setLoginError(data?.message || 'تم رفض الوصول. الرجاء التواصل مع الدعم.');
             break;
           case 404:
-            setLoginError(data?.message ||'Service not found. Please try again later.');
+            setLoginError(data?.message || 'الخدمة غير متاحة. الرجاء المحاولة لاحقًا.');
             break;
           case 429:
-            setLoginError(data?.message ||'Too many login attempts. Please wait and try again.');
+            setLoginError(data?.message || 'عدد كبير جدًا من محاولات تسجيل الدخول. الرجاء الانتظار والمحاولة مرة أخرى.');
             break;
           case 500:
-            setLoginError(data?.message ||'Server error. Please try again later.');
+            setLoginError(data?.message || 'خطأ في الخادم. الرجاء المحاولة لاحقًا.');
             break;
           default:
-            setLoginError(data?.Error || data?.message || 'Login failed. Please try again.');
+            setLoginError(data?.message || 'فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.');
         }
       } else if (error.request) {
-        // Network error
-        setLoginError('Network error. Please check your connection and try again.');
+        setLoginError('خطأ في الشبكة. الرجاء التحقق من اتصال الإنترنت والمحاولة مرة أخرى.');
       } else {
-        // Other error
-        setLoginError('An unexpected error occurred. Please try again.');
+        setLoginError('حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى.');
       }
     } finally {
       setLoginLoading(false);
@@ -179,26 +142,27 @@ console.log({response});
       handleLogin(e);
     }
   };
-  useEffect(()=>{
-         window.scrollTo({
-          top: 0,
-          behavior: "smooth", // smooth scrolling
-        });
-    },[])
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, []);
+
   return (
     <div className="min-h-screen image flex items-center justify-center lg:justify-around p-2 sm:p-4 lg:p-6">
       {/* Background overlay */}
       <div className='bg-[linear-gradient(to_left,rgba(0,0,0,0.6),rgba(0,0,0,0))] fixed inset-0'></div>
-      
+
       {/* Main Content Container */}
       <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-full max-w-7xl relative z-10 gap-4 lg:gap-8">
-        
-        {/* Mobile Brand Section - Only visible on small screens at the top */}
+        {/* Mobile Brand Section */}
         <div className='block lg:hidden text-center mb-4 sm:mb-6 px-4'>
-          <h1 className="font-[Montserrat-Arabic] font-bold text-xl xs:text-2xl sm:text-3xl text-white mb-2" dir="rtl">
+          <h1 className="font-bold font-montserratArabic text-xl xs:text-2xl sm:text-3xl text-white mb-2" dir="rtl">
             منصة روحاني
           </h1>
-          <p className='font-[Montserrat-Arabic] text-white text-xs xs:text-sm sm:text-base leading-relaxed text-center max-w-sm mx-auto' dir="rtl">
+          <p className='text-white font-montserratArabic text-xs xs:text-sm sm:text-base leading-relaxed text-center max-w-sm mx-auto' dir="rtl">
             منصة إلكترونية متكاملة للتعليم والعالج الروحاني والطاقي
           </p>
         </div>
@@ -211,59 +175,37 @@ console.log({response});
               تسجيل الدخول
             </h1>
             <p className="text-gray-600 font-montserratArabic text-xs sm:text-sm lg:text-base leading-relaxed px-2" dir="rtl">
-              أدخل إلى عالمك الخاص وتواصل للعالم بطريقة ممتعة
-              وآمنة
+              أدخل إلى عالمك الخاص وتواصل للعالم بطريقة ممتعة وآمنة
             </p>
           </div>
 
-          <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-            {/* Phone Number Field */}
+          {/* Login Error Message */}
+          {loginError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs sm:text-sm rounded-lg text-center">
+              {loginError}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4 lg:space-y-6">
+            {/* Email Field */}
             <div className="space-y-1 sm:space-y-2">
               <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
-                رقم التواصل
+                البريد الإلكتروني
               </div>
-              <div className="relative flex" dir="rtl">
-                {/* Country Code Selector */}
-                <div className="relative">
-                  <button
-                    onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border border-gray-300 rounded-r-lg sm:rounded-r-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-xs sm:text-sm lg:text-base min-w-[60px] sm:min-w-[80px]"
-                  >
-                    <span className="text-xs sm:text-sm lg:text-base">{selectedCountry.flag}</span>
-                    <span className="text-gray-700 font-medium text-xs sm:text-sm">{selectedCountry.code}</span>
-                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
-                  </button>
-                  
-                  {/* Dropdown */}
-                  {showCountryDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 max-h-32 sm:max-h-40 lg:max-h-48 overflow-y-auto min-w-[100px] ">
-                      {countries.map((country) => (
-                        <button
-                          key={country.code}
-                          onClick={() => {
-                            setSelectedCountry(country);
-                            setShowCountryDropdown(false);
-                          }}
-                          className="w-full  flex items-center gap-2 sm:gap-3 px-2   py-2 sm:py-2.5 lg:py-3 hover:bg-gray-50 transition-colors text-xs sm:text-sm lg:text-base"
-                        >
-                          <span className="text-xs sm:text-sm lg:text-base">{country.flag}</span>
-                          <span className="text-gray-700 text-xs sm:text-sm">{country.code}</span>
-                          {/* <span className="text-gray-500 text-xs hidden sm:inline lg:text-sm">{country.name}</span> */}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Phone Input */}
+              <div className="relative">
                 <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="1010101000"
-                  className="flex-1 px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border border-gray-300 border-r-0 rounded-l-lg sm:rounded-l-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base min-w-0"
+                  type="email"
+                  name="email"
+                  value={loginForm.email}
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder="example@example.com"
+                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${fieldErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
                   dir="ltr"
                 />
+                {fieldErrors.email && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
+                )}
               </div>
             </div>
 
@@ -272,55 +214,78 @@ console.log({response});
               <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
                 كلمة المرور
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base"
-                dir="rtl"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={loginForm.password}
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder="••••••••••••"
+                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${fieldErrors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
+                  dir="rtl"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+                {fieldErrors.password && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
+                )}
+              </div>
             </div>
 
             {/* Submit Button */}
             <button
-              onClick={handleSubmit}
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold py-2.5 sm:py-3 lg:py-4 rounded-lg sm:rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-xs sm:text-sm lg:text-base"
+              type="submit"
+              disabled={loginLoading}
+              className={`w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold py-2.5 sm:py-3 lg:py-4 rounded-lg sm:rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-xs sm:text-sm lg:text-base ${loginLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              تسجيل دخول 
+              {loginLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>جاري تسجيل الدخول...</span>
+                </div>
+              ) : (
+                'تسجيل دخول'
+              )}
             </button>
 
             {/* Footer Links */}
             <div className="text-center space-y-2 pt-2 sm:pt-3 lg:pt-4">
               <p className="text-gray-600 text-xs sm:text-sm lg:text-base" dir="rtl">
-                ليس لديك حساب؟ 
-                <Link to={"/register"} className="text-purple-600 hover:text-purple-700 font-medium mr-1">
+                ليس لديك حساب؟
+                <Link to="/register" className="text-purple-600 hover:text-purple-700 font-medium mr-1">
                   إنشاء حساب
                 </Link>
               </p>
-              <button 
-                className="text-purple-600 hover:text-purple-700 text-xs sm:text-sm lg:text-base font-medium"
+              <Link
+                to="/forget-password"
+                className="text-purple-600 hover:text-purple-700 text-xs sm:text-sm lg:text-base font-medium block"
               >
-                الهوية الشخصية الرئيسية
-              </button>
+                هل نسيت كلمة المرور؟
+              </Link>
             </div>
-          </div>
+          </form>
         </div>
-        
-        {/* Desktop Brand Section - Hidden on small screens, visible on large screens */}
+
+        {/* Desktop Brand Section */}
         <div className='hidden lg:block w-full max-w-[450px] xl:max-w-[550px] 2xl:max-w-[650px] order-1 lg:order-2'>
           <div className='flex justify-end items-center mb-4 lg:mb-6'>
-            <img 
-              src={image} 
-              alt="" 
-              className='w-full h-auto max-w-[300px] xl:max-w-[400px] 2xl:max-w-[500px]' 
+            <img
+              src={image}
+              alt=""
+              className='w-full h-auto max-w-[300px] xl:max-w-[400px] 2xl:max-w-[500px]'
             />
           </div>
           <h1 className="font-montserratArabic font-extrabold leading-tight xl:leading-relaxed text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl tracking-[0px] text-right text-white mb-4">
             منصة روحاني
           </h1>
           <p className='font-montserratArabic text-white font-bold text-sm lg:text-base xl:text-lg 2xl:text-xl leading-relaxed tracking-[0px] text-right'>
-            منصة إلكترونية متكاملة للتعليم والعالج الروحاني والطاقي، تجمع بين الكورسات، الجلسات، المتجر، التحفيظ، والاستشارات المباشرة .
+            منصة إلكترونية متكاملة للتعليم والعالج الروحاني والطاقي، تجمع بين الكورسات، الجلسات، المتجر، التحفيظ، والاستشارات المباشرة.
           </p>
         </div>
       </div>

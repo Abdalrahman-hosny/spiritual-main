@@ -17,6 +17,9 @@ import TrainerProfile from './Pages/TrainerProfile/TrainerProfile'
 import CourseDetails from './Pages/CourseDetails/CourseDetails'
 import ContactUs from './Pages/ContactUs/ContactUs'
 import OTPPage from './Pages/OTP/Otp'
+import ForgetPassword from './Pages/ForgetPassword/ForgetPasswor'
+import VerifyReset from './Pages/verifyReset/verifyReset'
+import ResetPassword from './Pages/ResetPassword/ResetPassword'
 import i18n from './locales/i18n'
 
 
@@ -47,6 +50,9 @@ function App() {
           <Route path='/contact-us'  element={<ContactUs />} />
           <Route path='/about-us' element={<AboutUs />} />
            <Route path="/verify-otp" element={<OTPPage />} />
+           <Route path="/forget-password" element={<ForgetPassword />} />
+           <Route path="/verify-reset" element={<VerifyReset />} />
+             <Route path="/reset-password" element={<ResetPassword />} />
 
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
