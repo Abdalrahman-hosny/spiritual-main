@@ -28,17 +28,14 @@ export default function ForgetPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateEmail()) {
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
       const response = await axios.post(
-        "https://ecommerce.routemisr.com/api/v1/auth/forgotPasswords",
+        "https://app.raw7any.com/api/forgot/password",
         {
           email: email.trim(),
         },
@@ -52,7 +49,7 @@ export default function ForgetPassword() {
       if (response.status === 200) {
         setSuccess(true);
         setTimeout(() => {
-          navigate("/verify-reset"); // تحويل المستخدم إلى صفحة التحقق من الكود
+          navigate("/verify-reset");
         }, 3000);
       }
     } catch (err) {
@@ -121,7 +118,7 @@ export default function ForgetPassword() {
           {/* Success Message */}
           {success && (
             <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 text-xs sm:text-sm rounded-lg text-center">
-              تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح. سيتم تحويلك إلى صفحة تسجيل الدخول.
+              تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح. سيتم تحويلك إلى صفحة التحقق.
             </div>
           )}
 

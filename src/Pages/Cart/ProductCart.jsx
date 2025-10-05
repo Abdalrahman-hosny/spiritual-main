@@ -2,9 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import plant from "../../assets/mandala_1265367 1.png";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion"; // لاستخدام التأثيرات الحركية
+import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export function ProductCart() {
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
   const [products, setProducts] = useState([
     {
       id: 1,
@@ -60,7 +64,7 @@ export function ProductCart() {
   );
 
   return (
-    <div className="pt-24 p-4" dir="rtl">
+    <div className="pt-24 p-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto">
         {/* العنوان */}
         <motion.h1
@@ -85,7 +89,7 @@ export function ProductCart() {
                 transition={{ duration: 0.3 }}
                 className="bg-white rounded-lg p-4 sm:p-6 shadow-sm md:shadow-none"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 gap-4">
+                <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-col sm:flex-row'} sm:items-center sm:gap-6 gap-4`}>
                   {/* صورة المنتج */}
                   <div className="flex-shrink-0 flex justify-center sm:block">
                     <Link to={`/product-details/${product.id}`}>
@@ -98,7 +102,7 @@ export function ProductCart() {
                   </div>
 
                   {/* تفاصيل المنتج */}
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 text-right">
                     <h3 className="text-lg sm:text-xl font-semibold text-red-600 mb-2">
                       {product.name}
                     </h3>
@@ -111,7 +115,7 @@ export function ProductCart() {
                   </div>
 
                   {/* عناصر التحكم */}
-                  <div className="flex items-center justify-between sm:justify-start gap-3 flex-shrink-0">
+                  <div className={`flex items-center ${isRTL ? 'justify-start' : 'justify-between sm:justify-start'} gap-3 flex-shrink-0`}>
                     <button
                       onClick={() => updateQuantity(product.id, -1)}
                       className="w-8 h-8 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-lg font-bold text-red-600"
@@ -156,7 +160,7 @@ export function ProductCart() {
                 <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z" />
               </svg>
             </div>
-            <p className="text-gray-500 text-lg">السلة فارغة</p>
+            <p className="text-gray-500 text-lg">{isRTL ? 'السلة فارغة' : 'Cart is empty'}</p>
           </motion.div>
         ) : (
           // زر اتمام الشراء
@@ -164,7 +168,7 @@ export function ProductCart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-8 flex justify-between items-center"
+            className={`mt-8 flex ${isRTL ? 'justify-between' : 'justify-end'} items-center`}
           >
             <div className="font-[Montserrat-Arabic] font-bold text-[18px] text-purple-600">
               الإجمالي: {totalPrice.toFixed(2)} جنية
@@ -173,7 +177,7 @@ export function ProductCart() {
               onClick={handleCheckout}
               className="bg-gradient-to-r from-purple-600 to-purple-800 text-white px-6 py-2 rounded-full font-medium hover:from-purple-700 hover:to-purple-900 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              اتمام الشراء
+              {isRTL ? 'اتمام الشراء' : 'Checkout'}
             </button>
           </motion.div>
         )}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { Lock, Phone, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import image from "../../assets/loginimg.png";
@@ -10,23 +10,23 @@ export default function Login() {
   const [loginError, setLoginError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [loginForm, setLoginForm] = useState({
-    email: '',
+    phone: '',
     password: ''
   });
 
   const navigate = useNavigate();
 
-  // Email validation regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Phone validation regex (Egyptian phone numbers)
+  const phoneRegex = /^\+201[0-9]{9}$/;
 
   const validateForm = () => {
     const errors = {};
 
-    // Email validation
-    if (!loginForm.email.trim()) {
-      errors.email = 'البريد الإلكتروني مطلوب';
-    } else if (!emailRegex.test(loginForm.email)) {
-      errors.email = 'الرجاء إدخال بريد إلكتروني صحيح';
+    // Phone validation
+    if (!loginForm.phone.trim()) {
+      errors.phone = 'رقم الهاتف مطلوب';
+    } else if (!phoneRegex.test(loginForm.phone)) {
+      errors.phone = 'الرجاء إدخال رقم هاتف صحيح (مثال: +201012345678)';
     }
 
     // Password validation
@@ -75,9 +75,9 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "https://ecommerce.routemisr.com/api/v1/auth/signin",
+        "https://app.raw7any.com/api/login",
         {
-          email: loginForm.email.trim(),
+          phone: loginForm.phone.trim(),
           password: loginForm.password
         },
         {
@@ -107,10 +107,10 @@ export default function Login() {
         const { status, data } = error.response;
         switch (status) {
           case 400:
-            setLoginError(data?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+            setLoginError(data?.message || 'رقم الهاتف أو كلمة المرور غير صحيحة');
             break;
           case 401:
-            setLoginError(data?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+            setLoginError(data?.message || 'رقم الهاتف أو كلمة المرور غير صحيحة');
             break;
           case 403:
             setLoginError(data?.message || 'تم رفض الوصول. الرجاء التواصل مع الدعم.');
@@ -187,24 +187,24 @@ export default function Login() {
           )}
 
           <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4 lg:space-y-6">
-            {/* Email Field */}
+            {/* Phone Field */}
             <div className="space-y-1 sm:space-y-2">
               <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
-                البريد الإلكتروني
+                رقم الهاتف
               </div>
               <div className="relative">
                 <input
-                  type="email"
-                  name="email"
-                  value={loginForm.email}
+                  type="text"
+                  name="phone"
+                  value={loginForm.phone}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  placeholder="example@example.com"
-                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${fieldErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
+                  placeholder="+201012345678"
+                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${fieldErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
                   dir="ltr"
                 />
-                {fieldErrors.email && (
-                  <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
+                {fieldErrors.phone && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>
                 )}
               </div>
             </div>

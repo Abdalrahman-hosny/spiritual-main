@@ -1,29 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, RefreshCw } from 'lucide-react';
+import axios from 'axios';
 
 export default function OTP() {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '', '']); // 5 أرقام بدلاً من 6
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [generatedOTP, setGeneratedOTP] = useState('');
+  const [phone, setPhone] = useState('+201013503789'); // رقم الهاتف الافتراضي
   const [canResend, setCanResend] = useState(false);
-  const [resendTimer, setResendTimer] = useState(30);
+  const [resendTimer, setResendTimer] = useState(60); // 60 ثانية
   const inputRefs = useRef([]);
   const navigate = useNavigate();
-
-  // توليد رمز OTP عشوائي وحفظه في state
-  const generateOTP = () => {
-    const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOTP(newOTP);
-    console.log("OTP sent to network console:", newOTP);
-  };
-
-  // توليد OTP عند تحميل الصفحة
-  useEffect(() => {
-    generateOTP();
-  }, []);
 
   // عداد الوقت لإعادة الإرسال
   useEffect(() => {
@@ -38,13 +27,25 @@ export default function OTP() {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
-  // إعادة تعيين العداد عند إعادة الإرسال
-  const handleResendOTP = () => {
-    if (canResend) {
-      generateOTP();
-      setResendTimer(30);
+  // إعادة إرسال OTP
+  const handleResendOTP = async () => {
+    if (!canResend) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      const response = await axios.post('https://app.raw7any.com/api/resend-otp', {
+        phone,
+      });
+      if (response.status !== 200) {
+        throw new Error('فشل في إعادة إرسال OTP');
+      }
+      setResendTimer(60);
       setCanResend(false);
       setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء إعادة الإرسال');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -54,7 +55,7 @@ export default function OTP() {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-      if (value && index < 5) {
+      if (value && index < 4) { // تعديل الشرط إلى `index < 4` بدلاً من `index < 5`
         inputRefs.current[index + 1].focus();
       }
     }
@@ -68,22 +69,28 @@ export default function OTP() {
   };
 
   // التحقق من رمز OTP
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const enteredOTP = otp.join('');
-
-    setTimeout(() => {
-      if (enteredOTP === generatedOTP) {
-        setSuccess(true);
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
-      } else {
-        setError('رمز OTP غير صحيح');
+    setError('');
+    const enteredToken = otp.join('');
+    try {
+      const response = await axios.post('https://app.raw7any.com/api/verify-otp', {
+        phone,
+        token: enteredToken,
+      });
+      if (response.status !== 200) {
+        throw new Error('رمز OTP غير صحيح');
       }
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -95,7 +102,6 @@ export default function OTP() {
               <h2 className="text-2xl font-bold text-gray-800 mb-2">تحقق من OTP</h2>
               <p className="text-gray-600">تم إرسال رمز التحقق إلى رقم هاتفك</p>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="flex justify-center gap-2">
                 {otp.map((digit, index) => (
@@ -111,21 +117,20 @@ export default function OTP() {
                   />
                 ))}
               </div>
-
               {error && <p className="text-red-500 text-center">{error}</p>}
-
               <div className="flex justify-center mb-4">
                 <button
                   type="button"
                   onClick={handleResendOTP}
-                  disabled={!canResend}
-                  className={`flex items-center gap-2 text-purple-600 font-medium ${!canResend ? 'opacity-50 cursor-not-allowed' : 'hover:text-purple-800'}`}
+                  disabled={!canResend || isLoading}
+                  className={`flex items-center gap-2 text-purple-600 font-medium ${
+                    !canResend || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:text-purple-800'
+                  }`}
                 >
                   <RefreshCw className="w-4 h-4" />
                   إعادة إرسال OTP {canResend ? '' : `(${resendTimer}s)`}
                 </button>
               </div>
-
               <button
                 type="submit"
                 disabled={isLoading}

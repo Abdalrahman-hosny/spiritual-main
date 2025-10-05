@@ -1,20 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
-import image from "../../assets/loginimg.png";
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, RefreshCw } from 'lucide-react';
+import axios from 'axios'; // تأكد من تثبيت axios: npm install axios
 
 export default function VerifyReset() {
-  const [resetCode, setResetCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  // تعريف المتغيرات والحالات
+  const [email, setEmail] = useState(''); // بريد المستخدم
+  const [otp, setOtp] = useState(['', '', '', '', '', '']); // كود التحقق
+  const [isLoading, setIsLoading] = useState(false); // حالة التحميل
+  const [error, setError] = useState(''); // رسالة الخطأ
+  const [success, setSuccess] = useState(false); // حالة النجاح
+  const [canResend, setCanResend] = useState(false); // إمكانية إعادة الإرسال
+  const [resendTimer, setResendTimer] = useState(60); // عداد إعادة الإرسال (60 ثانية)
+  const [resendLoading, setResendLoading] = useState(false); // حالة تحميل إعادة الإرسال
+  const [resendSuccess, setResendSuccess] = useState(false); // حالة نجاح إعادة الإرسال
+  const inputRefs = useRef([]);
   const navigate = useNavigate();
 
-  const validateCode = () => {
-    if (!resetCode.trim()) {
+  // دالة للتحقق من صحة المدخلات
+  const validateInputs = () => {
+    const enteredOTP = otp.join('');
+    if (!email.trim()) {
+      setError('البريد الإلكتروني مطلوب');
+      return false;
+    } else if (!enteredOTP.trim()) {
       setError('كود التحقق مطلوب');
       return false;
-    } else if (resetCode.length !== 6) {
+    } else if (enteredOTP.length !== 6) {
       setError('كود التحقق يجب أن يتكون من 6 أرقام');
       return false;
     }
@@ -22,57 +34,101 @@ export default function VerifyReset() {
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // عداد الوقت لإعادة الإرسال
+  useEffect(() => {
+    let timer;
+    if (resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer(prev => prev - 1);
+      }, 1000);
+    } else {
+      setCanResend(true);
+    }
+    return () => clearInterval(timer);
+  }, [resendTimer]);
 
-    if (!validateCode()) {
+  // إعادة إرسال OTP
+  const handleResendOTP = async () => {
+    if (!canResend) return;
+    if (!email.trim()) {
+      setError('البريد الإلكتروني مطلوب');
       return;
     }
-
-    setLoading(true);
+    setResendLoading(true);
     setError('');
-
     try {
-      console.log("OTP sent to API:", resetCode); // عرض الكود في console
-
-      const response = await axios.post(
-        "https://ecommerce.routemisr.com/api/v1/auth/verifyResetCode",
-        {
-          resetCode: resetCode.trim(),
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }
-      );
-
-      if (response.status === 200) {
-        setSuccess(true);
-        setTimeout(() => {
-          navigate("/reset-password"); // تحويل المستخدم إلى صفحة إعادة تعيين كلمة المرور
-        }, 3000);
+      const response = await axios.post('https://app.raw7any.com/api/forgot/resend-otp', {
+        email,
+      });
+      if (response.status !== 200) {
+        throw new Error('فشل في إعادة إرسال OTP');
       }
+      setResendTimer(60);
+      setCanResend(false);
+      setResendSuccess(true);
+      setTimeout(() => {
+        setResendSuccess(false);
+      }, 3000);
     } catch (err) {
-      console.log('Error:', err);
-      if (err.response) {
-        setError(err.response.data.message || 'كود التحقق غير صحيح. الرجاء المحاولة مرة أخرى.');
-      } else if (err.request) {
-        setError('خطأ في الشبكة. الرجاء التحقق من اتصال الإنترنت والمحاولة مرة أخرى.');
-      } else {
-        setError('حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى.');
-      }
+      setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء إعادة الإرسال');
     } finally {
-      setLoading(false);
+      setResendLoading(false);
     }
   };
 
+  // التركيز تلقائيًا على الحقل التالي
+  const handleChange = (index, value) => {
+    if (/^\d*$/.test(value) && value.length <= 1) {
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
+      if (value && index < 5) {
+        inputRefs.current[index + 1].focus();
+      }
+    }
+  };
+
+  // التركيز على الحقل السابق عند الحذف
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  // التحقق من رمز OTP
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateInputs()) return;
+    setIsLoading(true);
+    setError('');
+    const enteredOTP = otp.join('');
+    try {
+      const response = await axios.post('https://app.raw7any.com/api/forgot/verify-otp', {
+        email,
+        otp: enteredOTP,
+      });
+      if (response.status !== 200) {
+        throw new Error('رمز OTP غير صحيح');
+      }
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/reset-password');
+      }, 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // دالة للتعامل مع ضغط زر Enter
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSubmit(e);
     }
   };
 
+  // عند تحميل الصفحة، انتقل إلى الأعلى بشكل سلس
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -81,116 +137,105 @@ export default function VerifyReset() {
   }, []);
 
   return (
-    <div className="min-h-screen image flex items-center justify-center lg:justify-around p-2 sm:p-4 lg:p-6">
-      {/* Background overlay */}
-      <div className='bg-[linear-gradient(to_left,rgba(0,0,0,0.6),rgba(0,0,0,0))] fixed inset-0'></div>
-
-      {/* Main Content Container */}
-      <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-full max-w-7xl relative z-10 gap-4 lg:gap-8">
-        {/* Mobile Brand Section */}
-        <div className='block lg:hidden text-center mb-4 sm:mb-6 px-4'>
-          <h1 className="font-bold font-montserratArabic text-xl xs:text-2xl sm:text-3xl text-white mb-2" dir="rtl">
-            منصة روحاني
-          </h1>
-          <p className='text-white font-montserratArabic text-xs xs:text-sm sm:text-base leading-relaxed text-center max-w-sm mx-auto' dir="rtl">
-            منصة إلكترونية متكاملة للتعليم والعالج الروحاني والطاقي
-          </p>
-        </div>
-
-        {/* Verify Reset Code Form Card */}
-        <div className="relative bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 w-full max-w-[320px] xs:max-w-[360px] sm:max-w-md lg:max-w-lg shadow-2xl order-2 lg:order-1">
-          {/* Header */}
-          <div className="text-center mb-4 sm:mb-6 lg:mb-8">
-            <h1 className="text-lg xs:text-xl font-montserratArabic sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2" dir="rtl">
-              التحقق من كود إعادة التعيين
-            </h1>
-            <p className="text-gray-600 font-montserratArabic text-xs sm:text-sm lg:text-base leading-relaxed px-2" dir="rtl">
-              أدخل كود التحقق الذي أرسلناه إلى بريدك الإلكتروني
-            </p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs sm:text-sm rounded-lg text-center">
-              {error}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-lg">
+        {!success ? (
+          <>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">التحقق من كود إعادة التعيين</h2>
+              <p className="text-gray-600">أدخل بريدك الإلكتروني وكود التحقق المرسل إليه</p>
             </div>
-          )}
-
-          {/* Success Message */}
-          {success && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 text-xs sm:text-sm rounded-lg text-center">
-              تم التحقق من الكود بنجاح. سيتم تحويلك إلى صفحة إعادة تعيين كلمة المرور.
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-6">
-            {/* Reset Code Field */}
-            <div className="space-y-1 sm:space-y-2">
-              <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
-                كود التحقق
-              </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="resetCode"
-                  value={resetCode}
-                  onChange={(e) => setResetCode(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="123456"
-                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
-                  dir="ltr"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold py-2.5 sm:py-3 lg:py-4 rounded-lg sm:rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-xs sm:text-sm lg:text-base ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>جاري التحقق...</span>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* حقل البريد الإلكتروني */}
+              <div className="space-y-1">
+                <label className="block text-right text-gray-700 text-sm font-medium">البريد الإلكتروني</label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="example@example.com"
+                    className={`w-full px-3 py-2 text-sm bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right`}
+                  />
                 </div>
-              ) : (
-                'تحقق من الكود'
-              )}
-            </button>
+              </div>
 
-            {/* Footer Links */}
-            <div className="text-center space-y-2 pt-2 sm:pt-3 lg:pt-4">
-              <p className="text-gray-600 text-xs sm:text-sm lg:text-base" dir="rtl">
-                لم تستلم الكود؟
+              {/* حقل كود التحقق */}
+              <div className="flex justify-center gap-2" dir='ltr'>
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    type="text"
+                    maxLength="1"
+                    value={digit}
+                    onChange={(e) => handleChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    className="w-12 h-12 text-center text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                ))}
+              </div>
+
+              {/* عرض رسالة الخطأ */}
+              {error && <p className="text-red-500 text-center">{error}</p>}
+
+              {/* زر إعادة إرسال OTP */}
+              <div className="flex justify-center mb-4">
                 <button
                   type="button"
-                  className="text-purple-600 hover:text-purple-700 font-medium mr-1"
-                  onClick={() => navigate("/forget-password")}
+                  onClick={handleResendOTP}
+                  disabled={!canResend || resendLoading}
+                  className={`flex items-center gap-2 text-purple-600 font-medium ${
+                    !canResend || resendLoading ? 'opacity-50 cursor-not-allowed' : 'hover:text-purple-800'
+                  }`}
                 >
-                  إعادة الإرسال
+                  <RefreshCw className="w-4 h-4" />
+                  {resendLoading ? 'جاري الإرسال...' : `إعادة إرسال الكود ${canResend ? '' : `(${resendTimer}s)`}`}
                 </button>
-              </p>
-            </div>
-          </form>
-        </div>
+              </div>
 
-        {/* Desktop Brand Section */}
-        <div className='hidden lg:block w-full max-w-[450px] xl:max-w-[550px] 2xl:max-w-[650px] order-1 lg:order-2'>
-          <div className='flex justify-end items-center mb-4 lg:mb-6'>
-            <img
-              src={image}
-              alt=""
-              className='w-full h-auto max-w-[300px] xl:max-w-[400px] 2xl:max-w-[500px]'
-            />
+              {/* زر التحقق */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
+                  isLoading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800'
+                }`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>جاري التحقق...</span>
+                  </div>
+                ) : (
+                  'تحقق من الكود'
+                )}
+              </button>
+
+              {/* عرض رسالة نجاح إعادة الإرسال */}
+              {resendSuccess && (
+                <div className="p-3 bg-green-50 border border-green-200 text-green-600 text-sm rounded-lg text-center">
+                  تم إعادة إرسال كود التحقق بنجاح.
+                </div>
+              )}
+            </form>
+          </>
+        ) : (
+          // صفحة "تم بنجاح"
+          <div className="text-center space-y-4">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">تم التحقق بنجاح!</h2>
+            <p className="text-gray-600">سيتم إعادة توجيهك إلى صفحة إعادة تعيين كلمة المرور...</p>
           </div>
-          <h1 className="font-montserratArabic font-extrabold leading-tight xl:leading-relaxed text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl tracking-[0px] text-right text-white mb-4">
-            منصة روحاني
-          </h1>
-          <p className='font-montserratArabic text-white font-bold text-sm lg:text-base xl:text-lg 2xl:text-xl leading-relaxed tracking-[0px] text-right'>
-            منصة إلكترونية متكاملة للتعليم والعالج الروحاني والطاقي، تجمع بين الكورسات، الجلسات، المتجر، التحفيظ، والاستشارات المباشرة.
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );

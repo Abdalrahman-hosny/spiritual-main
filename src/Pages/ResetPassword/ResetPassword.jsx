@@ -7,7 +7,10 @@ import image from "../../assets/loginimg.png";
 export default function ResetPassword() {
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [otp, setOtp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -18,44 +21,64 @@ export default function ResetPassword() {
 
   const validateForm = () => {
     const errors = {};
-
     if (!email.trim()) {
       errors.email = 'البريد الإلكتروني مطلوب';
     } else if (!emailRegex.test(email)) {
       errors.email = 'الرجاء إدخال بريد إلكتروني صحيح';
     }
-
     if (!newPassword.trim()) {
       errors.newPassword = 'كلمة المرور الجديدة مطلوبة';
     } else if (newPassword.length < 8) {
       errors.newPassword = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
     }
-
+    if (!confirmPassword.trim()) {
+      errors.confirmPassword = 'تأكيد كلمة المرور مطلوب';
+    } else if (newPassword !== confirmPassword) {
+      errors.confirmPassword = 'كلمة المرور وتأكيدها غير متطابقين';
+    }
+    if (!otp.trim()) {
+      errors.otp = 'كود التحقق مطلوب';
+    } else if (otp.length !== 6) {
+      errors.otp = 'كود التحقق يجب أن يتكون من 6 أرقام';
+    }
     if (Object.keys(errors).length > 0) {
-      setError(errors.email || errors.newPassword);
+      setError(errors.email || errors.newPassword || errors.confirmPassword || errors.otp);
       return false;
     }
-
     setError('');
     return true;
   };
 
+  /**
+   * API: إعادة تعيين كلمة المرور
+   * - URL: {{base_url}}/forgot/reset-password
+   * - Method: POST
+   * - Body: {
+   *     "email": string,
+   *     "password": string,
+   *     "password_confirmation": string,
+   *     "otp": string
+   *   }
+   * - Headers: { Content-Type: application/json }
+   * - Success: 200 -> الانتقال إلى صفحة تسجيل الدخول
+   * - Error: عرض رسالة الخطأ المناسبة
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       return;
     }
-
     setLoading(true);
     setError('');
 
     try {
-      const response = await axios.put(
-        "https://ecommerce.routemisr.com/api/v1/auth/resetPassword",
+      const response = await axios.post(
+        "https://app.raw7any.com/api/forgot/reset-password",
         {
           email: email.trim(),
-          newPassword: newPassword.trim(),
+          password: newPassword.trim(),
+          password_confirmation: confirmPassword.trim(),
+          otp: otp.trim(),
         },
         {
           headers: {
@@ -67,7 +90,7 @@ export default function ResetPassword() {
       if (response.status === 200) {
         setSuccess(true);
         setTimeout(() => {
-          navigate("/login"); // تحويل المستخدم إلى صفحة تسجيل الدخول
+          navigate("/login");
         }, 3000);
       }
     } catch (err) {
@@ -122,7 +145,7 @@ export default function ResetPassword() {
               إعادة تعيين كلمة المرور
             </h1>
             <p className="text-gray-600 font-montserratArabic text-xs sm:text-sm lg:text-base leading-relaxed px-2" dir="rtl">
-              أدخل بريدك الإلكتروني وكلمة المرور الجديدة
+              أدخل بريدك الإلكتروني، كلمة المرور الجديدة، تأكيد كلمة المرور، وكود التحقق
             </p>
           </div>
 
@@ -160,6 +183,25 @@ export default function ResetPassword() {
               </div>
             </div>
 
+            {/* OTP Field */}
+            <div className="space-y-1 sm:space-y-2">
+              <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
+                كود التحقق
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="otp"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="123456"
+                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
+                  dir="ltr"
+                />
+              </div>
+            </div>
+
             {/* New Password Field */}
             <div className="space-y-1 sm:space-y-2">
               <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
@@ -182,6 +224,32 @@ export default function ResetPassword() {
                   className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password Field */}
+            <div className="space-y-1 sm:space-y-2">
+              <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
+                تأكيد كلمة المرور
+              </div>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="••••••••••••"
+                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
+                  dir="rtl"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>

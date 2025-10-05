@@ -17,11 +17,17 @@ const CourseDetails = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
+  // تحديث اتجاه الصفحة عند تغيير اللغة
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = i18n.language;
+  }, [isRTL, i18n.language]);
 
   const handleTabChange = (tabId) => {
     if (tabId === activeTab) return;
-
     setIsLoading(true);
     setTimeout(() => {
       setActiveTab(tabId);
@@ -65,7 +71,7 @@ const CourseDetails = () => {
   };
 
   const plantVariants = {
-    hidden: { opacity: 0, x: -50, rotate: -90 },
+    hidden: { opacity: 0, x: isRTL ? 50 : -50, rotate: -90 },
     visible: {
       opacity: 1,
       x: 0,
@@ -79,7 +85,7 @@ const CourseDetails = () => {
   };
 
   return (
-    <div>
+    <div dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Hero Section */}
       <div className="relative">
         <div className="image">
@@ -111,13 +117,12 @@ const CourseDetails = () => {
                 </motion.div>
               </motion.div>
             </div>
-
             {/* Plant Decoration */}
             <motion.div
               variants={plantVariants}
               initial="hidden"
               animate="visible"
-              className="absolute z-40 -bottom-6 sm:-bottom-8 left-0 transform -translate-x-1/4 translate-y-1/4 sm:-translate-x-1/3 sm:translate-y-1/3 md:-translate-x-1/5 md:translate-y-1/5 lg:-translate-x-1/3 lg:translate-y-1/3"
+              className={`absolute z-40 -bottom-6 sm:-bottom-8 ${isRTL ? 'right-0 transform translate-x-1/4 translate-y-1/4' : 'left-0 transform -translate-x-1/4 translate-y-1/4'} sm:-translate-x-1/3 sm:translate-y-1/3 md:-translate-x-1/5 md:translate-y-1/5 lg:-translate-x-1/3 lg:translate-y-1/3`}
             >
               <div className="relative">
                 <div className="absolute -top-12 left-2 w-24 h-24 sm:w-32 sm:h-32 sm:-top-16 sm:left-4 md:w-48 md:h-48 md:-top-24 md:left-6 lg:w-64 lg:h-64 lg:-top-32 lg:left-8 xl:w-80 xl:h-80 xl:-top-36 rounded-full">
@@ -141,13 +146,12 @@ const CourseDetails = () => {
           </div>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="pt-24 bg-white">
         <div className="w-full md:w-[80%] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
           {/* Course Info Card */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             className="hidden bg-white shadow-md rounded-md p-6 border border-gray-100 md:flex flex-col justify-between"
@@ -161,9 +165,9 @@ const CourseDetails = () => {
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
                   الاحد 10:00 صباحا
                 </span>
-                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px] text-right">
+                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
                   {t("course.time")}
-                  <IoMdTime className="text-purple-500 font-bold text-md" />
+                  {isRTL ? <IoMdTime className="mr-1 text-purple-500 font-bold text-md" /> : <IoMdTime className="ml-1 text-purple-500 font-bold text-md" />}
                 </span>
               </div>
               {/* Files */}
@@ -171,9 +175,9 @@ const CourseDetails = () => {
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
                   10
                 </span>
-                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px] text-right">
+                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
                   {t("course.files")}
-                  <CiFileOn className="text-purple-500 font-bold text-md" />
+                  {isRTL ? <CiFileOn className="mr-1 text-purple-500 font-bold text-md" /> : <CiFileOn className="ml-1 text-purple-500 font-bold text-md" />}
                 </span>
               </div>
               {/* Duration */}
@@ -181,9 +185,9 @@ const CourseDetails = () => {
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
                   1 Hours
                 </span>
-                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px] text-right">
+                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
                   {t("course.duration")}
-                  <CiPlay1 className="text-purple-500 font-bold text-md" />
+                  {isRTL ? <CiPlay1 className="mr-1 text-purple-500 font-bold text-md" /> : <CiPlay1 className="ml-1 text-purple-500 font-bold text-md" />}
                 </span>
               </div>
               {/* Lectures */}
@@ -191,13 +195,12 @@ const CourseDetails = () => {
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
                   4
                 </span>
-                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px] text-right">
+                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
                   {t("course.lectures")}
-                  <CiPlay1 className="text-purple-500 font-bold text-md" />
+                  {isRTL ? <CiPlay1 className="mr-1 text-purple-500 font-bold text-md" /> : <CiPlay1 className="ml-1 text-purple-500 font-bold text-md" />}
                 </span>
               </div>
             </div>
-
             {/* Price and Subscription */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -218,7 +221,6 @@ const CourseDetails = () => {
                 </motion.button>
               </div>
             </motion.div>
-
             {/* Social Media */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -242,7 +244,6 @@ const CourseDetails = () => {
               </p>
             </motion.div>
           </motion.div>
-
           {/* Video Preview and Trainer Info */}
           <div className="col-span-3 lg:col-span-2">
             <motion.div
@@ -268,7 +269,6 @@ const CourseDetails = () => {
                   </motion.button>
                 </div>
               </div>
-
               {/* Trainer Info */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -291,7 +291,7 @@ const CourseDetails = () => {
                     </p>
                   </div>
                 </div>
-                <div className="border-r-2 border-gray-300 ps-6">
+                <div className={`border-${isRTL ? 'l' : 'r'}-2 border-gray-300 ${isRTL ? 'pe-6' : 'ps-6'}`}>
                   <span className="font-[Montserrat-Arabic] font-normal text-[14px] text-[#555555]">
                     {t("course.category")}
                   </span>
@@ -302,7 +302,6 @@ const CourseDetails = () => {
               </motion.div>
             </motion.div>
           </div>
-
           {/* Course Title and Tabs */}
           <div className="col-span-3 pt-3">
             <motion.h2
@@ -313,7 +312,6 @@ const CourseDetails = () => {
             >
               {t("course.courseName")}
             </motion.h2>
-
             {/* Dynamic Tab Navigation */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -333,7 +331,7 @@ const CourseDetails = () => {
                     className={`relative flex items-center px-4 py-2 font-[Montserrat-Arabic] font-light text-[14px] leading-[32.3px] text-center align-middle transition-all duration-300 flex-1 justify-center ${
                       isActive
                         ? `bg-purple-600 text-white shadow-md transform scale-105 ${
-                            tab.id === "courses" ? "rounded-e-2xl" : "rounded-r-2xl"
+                            tab.id === "courses" ? "rounded-s-2xl rtl:rounded-s-none rtl:rounded-e-2xl" : "rounded-e-2xl rtl:rounded-e-none rtl:rounded-s-2xl"
                           }`
                         : "text-gray-600"
                     } ${
@@ -342,7 +340,7 @@ const CourseDetails = () => {
                   >
                     <span>{tab.label}</span>
                     {tab.badge && (
-                      <span className="absolute top-0 right-1/2 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className={`absolute top-0 ${isRTL ? 'left-1/2 transform -translate-x-1/2' : 'right-1/2 transform translate-x-1/2'} -translate-y-1/2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center`}>
                         {tab.badge}
                       </span>
                     )}
@@ -350,7 +348,6 @@ const CourseDetails = () => {
                 );
               })}
             </motion.div>
-
             {/* Loading State */}
             {isLoading && (
               <div className="flex items-center justify-center py-20">
@@ -361,7 +358,6 @@ const CourseDetails = () => {
                 ></motion.div>
               </div>
             )}
-
             {/* Dynamic Tab Content */}
             {!isLoading && (
               <AnimatePresence mode="wait">
@@ -403,7 +399,6 @@ const CourseDetails = () => {
             )}
           </div>
         </div>
-
         {/* Related Courses */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -417,14 +412,15 @@ const CourseDetails = () => {
           <CourseSlider isTrue={false} />
         </motion.div>
       </div>
-
       <Footer />
     </div>
   );
 };
 
 const TrainerFiles = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
   const files = [
     {
       id: 1,
@@ -443,7 +439,7 @@ const TrainerFiles = () => {
   ];
 
   return (
-    <div className="py-10 bg-white">
+    <div className="py-10 bg-white" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="space-y-6">
         {files.map((file) => (
           <motion.div

@@ -28,7 +28,7 @@ export default function Details() {
       transition: { duration: 0.8, ease: "easeOut" }
     }
   };
-
+/*حركه الورده*/
   const plantVariants = {
     hidden: { opacity: 0, x: -50, rotate: -90 },
     visible: {
@@ -81,7 +81,7 @@ export default function Details() {
               className="absolute z-40 -bottom-6 sm:-bottom-8 left-0 transform -translate-x-1/4 translate-y-1/4"
             >
               <div className="relative">
-                <div className="absolute -top-12 left-2 w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 xl:w-80 xl:h-80 rounded-full">
+                <div className="absolute -top-30 left-2 w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 xl:w-80 xl:h-80 rounded-full">
                   <motion.img
                     src={plant}
                     alt="Plant Decoration"

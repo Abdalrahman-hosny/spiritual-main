@@ -1,12 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import logo from "../../assets/featurelogo.png";
 
 export default function Features() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
+  // تحديث اتجاه الصفحة عند تغيير اللغة
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = i18n.language;
+  }, [isRTL, i18n.language]);
+
   return (
-    <div className="pt-24">
+    <div className="pt-24" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="text-center">
         <h1 className="text-purple-500 font-[Montserrat-Arabic] font-semibold text-[20px] leading-[38px] tracking-[0] text-center align-middle">
           {t("features.title")}
@@ -42,7 +50,7 @@ const cardVariants = {
   }),
   hover: {
     scale: 1.03,
-    borderColor: "#8B5CF6", // لون بنفسجي
+    borderColor: "#8B5CF6",
     boxShadow: "0 10px 20px rgba(139, 92, 246, 0.2)",
     transition: {
       duration: 0.3,
@@ -52,9 +60,11 @@ const cardVariants = {
 };
 
 const CardsGrid = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
   return (
-    <div className="w-[80%] mx-auto">
+    <div className="w-[80%] mx-auto" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
         {cards.map((card, index) => (
           <motion.div

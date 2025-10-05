@@ -15,7 +15,7 @@ export default function HowWork() {
   };
 
   return (
-    <div className="image relative min-h-screen mb-20">
+    <div className="image relative min-h-screen ">
       {/* Overlay */}
       <div className="bg-black/50 absolute inset-0"></div>
 

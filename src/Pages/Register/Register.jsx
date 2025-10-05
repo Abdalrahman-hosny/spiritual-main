@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Lock, Mail, CheckCircle, ChevronDown, User, Users, Star, Shield, Phone } from 'lucide-react';
+import { Lock, Mail, CheckCircle, ChevronDown, User, Users, Star, Shield, Phone, Calendar } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -10,13 +10,18 @@ import image from "../../assets/loginimg.png";
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('الاسم الكامل مطلوب'),
   email: Yup.string().email('بريد إلكتروني غير صالح').required('البريد الإلكتروني مطلوب'),
-  phone: Yup.string().required('رقم التواصل مطلوب'),
+  phone: Yup.string()
+    .required('رقم التواصل مطلوب')
+    .matches(/^[0-9]{8,15}$/, 'رقم الهاتف غير صالح'),
   password: Yup.string()
     .min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل')
     .required('كلمة المرور مطلوبة'),
-  rePassword: Yup.string()
+  password_confirmation: Yup.string()
     .oneOf([Yup.ref('password'), null], 'كلمة المرور غير متطابقة')
     .required('تأكيد كلمة المرور مطلوب'),
+  birth_date: Yup.date()
+    .required('تاريخ الميلاد مطلوب')
+    .max(new Date(), 'تاريخ الميلاد يجب أن يكون في الماضي')
 });
 
 export default function Register() {
@@ -25,6 +30,7 @@ export default function Register() {
   const [selectedUserType, setSelectedUserType] = useState('');
   const [selectedCountry, setSelectedCountry] = useState({ code: '+20', flag: '🇪🇬', name: 'مصر' });
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [otpToken, setOtpToken] = useState(''); // تخزين OTP Token
   const navigate = useNavigate();
 
   // بيانات الدول
@@ -60,29 +66,40 @@ export default function Register() {
       email: '',
       phone: '',
       password: '',
-      rePassword: ''
+      password_confirmation: '',
+      birth_date: ''
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        const response = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signup', {
+        const response = await axios.post('https://app.raw7any.com/api/register', {
           name: values.name,
           email: values.email,
-          phone: values.phone, // إرسال رقم الهاتف كما هو
+          phone: selectedCountry.code + values.phone,
           password: values.password,
-          rePassword: values.rePassword
+          password_confirmation: values.password_confirmation,
+          birth_date: values.birth_date,
         });
 
         console.log("الرد من الخادم:", response.data);
 
-        setCurrentTab(2); // عرض صفحة "تم بنجاح"
+        // تخزين OTP Token إذا كان موجودًا في الاستجابة
+        if (response.data.token || response.data.otp_code) {
+          setOtpToken(response.data.token || response.data.otp_code);
+        }
+
+        setCurrentTab(2);
         setTimeout(() => {
-          navigate('/verify-otp'); // إعادة التوجيه إلى صفحة OTP
-        }, 3000); // الانتظار 3 ثوانٍ
+          navigate('/verify-otp', {
+            state: {
+              phone: selectedCountry.code + values.phone,
+              otpToken: otpToken || response.data.token || response.data.otp_code
+            }
+          });
+        }, 3000);
       } catch (error) {
         console.error("خطأ في إرسال البيانات:", error);
-        // عرض رسالة الخطأ للمستخدم
         if (error.response && error.response.data && error.response.data.message) {
           alert(error.response.data.message);
         }
@@ -310,6 +327,24 @@ export default function Register() {
             <p className="text-red-500 text-xs mt-1">{formik.errors.phone}</p>
           )}
         </div>
+        {/* تاريخ الميلاد */}
+        <div className="space-y-2">
+          <label className="block text-right text-gray-700 font-medium" dir="rtl">
+            تاريخ الميلاد
+          </label>
+          <input
+            type="date"
+            name="birth_date"
+            value={formik.values.birth_date}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className="w-full px-3 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+            dir="ltr"
+          />
+          {formik.touched.birth_date && formik.errors.birth_date && (
+            <p className="text-red-500 text-xs mt-1">{formik.errors.birth_date}</p>
+          )}
+        </div>
         {/* كلمة المرور */}
         <div className="space-y-2">
           <label className="block text-right text-gray-700 font-medium" dir="rtl">
@@ -336,16 +371,16 @@ export default function Register() {
           </label>
           <input
             type="password"
-            name="rePassword"
-            value={formik.values.rePassword}
+            name="password_confirmation"
+            value={formik.values.password_confirmation}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             placeholder="********"
             className="w-full px-3 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
             dir="rtl"
           />
-          {formik.touched.rePassword && formik.errors.rePassword && (
-            <p className="text-red-500 text-xs mt-1">{formik.errors.rePassword}</p>
+          {formik.touched.password_confirmation && formik.errors.password_confirmation && (
+            <p className="text-red-500 text-xs mt-1">{formik.errors.password_confirmation}</p>
           )}
         </div>
         {/* أزرار التنقل */}
