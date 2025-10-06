@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { FaRegCircleUser, FaBars, FaGlobe } from 'react-icons/fa6';
 import { FaShoppingBag, FaTimes } from 'react-icons/fa';
 import logo from "../../assets/navbarlogo.png";
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 export default function Navbar({ bg }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
-  const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] =useState(false);
+  const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
   const isRTL = i18n.language === 'ar';
@@ -42,9 +43,10 @@ export default function Navbar({ bg }) {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
     setIsAuthDropdownOpen(false);
-    window.location.href = "/login";
+    navigate("/login");
   };
 
+  // مكون القائمة المنسدلة للغة
   const LanguageDropdown = ({ isMobile = false }) => (
     <div className="relative">
       <button
@@ -79,9 +81,10 @@ export default function Navbar({ bg }) {
     </div>
   );
 
+  // مكون القائمة المنسدلة للحساب
   const AuthDropdown = ({ isMobile = false }) => {
-    const user = JSON.parse(sessionStorage.getItem("user"));
     const isLoggedIn = !!sessionStorage.getItem("token");
+
     return (
       <div className="relative">
         <button
@@ -92,26 +95,30 @@ export default function Navbar({ bg }) {
           <FaRegCircleUser className={`${isMobile ? 'text-[12px]' : 'text-[15px] xl:text-[18px]'} text-purple-500`} />
         </button>
         {isAuthDropdownOpen && (
-          <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-32 bg-white shadow-xl rounded-lg border border-gray-100 transition-all duration-200 z-50`}>
+          <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 bg-white shadow-xl rounded-lg border border-gray-100 transition-all duration-200 z-50`}>
             <div className="py-1">
               {isLoggedIn ? (
                 <>
-                  <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
-                    {user?.name || "مستخدم"}
-                  </div>
+                  <Link
+                    to="/profile"
+                    className={`block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150 ${isRTL ? 'text-right' : 'text-left'}`}
+                    onClick={() => setIsAuthDropdownOpen(false)}
+                  >
+                    {isRTL ? 'الملف الشخصي' : 'Profile'}
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150 text-left"
+                    className={`w-full px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150 ${isRTL ? 'text-right' : 'text-left'}`}
                   >
-                    تسجيل الخروج
+                    {isRTL ? 'تسجيل الخروج' : 'Logout'}
                   </button>
                 </>
               ) : (
                 <Link
                   to="/login"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150"
+                  className={`block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150 ${isRTL ? 'text-right' : 'text-left'}`}
                 >
-                  تسجيل دخول
+                  {isRTL ? 'تسجيل دخول' : 'Login'}
                 </Link>
               )}
             </div>
@@ -124,6 +131,7 @@ export default function Navbar({ bg }) {
   return (
     <div className={`${bg}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <nav className={`w-[95%] z-50 lg:w-[90%] xl:w-[85%] 2xl:w-[80%] mx-auto flex items-center justify-between px-2 sm:px-4 py-3 sm:py-4`}>
+        {/* قائمة سطح المكتب (اليسار) */}
         <div className={`hidden lg:flex items-center ${isRTL ? 'space-x-reverse gap-3' : 'gap-3'}`}>
           <LanguageDropdown />
           <Link to={"/cart"} className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
@@ -188,6 +196,8 @@ export default function Navbar({ bg }) {
             )}
           </div>
         </div>
+
+        {/* قائمة الهواتف المتوسطة (الموبايل) */}
         <div className={`hidden md:flex lg:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown />
           <div className="mx-2"></div>
@@ -209,6 +219,8 @@ export default function Navbar({ bg }) {
             )}
           </button>
         </div>
+
+        {/* قائمة الهواتف الصغيرة (الموبايل) */}
         <div className={`flex md:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown isMobile={true} />
           <div className="mx-1"></div>
@@ -230,6 +242,8 @@ export default function Navbar({ bg }) {
             )}
           </button>
         </div>
+
+        {/* الشعار */}
         <div className="flex items-center">
           <img
             src={logo}
@@ -238,6 +252,8 @@ export default function Navbar({ bg }) {
           />
         </div>
       </nav>
+
+      {/* القائمة المنسدلة للهواتف (الموبايل) */}
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/40" onClick={toggleMobileMenu}>
           <div
@@ -314,6 +330,8 @@ export default function Navbar({ bg }) {
           </div>
         </div>
       )}
+
+      {/* إغلاق القائمة المنسدلة عند الضغط خارجها */}
       {isLanguageDropdownOpen && (
         <div
           className="fixed inset-0 z-40"

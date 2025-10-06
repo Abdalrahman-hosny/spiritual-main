@@ -20,6 +20,7 @@ import OTPPage from './Pages/OTP/Otp'
 import ForgetPassword from './Pages/ForgetPassword/ForgetPasswor'
 import VerifyReset from './Pages/verifyReset/verifyReset'
 import ResetPassword from './Pages/ResetPassword/ResetPassword'
+import Profile from './Pages/profile/profile'
 import i18n from './locales/i18n'
 
 
@@ -53,6 +54,7 @@ function App() {
            <Route path="/forget-password" element={<ForgetPassword />} />
            <Route path="/verify-reset" element={<VerifyReset />} />
              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/profile" element={<Profile />} />
 
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
