@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import image from "../../assets/loginimg.png";
 
 // تعريف Schema للتحقق باستخدام Yup
@@ -30,7 +32,7 @@ export default function Register() {
   const [selectedUserType, setSelectedUserType] = useState('');
   const [selectedCountry, setSelectedCountry] = useState({ code: '+20', flag: '🇪🇬', name: 'مصر' });
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [otpToken, setOtpToken] = useState(''); // تخزين OTP Token
+  const [otpToken, setOtpToken] = useState('');
   const navigate = useNavigate();
 
   // بيانات الدول
@@ -81,14 +83,11 @@ export default function Register() {
           password_confirmation: values.password_confirmation,
           birth_date: values.birth_date,
         });
-
         console.log("الرد من الخادم:", response.data);
-
         // تخزين OTP Token إذا كان موجودًا في الاستجابة
         if (response.data.token || response.data.otp_code) {
           setOtpToken(response.data.token || response.data.otp_code);
         }
-
         setCurrentTab(2);
         setTimeout(() => {
           navigate('/verify-otp', {
@@ -101,7 +100,15 @@ export default function Register() {
       } catch (error) {
         console.error("خطأ في إرسال البيانات:", error);
         if (error.response && error.response.data && error.response.data.message) {
-          alert(error.response.data.message);
+          toast.error(error.response.data.message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
         }
       } finally {
         setIsLoading(false);
@@ -483,6 +490,7 @@ export default function Register() {
           </p>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }
