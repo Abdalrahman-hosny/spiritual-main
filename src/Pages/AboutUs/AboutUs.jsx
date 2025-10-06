@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { FaQuran, FaPray, FaShoppingBag } from "react-icons/fa";
-import Navbar from '../Navbar/Navbar';
+
 
 export default function AboutUs() {
   const { t } = useTranslation();
@@ -104,7 +104,7 @@ export default function AboutUs() {
 
         {/* المحتوى */}
         <div className="relative z-50 p-8 flex flex-col flex-grow">
-          <Navbar />
+          
 
           {/* عنوان الصفحة */}
           <motion.div

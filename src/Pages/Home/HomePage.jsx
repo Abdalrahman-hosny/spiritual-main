@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Navbar from '../Navbar/Navbar';
+
 import Herosection from './Herosection';
 import Features from './Features';
 import CourseSlider from './CourseSlider';
 import HowWork from './HowWork';
-import Footer from '../Footer/Footer';
+
 
 const VideoSection = () => {
   return (
@@ -51,13 +51,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen overflow-hidden relative">
-      <Navbar bg={`hero bg-black/90`} />
+      
       <Herosection />
       <Features />
       <CourseSlider />
       <VideoSection />
       <HowWork />
-      <Footer />
+      
 
       {/* زر Scroll to Top */}
       {isVisible && (

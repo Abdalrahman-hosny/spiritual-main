@@ -1,9 +1,8 @@
 import React, { useEffect } from "react";
 import plant from "../../assets/mandala_1265367 1.png";
-import Navbar from '../Navbar/Navbar';
 import { ProductCart } from "./ProductCart";
 import CheckoutSummary from "./Summary";
-import Footer from "../Footer/Footer";
+import Footer from "../../layout/Footer/Footer";
 import { useTranslation } from "react-i18next"; // 👈 استدعاء i18n
 
 export default function Cart() {

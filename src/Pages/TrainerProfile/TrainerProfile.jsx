@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Star, MessageCircle, BookOpen, Package, User, Clock, Users, Award, CheckCircle, ShoppingCart, Calendar, Heart, Eye } from 'lucide-react';
-import Navbar from '../Navbar/Navbar';
+
 import plant from "../../assets/mandala_1265367 1.png";
 import { AiFillStar } from "react-icons/ai";
 import { BiVideo } from "react-icons/bi";
@@ -10,7 +10,7 @@ import image2 from "../../assets/bg-login.png";
 import image3 from "../../assets/hero.png";
 import user from "../../assets/user.png";
 import { Link } from "react-router-dom";
-import Footer from '../Footer/Footer';
+
 import { FaShoppingBag } from 'react-icons/fa';
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -103,7 +103,7 @@ export default function TrainerProfile() {
       {/* Hero Section */}
       <div className='relative'>
         <div className='image'>
-          <Navbar bg={`bg-black/70`} />
+          
           <div className="relative bg-black/70">
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
@@ -363,7 +363,7 @@ export default function TrainerProfile() {
         }
       `}</style>
 
-      <Footer />
+      
     </div>
   );
 }

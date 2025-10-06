@@ -16,7 +16,6 @@ export default function Navbar({ bg }) {
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
   const isRTL = i18n.language === 'ar';
 
-  // عند تغيير اللغة، قم بتحديث اتجاه الصفحة
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
     document.documentElement.lang = i18n.language;
@@ -84,7 +83,6 @@ export default function Navbar({ bg }) {
   // مكون القائمة المنسدلة للحساب
   const AuthDropdown = ({ isMobile = false }) => {
     const isLoggedIn = !!sessionStorage.getItem("token");
-
     return (
       <div className="relative">
         <button
@@ -134,7 +132,7 @@ export default function Navbar({ bg }) {
         {/* قائمة سطح المكتب (اليسار) */}
         <div className={`hidden lg:flex items-center ${isRTL ? 'space-x-reverse gap-3' : 'gap-3'}`}>
           <LanguageDropdown />
-          <Link to={"/cart"} className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
+          <Link to="/cart" className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
             <FaShoppingBag className="text-[15px] xl:text-[18px] text-purple-500" />
           </Link>
           <AuthDropdown />
@@ -196,14 +194,13 @@ export default function Navbar({ bg }) {
             )}
           </div>
         </div>
-
         {/* قائمة الهواتف المتوسطة (الموبايل) */}
         <div className={`hidden md:flex lg:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown />
           <div className="mx-2"></div>
           <AuthDropdown isMobile={true} />
           <div className="mx-2"></div>
-          <Link to={"/cart"} className="w-8 cursor-pointer h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
+          <Link to="/cart" className="w-8 cursor-pointer h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
             <FaShoppingBag className="text-[14px] text-purple-500" />
           </Link>
           <div className="mx-2"></div>
@@ -219,12 +216,11 @@ export default function Navbar({ bg }) {
             )}
           </button>
         </div>
-
         {/* قائمة الهواتف الصغيرة (الموبايل) */}
         <div className={`flex md:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown isMobile={true} />
           <div className="mx-1"></div>
-          <Link to={"/cart"} className="w-7 h-7 cursor-pointer bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
+          <Link to="/cart" className="w-7 h-7 cursor-pointer bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
             <FaShoppingBag className="text-[12px] text-purple-500" />
           </Link>
           <div className="mx-1"></div>
@@ -242,17 +238,17 @@ export default function Navbar({ bg }) {
             )}
           </button>
         </div>
-
         {/* الشعار */}
         <div className="flex items-center">
-          <img
-            src={logo}
-            alt="Logo"
-            className="h-6 sm:h-8 md:h-10 lg:h-11 xl:h-12 2xl:h-14 w-auto"
-          />
+          <Link to="/">
+            <img
+              src={logo}
+              alt="Logo"
+              className="h-6 sm:h-8 md:h-10 lg:h-11 xl:h-12 2xl:h-14 w-auto"
+            />
+          </Link>
         </div>
       </nav>
-
       {/* القائمة المنسدلة للهواتف (الموبايل) */}
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/40" onClick={toggleMobileMenu}>
@@ -330,7 +326,6 @@ export default function Navbar({ bg }) {
           </div>
         </div>
       )}
-
       {/* إغلاق القائمة المنسدلة عند الضغط خارجها */}
       {isLanguageDropdownOpen && (
         <div

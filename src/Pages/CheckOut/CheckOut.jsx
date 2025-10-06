@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'; // استيراد useTranslation
 import { Check, ChevronDown } from 'lucide-react';
 import plant from "../../assets/mandala_1265367 1.png";
 import image from "../../assets/hero.png";
-import Navbar from '../Navbar/Navbar';
-import Footer from '../Footer/Footer';
+
+
 
 export default function CheckOut() {
   const { t } = useTranslation(); // استخدام useTranslation
@@ -46,7 +46,7 @@ export default function CheckOut() {
       {/* Hero Section */}
       <div className='relative'>
         <div className='image'>
-          <Navbar bg={`bg-black/70`} />
+        
           <div className="relative bg-black/70">
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <div className="text-center p-4 md:p-8 max-w-4xl">
@@ -237,7 +237,7 @@ export default function CheckOut() {
           </div>
         </div>
       </div>
-      <Footer />
+      
     </div>
   );
 }

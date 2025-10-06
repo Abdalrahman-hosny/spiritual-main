@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import plant from "../../assets/mandala_1265367 1.png";
 import { Link } from "react-router-dom";
@@ -8,35 +8,18 @@ import { useTranslation } from "react-i18next";
 export function ProductCart() {
   const { i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "فيزدل",
-      description: "مسبحة + 99 خرزة تصميم منقوش بأسماء الله الحسنى وسبندا محمد ص إسلامية",
-      price: 5000.0,
-      quantity: 1,
-      image: plant,
-    },
-    {
-      id: 2,
-      name: "فيزدل",
-      description: "مسبحة + 99 خرزة تصميم منقوش بأسماء الله الحسنى وسبندا محمد ص إسلامية",
-      price: 5000.0,
-      quantity: 1,
-      image: plant,
-    },
-    {
-      id: 3,
-      name: "فيزدل",
-      description: "مسبحة + 99 خرزة تصميم منقوش بأسماء الله الحسنى وسبندا محمد ص إسلامية",
-      price: 5000.0,
-      quantity: 1,
-      image: plant,
-    },
-  ]);
+  const [products, setProducts] = useState(() => {
+    // استرجاع المنتجات من localStorage إذا كانت موجودة
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
 
   const navigate = useNavigate();
+
+  // حفظ السلة في localStorage عند التحديث
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(products));
+  }, [products]);
 
   const updateQuantity = (id, change) => {
     setProducts(

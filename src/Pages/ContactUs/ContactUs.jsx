@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { MapPin, Phone, Clock, User } from 'lucide-react';
 import plant from "../../assets/mandala_1265367 1.png";
 import { useTranslation } from 'react-i18next';
-import Navbar from '../Navbar/Navbar';
-import Footer from '../Footer/Footer';
+
+
 import { FaMapMarkerAlt, FaEnvelope, FaClock } from "react-icons/fa";
 import map from "../../assets/location.png"
 import message1 from "../../assets/message.png"
@@ -73,7 +73,7 @@ const cards = [
     <div className="min-h-screen bg-gray-50" >
           <div className='relative'>
                         <div className='image'>
-                          <Navbar bg={`bg-black/70`} />
+                          
                           {/* <div className="relative bg-black/70">
                             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
                               <div className="text-center p-4 md:p-8 max-w-4xl">
@@ -292,7 +292,7 @@ const cards = [
       </div>
 <div className='w-full pt-84'>
 
-      <Footer/>
+      
 
 </div>
 

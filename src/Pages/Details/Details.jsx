@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import plant from "../../assets/mandala_1265367 1.png";
-import Navbar from '../Navbar/Navbar';
+
 import { Star } from 'lucide-react';
 
 import ProductDetailsSlider from './ProductDetailsSlider';
 import CommentForm from './commentForm';
-import Footer from '../Footer/Footer';
+
 
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -44,7 +44,7 @@ export default function Details() {
       {/* Hero Section */}
       <div className='relative'>
         <div className='image'>
-          <Navbar bg={`bg-black/70`} />
+          
           <div className="relative bg-black/70">
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
@@ -106,7 +106,7 @@ export default function Details() {
         <CommentForm />
       </div>
 
-      <Footer />
+    
     </div>
   );
 }

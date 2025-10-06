@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import preview from "../../assets/hero.png";
 import plant from "../../assets/mandala_1265367 1.png";
-import Navbar from "../Navbar/Navbar";
+
 import { useTranslation } from "react-i18next";
 import { CiFileOn, CiPlay1 } from "react-icons/ci";
 import { IoMdTime } from "react-icons/io";
@@ -11,7 +11,7 @@ import { GrFacebookOption } from "react-icons/gr";
 import pdf from "../../assets/extentions/pdf-svgrepo-com.svg";
 import { motion, AnimatePresence } from "framer-motion";
 import CourseSlider from "../Home/CourseSlider";
-import Footer from "../Footer/Footer";
+
 
 const CourseDetails = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -89,7 +89,7 @@ const CourseDetails = () => {
       {/* Hero Section */}
       <div className="relative">
         <div className="image">
-          <Navbar bg={`bg-black/70`} />
+          
           <div className="relative bg-black/70">
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
@@ -412,7 +412,7 @@ const CourseDetails = () => {
           <CourseSlider isTrue={false} />
         </motion.div>
       </div>
-      <Footer />
+      
     </div>
   );
 };
