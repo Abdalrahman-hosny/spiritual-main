@@ -13,7 +13,6 @@ export default function Login() {
     phone: '',
     password: ''
   });
-
   const navigate = useNavigate();
 
   // Phone validation regex (Egyptian phone numbers)
@@ -21,21 +20,18 @@ export default function Login() {
 
   const validateForm = () => {
     const errors = {};
-
     // Phone validation
     if (!loginForm.phone.trim()) {
       errors.phone = 'رقم الهاتف مطلوب';
     } else if (!phoneRegex.test(loginForm.phone)) {
       errors.phone = 'الرجاء إدخال رقم هاتف صحيح (مثال: +201012345678)';
     }
-
     // Password validation
     if (!loginForm.password.trim()) {
       errors.password = 'كلمة المرور مطلوبة';
     } else if (loginForm.password.length < 6) {
       errors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
     }
-
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -46,7 +42,6 @@ export default function Login() {
       ...prev,
       [name]: value
     }));
-
     // Clear specific field error when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
@@ -54,7 +49,6 @@ export default function Login() {
         [name]: ''
       }));
     }
-
     // Clear general login error
     if (loginError) {
       setLoginError('');
@@ -63,12 +57,10 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     // Validate form before submitting
     if (!validateForm()) {
       return;
     }
-
     setLoginLoading(true);
     setLoginError('');
     setFieldErrors({});
@@ -87,21 +79,21 @@ export default function Login() {
         }
       );
 
-      // Check if response is successful and contains a token
-      if (response.data.token) {
-        sessionStorage.setItem("token", response.data.token);
+      // Check if response is successful and contains a token inside response.data.data
+      if (response.data.data && response.data.data.token) {
+        sessionStorage.setItem("token", response.data.data.token);
+        // إعادة التوجيه إلى صفحة home
         navigate("/");
 
         // Optional: Store user data if needed
-        if (response.data.user) {
-          sessionStorage.setItem("user", JSON.stringify(response.data.user));
+        if (response.data.data.user) {
+          sessionStorage.setItem("user", JSON.stringify(response.data.data.user));
         }
       } else {
         setLoginError('لم يتم استقبال بيانات تسجيل الدخول. الرجاء المحاولة مرة أخرى.');
       }
     } catch (error) {
       console.log('Login error:', error);
-
       // Handle different types of errors
       if (error.response) {
         const { status, data } = error.response;
@@ -148,13 +140,37 @@ export default function Login() {
       top: 0,
       behavior: "smooth",
     });
+
+    // استعادة البيانات المحفوظة من sessionStorage
+    const savedRegisterPhone = sessionStorage.getItem("registerPhone");
+    const savedRegisterPassword = sessionStorage.getItem("registerPassword");
+    const savedResetPhone = sessionStorage.getItem("resetPhone");
+    const savedResetPassword = sessionStorage.getItem("resetPassword");
+
+    // استخدام بيانات التسجيل إذا كانت موجودة
+    if (savedRegisterPhone && savedRegisterPassword) {
+      setLoginForm({
+        phone: savedRegisterPhone,
+        password: savedRegisterPassword,
+      });
+      sessionStorage.removeItem("registerPhone");
+      sessionStorage.removeItem("registerPassword");
+    }
+    // استخدام بيانات إعادة تعيين كلمة المرور إذا كانت موجودة
+    else if (savedResetPhone && savedResetPassword) {
+      setLoginForm({
+        phone: savedResetPhone,
+        password: savedResetPassword,
+      });
+      sessionStorage.removeItem("resetPhone");
+      sessionStorage.removeItem("resetPassword");
+    }
   }, []);
 
   return (
     <div className="min-h-screen image flex items-center justify-center lg:justify-around p-2 sm:p-4 lg:p-6">
       {/* Background overlay */}
       <div className='bg-[linear-gradient(to_left,rgba(0,0,0,0.6),rgba(0,0,0,0))] fixed inset-0'></div>
-
       {/* Main Content Container */}
       <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-full max-w-7xl relative z-10 gap-4 lg:gap-8">
         {/* Mobile Brand Section */}
@@ -166,7 +182,6 @@ export default function Login() {
             منصة إلكترونية متكاملة للتعليم والعالج الروحاني والطاقي
           </p>
         </div>
-
         {/* Login Form Card */}
         <div className="relative bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 w-full max-w-[320px] xs:max-w-[360px] sm:max-w-md lg:max-w-lg shadow-2xl order-2 lg:order-1">
           {/* Header */}
@@ -178,14 +193,12 @@ export default function Login() {
               أدخل إلى عالمك الخاص وتواصل للعالم بطريقة ممتعة وآمنة
             </p>
           </div>
-
           {/* Login Error Message */}
           {loginError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs sm:text-sm rounded-lg text-center">
               {loginError}
             </div>
           )}
-
           <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4 lg:space-y-6">
             {/* Phone Field */}
             <div className="space-y-1 sm:space-y-2">
@@ -208,7 +221,6 @@ export default function Login() {
                 )}
               </div>
             </div>
-
             {/* Password Field */}
             <div className="space-y-1 sm:space-y-2">
               <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
@@ -237,7 +249,6 @@ export default function Login() {
                 )}
               </div>
             </div>
-
             {/* Submit Button */}
             <button
               type="submit"
@@ -253,7 +264,6 @@ export default function Login() {
                 'تسجيل دخول'
               )}
             </button>
-
             {/* Footer Links */}
             <div className="text-center space-y-2 pt-2 sm:pt-3 lg:pt-4">
               <p className="text-gray-600 text-xs sm:text-sm lg:text-base" dir="rtl">
@@ -271,7 +281,6 @@ export default function Login() {
             </div>
           </form>
         </div>
-
         {/* Desktop Brand Section */}
         <div className='hidden lg:block w-full max-w-[450px] xl:max-w-[550px] 2xl:max-w-[650px] order-1 lg:order-2'>
           <div className='flex justify-end items-center mb-4 lg:mb-6'>

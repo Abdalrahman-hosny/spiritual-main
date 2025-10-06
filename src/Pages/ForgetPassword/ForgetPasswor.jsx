@@ -1,25 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Mail } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import image from "../../assets/loginimg.png";
 
 export default function ForgetPassword() {
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  // Email validation regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  const validateEmail = () => {
-    if (!email.trim()) {
-      setError('البريد الإلكتروني مطلوب');
+  // دالة للتحقق من رقم الهاتف
+  const validatePhone = () => {
+    if (!phone.trim()) {
+      setError('رقم الهاتف مطلوب');
       return false;
-    } else if (!emailRegex.test(email)) {
-      setError('الرجاء إدخال بريد إلكتروني صحيح');
+    } else if (!phone.startsWith('+20') && !phone.startsWith('20')) {
+      setError('الرجاء إدخال رقم هاتف مصري صحيح (مثال: +201012345678)');
       return false;
     }
     setError('');
@@ -28,7 +26,7 @@ export default function ForgetPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateEmail()) {
+    if (!validatePhone()) {
       return;
     }
     setLoading(true);
@@ -37,7 +35,7 @@ export default function ForgetPassword() {
       const response = await axios.post(
         "https://app.raw7any.com/api/forgot/password",
         {
-          email: email.trim(),
+          phone: phone.trim(),
         },
         {
           headers: {
@@ -45,12 +43,15 @@ export default function ForgetPassword() {
           }
         }
       );
-
       if (response.status === 200) {
         setSuccess(true);
-        setTimeout(() => {
-          navigate("/verify-reset");
-        }, 3000);
+        // تمرير رقم الهاتف و token إلى صفحة VerifyReset
+        navigate("/verify-reset", {
+          state: {
+            phone: phone.trim(),
+            token: response.data.token // افتراضًا أن API يعيد token
+          }
+        });
       }
     } catch (err) {
       console.log('Error:', err);
@@ -83,7 +84,6 @@ export default function ForgetPassword() {
     <div className="min-h-screen image flex items-center justify-center lg:justify-around p-2 sm:p-4 lg:p-6">
       {/* Background overlay */}
       <div className='bg-[linear-gradient(to_left,rgba(0,0,0,0.6),rgba(0,0,0,0))] fixed inset-0'></div>
-
       {/* Main Content Container */}
       <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-full max-w-7xl relative z-10 gap-4 lg:gap-8">
         {/* Mobile Brand Section */}
@@ -95,7 +95,6 @@ export default function ForgetPassword() {
             منصة إلكترونية متكاملة للتعليم والعالج الروحاني والطاقي
           </p>
         </div>
-
         {/* Forget Password Form Card */}
         <div className="relative bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 w-full max-w-[320px] xs:max-w-[360px] sm:max-w-md lg:max-w-lg shadow-2xl order-2 lg:order-1">
           {/* Header */}
@@ -104,44 +103,40 @@ export default function ForgetPassword() {
               نسيت كلمة المرور؟
             </h1>
             <p className="text-gray-600 font-montserratArabic text-xs sm:text-sm lg:text-base leading-relaxed px-2" dir="rtl">
-              أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور
+              أدخل رقم هاتفك وسنرسل لك رابطًا لإعادة تعيين كلمة المرور
             </p>
           </div>
-
           {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs sm:text-sm rounded-lg text-center">
               {error}
             </div>
           )}
-
           {/* Success Message */}
           {success && (
             <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 text-xs sm:text-sm rounded-lg text-center">
-              تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح. سيتم تحويلك إلى صفحة التحقق.
+              تم إرسال رابط إعادة تعيين كلمة المرور إلى رقم هاتفك بنجاح. سيتم تحويلك إلى صفحة التحقق.
             </div>
           )}
-
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-6">
-            {/* Email Field */}
+            {/* Phone Field */}
             <div className="space-y-1 sm:space-y-2">
               <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
-                البريد الإلكتروني
+                رقم الهاتف
               </div>
               <div className="relative">
                 <input
-                  type="email"
-                  name="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="tel"
+                  name="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="example@example.com"
+                  placeholder="+201012345678"
                   className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
                   dir="ltr"
                 />
               </div>
             </div>
-
             {/* Submit Button */}
             <button
               type="submit"
@@ -157,7 +152,6 @@ export default function ForgetPassword() {
                 'إرسال رابط إعادة تعيين'
               )}
             </button>
-
             {/* Footer Links */}
             <div className="text-center space-y-2 pt-2 sm:pt-3 lg:pt-4">
               <p className="text-gray-600 text-xs sm:text-sm lg:text-base" dir="rtl">
@@ -169,7 +163,6 @@ export default function ForgetPassword() {
             </div>
           </form>
         </div>
-
         {/* Desktop Brand Section */}
         <div className='hidden lg:block w-full max-w-[450px] xl:max-w-[550px] 2xl:max-w-[650px] order-1 lg:order-2'>
           <div className='flex justify-end items-center mb-4 lg:mb-6'>

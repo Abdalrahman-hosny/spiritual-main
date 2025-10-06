@@ -1,38 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle, RefreshCw } from 'lucide-react';
-import axios from 'axios'; // تأكد من تثبيت axios: npm install axios
+import axios from 'axios';
 
 export default function VerifyReset() {
-  // تعريف المتغيرات والحالات
-  const [email, setEmail] = useState(''); // بريد المستخدم
-  const [otp, setOtp] = useState(['', '', '', '', '', '']); // كود التحقق
-  const [isLoading, setIsLoading] = useState(false); // حالة التحميل
-  const [error, setError] = useState(''); // رسالة الخطأ
-  const [success, setSuccess] = useState(false); // حالة النجاح
-  const [canResend, setCanResend] = useState(false); // إمكانية إعادة الإرسال
-  const [resendTimer, setResendTimer] = useState(60); // عداد إعادة الإرسال (60 ثانية)
-  const [resendLoading, setResendLoading] = useState(false); // حالة تحميل إعادة الإرسال
-  const [resendSuccess, setResendSuccess] = useState(false); // حالة نجاح إعادة الإرسال
-  const inputRefs = useRef([]);
-  const navigate = useNavigate();
+  const [token, setToken] = useState(''); // كود التحقق
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [canResend, setCanResend] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
-  // دالة للتحقق من صحة المدخلات
-  const validateInputs = () => {
-    const enteredOTP = otp.join('');
-    if (!email.trim()) {
-      setError('البريد الإلكتروني مطلوب');
-      return false;
-    } else if (!enteredOTP.trim()) {
-      setError('كود التحقق مطلوب');
-      return false;
-    } else if (enteredOTP.length !== 6) {
-      setError('كود التحقق يجب أن يتكون من 6 أرقام');
-      return false;
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // استخراج `phone` من `location.state`
+  const phone = location.state?.phone;
+
+  // إذا لم يكن هناك `phone`، قم بإعادة التوجيه إلى صفحة "نسيت كلمة المرور"
+  useEffect(() => {
+    if (!phone) {
+      navigate('/forgot-password');
     }
-    setError('');
-    return true;
-  };
+  }, [phone, navigate]);
 
   // عداد الوقت لإعادة الإرسال
   useEffect(() => {
@@ -47,21 +39,17 @@ export default function VerifyReset() {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
-  // إعادة إرسال OTP
-  const handleResendOTP = async () => {
+  // إعادة إرسال الرسالة إلى نفس رقم الهاتف
+  const handleResendToken = async () => {
     if (!canResend) return;
-    if (!email.trim()) {
-      setError('البريد الإلكتروني مطلوب');
-      return;
-    }
     setResendLoading(true);
     setError('');
     try {
-      const response = await axios.post('https://app.raw7any.com/api/forgot/resend-otp', {
-        email,
+      const response = await axios.post('https://app.raw7any.com/api/forgot/password', {
+        phone,
       });
       if (response.status !== 200) {
-        throw new Error('فشل في إعادة إرسال OTP');
+        throw new Error('فشل في إعادة إرسال الرسالة');
       }
       setResendTimer(60);
       setCanResend(false);
@@ -76,44 +64,36 @@ export default function VerifyReset() {
     }
   };
 
-  // التركيز تلقائيًا على الحقل التالي
-  const handleChange = (index, value) => {
-    if (/^\d*$/.test(value) && value.length <= 1) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-      if (value && index < 5) {
-        inputRefs.current[index + 1].focus();
-      }
-    }
-  };
-
-  // التركيز على الحقل السابق عند الحذف
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1].focus();
-    }
-  };
-
-  // التحقق من رمز OTP
+  // التحقق من `token`
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateInputs()) return;
+    if (!token.trim()) {
+      setError('كود التحقق مطلوب');
+      return;
+    } else if (token.length !== 5) {
+      setError('كود التحقق يجب أن يتكون من 5 أرقام');
+      return;
+    }
     setIsLoading(true);
     setError('');
-    const enteredOTP = otp.join('');
     try {
       const response = await axios.post('https://app.raw7any.com/api/forgot/verify-otp', {
-        email,
-        otp: enteredOTP,
+        phone,
+        token,
       });
       if (response.status !== 200) {
-        throw new Error('رمز OTP غير صحيح');
+        throw new Error('كود التحقق غير صحيح');
       }
       setSuccess(true);
+      // تمرير `phone` و `token` إلى صفحة ResetPassword
       setTimeout(() => {
-        navigate('/reset-password');
-      }, 3000);
+        navigate('/reset-password', {
+          state: {
+            phone: phone,
+            token: token
+          }
+        });
+      }, 2000);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق');
     } finally {
@@ -143,59 +123,42 @@ export default function VerifyReset() {
           <>
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-2">التحقق من كود إعادة التعيين</h2>
-              <p className="text-gray-600">أدخل بريدك الإلكتروني وكود التحقق المرسل إليه</p>
+              <p className="text-gray-600">
+                تم إرسال كود التحقق إلى رقم هاتفك: <span className="font-bold">{phone}</span>
+              </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* حقل البريد الإلكتروني */}
+              {/* حقل كود التحقق (token) */}
               <div className="space-y-1">
-                <label className="block text-right text-gray-700 text-sm font-medium">البريد الإلكتروني</label>
+                <label className="block text-right text-gray-700 text-sm font-medium">كود التحقق</label>
                 <div className="relative">
                   <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    name="token"
+                    value={token}
+                    onChange={(e) => setToken(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="example@example.com"
+                    placeholder="12345"
                     className={`w-full px-3 py-2 text-sm bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right`}
                   />
                 </div>
               </div>
-
-              {/* حقل كود التحقق */}
-              <div className="flex justify-center gap-2" dir='ltr'>
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    ref={(el) => (inputRefs.current[index] = el)}
-                    type="text"
-                    maxLength="1"
-                    value={digit}
-                    onChange={(e) => handleChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-12 text-center text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                ))}
-              </div>
-
               {/* عرض رسالة الخطأ */}
               {error && <p className="text-red-500 text-center">{error}</p>}
-
-              {/* زر إعادة إرسال OTP */}
+              {/* زر إعادة إرسال الرسالة */}
               <div className="flex justify-center mb-4">
                 <button
                   type="button"
-                  onClick={handleResendOTP}
+                  onClick={handleResendToken}
                   disabled={!canResend || resendLoading}
                   className={`flex items-center gap-2 text-purple-600 font-medium ${
                     !canResend || resendLoading ? 'opacity-50 cursor-not-allowed' : 'hover:text-purple-800'
                   }`}
                 >
                   <RefreshCw className="w-4 h-4" />
-                  {resendLoading ? 'جاري الإرسال...' : `إعادة إرسال الكود ${canResend ? '' : `(${resendTimer}s)`}`}
+                  {resendLoading ? 'جاري الإرسال...' : `إعادة إرسال الرسالة ${canResend ? '' : `(${resendTimer}s)`}`}
                 </button>
               </div>
-
               {/* زر التحقق */}
               <button
                 type="submit"
@@ -215,11 +178,10 @@ export default function VerifyReset() {
                   'تحقق من الكود'
                 )}
               </button>
-
               {/* عرض رسالة نجاح إعادة الإرسال */}
               {resendSuccess && (
                 <div className="p-3 bg-green-50 border border-green-200 text-green-600 text-sm rounded-lg text-center">
-                  تم إعادة إرسال كود التحقق بنجاح.
+                  تم إعادة إرسال الرسالة بنجاح.
                 </div>
               )}
             </form>
