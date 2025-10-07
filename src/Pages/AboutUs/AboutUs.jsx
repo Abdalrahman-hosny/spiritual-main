@@ -40,6 +40,7 @@ export default function AboutUs() {
   }, []);
 
   return (
+  
     <AnimatePresence>
       <motion.div
         initial="initial"
@@ -69,6 +70,7 @@ export default function AboutUs() {
         </div>
 
         {/* Shooting stars */}
+        <div className="pt-[80px]"></div>
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(3)].map((_, i) => (
             <div

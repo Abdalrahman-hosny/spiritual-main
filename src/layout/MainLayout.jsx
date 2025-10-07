@@ -8,8 +8,8 @@ export default function MainLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* ✅ Navbar ثابت */}
-      <Navbar  bg={`bg-black/70`}/>
-       <div className="relative bg-black/70"></div>
+      <Navbar  />
+      
 
       {/* 🔄 هنا بتتغير الصفحات */}
       <main className="flex-grow">

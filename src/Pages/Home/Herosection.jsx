@@ -1,14 +1,13 @@
-// src/components/Herosection.jsx
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom'; // استيراد useNavigate
-import plant from "../../assets/Moon.png";
+import { useNavigate } from 'react-router-dom';
+import plant from '../../assets/Moon.png';
 import './home.css';
 
 export default function Herosection() {
   const { t, i18n } = useTranslation();
   const [isLoaded, setIsLoaded] = useState(false);
-  const navigate = useNavigate(); // استخدام useNavigate للتنقل
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsLoaded(true);
@@ -30,11 +29,12 @@ export default function Herosection() {
                 height: `${Math.random() * 3 + 1}px`,
                 animationDelay: `${Math.random() * 3}s`,
                 animationDuration: `${Math.random() * 2 + 1}s`,
-                opacity: Math.random() * 0.8 + 0.2
+                opacity: Math.random() * 0.8 + 0.2,
               }}
             />
           ))}
         </div>
+
         {/* Shooting stars */}
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(3)].map((_, i) => (
@@ -48,12 +48,14 @@ export default function Herosection() {
                 animationDuration: '3s',
                 animationTimingFunction: 'linear',
                 animationDelay: `${i * 2}s`,
-                animationIterationCount: 'infinite'
+                animationIterationCount: 'infinite',
               }}
             />
           ))}
         </div>
-        {/* Main content */}
+
+        {/* Main content */}<div className="pt-[80px]"></div>
+        
         <div className="overflow-hidden min-h-[80vh] z-10 flex justify-center items-center px-4">
           <div className="text-right p-4 md:p-8 md:w-[90%] overflow-hidden">
             <h1
@@ -88,7 +90,7 @@ export default function Herosection() {
               {t('hero.description')}
             </p>
             <button
-              onClick={() => navigate('/about-us')} // هنا: عند الضغط، ينقل إلى /about-us
+              onClick={() => navigate('/about-us')}
               className={`bg-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-500 transform hover:scale-105 hover:bg-purple-700 shadow-2xl hover:shadow-purple-500/25 relative overflow-hidden group ${
                 isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
               }`}
@@ -99,6 +101,7 @@ export default function Herosection() {
             </button>
           </div>
         </div>
+
         {/* Planet */}
         <div
           className={`absolute -bottom-4 left-0 transform -translate-x-1/3 translate-y-1/3 sm:-translate-x-1/4 sm:translate-y-1/4 md:-translate-x-1/5 md:translate-y-1/5 lg:-translate-x-1/3 lg:translate-y-1/3 transition-all duration-1500 ease-out ${
@@ -109,11 +112,16 @@ export default function Herosection() {
           <div className="relative">
             <div className="absolute -top-16 left-4 w-32 h-32 sm:w-40 sm:h-40 sm:-top-20 sm:left-6 md:w-56 md:h-56 md:-top-28 md:left-6 lg:w-72 lg:h-72 lg:-top-36 lg:left-8 xl:w-96 xl:h-96 xl:-top-40 rounded-full bg-purple-500/10 animate-pulse" />
             <div className="absolute z-50 -top-16 left-4 w-32 h-32 sm:w-40 sm:h-40 sm:-top-20 sm:left-6 md:w-56 md:h-56 md:-top-28 md:left-6 lg:w-72 lg:h-72 lg:-top-36 lg:left-8 xl:w-96 xl:h-96 xl:-top-40 rounded-full overflow-hidden animate-[float_6s_ease-in-out_infinite] hover:animate-[float_3s_ease-in-out_infinite] transition-all duration-300 hover:scale-105">
-              <img src={plant} alt="Moon Planet" className="w-full h-full object-cover animate-[slowSpin_20s_linear_infinite]" />
+              <img
+                src={plant}
+                alt="Moon Planet"
+                className="w-full h-full object-cover animate-[slowSpin_20s_linear_infinite]"
+              />
               <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 via-transparent to-blue-400/20 rounded-full" />
             </div>
           </div>
         </div>
+
         {/* Floating particles */}
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(20)].map((_, i) => (
@@ -127,21 +135,31 @@ export default function Herosection() {
                 animationDuration: `${3 + Math.random() * 4}s`,
                 animationTimingFunction: 'ease-in-out',
                 animationIterationCount: 'infinite',
-                animationDelay: `${Math.random() * 2}s`
+                animationDelay: `${Math.random() * 2}s`,
               }}
             />
           ))}
         </div>
       </div>
+
       {/* CSS keyframes */}
-      <style>{`
+      <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
         }
         @keyframes slowSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
         @keyframes shootingStar {
           0% {
@@ -157,7 +175,8 @@ export default function Herosection() {
           }
         }
         @keyframes floatParticle {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px) translateX(0px);
             opacity: 0.4;
           }
@@ -171,8 +190,12 @@ export default function Herosection() {
           }
         }
         @keyframes shimmer {
-          0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-          100% { transform: translateX(200%) translateY(200%) rotate(45deg); }
+          0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+          }
+          100% {
+            transform: translateX(200%) translateY(200%) rotate(45deg);
+          }
         }
       `}</style>
     </div>

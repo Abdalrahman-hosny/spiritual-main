@@ -14,6 +14,7 @@ export default function Navbar({ bg }) {
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
+
   const isRTL = i18n.language === 'ar';
 
   useEffect(() => {
@@ -45,7 +46,6 @@ export default function Navbar({ bg }) {
     navigate("/login");
   };
 
-  // مكون القائمة المنسدلة للغة
   const LanguageDropdown = ({ isMobile = false }) => (
     <div className="relative">
       <button
@@ -80,7 +80,6 @@ export default function Navbar({ bg }) {
     </div>
   );
 
-  // مكون القائمة المنسدلة للحساب
   const AuthDropdown = ({ isMobile = false }) => {
     const isLoggedIn = !!sessionStorage.getItem("token");
     return (
@@ -127,9 +126,9 @@ export default function Navbar({ bg }) {
   };
 
   return (
-    <div className={`${bg}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <nav className={`w-[95%] z-50 lg:w-[90%] xl:w-[85%] 2xl:w-[80%] mx-auto flex items-center justify-between px-2 sm:px-4 py-3 sm:py-4`}>
-        {/* قائمة سطح المكتب (اليسار) */}
+    <div className={`fixed top-0 left-0 w-full z-[9999] bg-transparent backdrop-blur-sm ${bg ? bg : 'bg-black/70'}`}>
+      <nav className="w-[95%] lg:w-[90%] xl:w-[85%] 2xl:w-[80%] mx-auto flex items-center justify-between px-2 sm:px-4 py-3 sm:py-4 h-full">
+        {/* قائمة سطح المكتب */}
         <div className={`hidden lg:flex items-center ${isRTL ? 'space-x-reverse gap-3' : 'gap-3'}`}>
           <LanguageDropdown />
           <Link to="/cart" className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
@@ -194,7 +193,8 @@ export default function Navbar({ bg }) {
             )}
           </div>
         </div>
-        {/* قائمة الهواتف المتوسطة (الموبايل) */}
+
+        {/* قائمة الهواتف المتوسطة */}
         <div className={`hidden md:flex lg:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown />
           <div className="mx-2"></div>
@@ -216,7 +216,8 @@ export default function Navbar({ bg }) {
             )}
           </button>
         </div>
-        {/* قائمة الهواتف الصغيرة (الموبايل) */}
+
+        {/* قائمة الهواتف الصغيرة */}
         <div className={`flex md:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown isMobile={true} />
           <div className="mx-1"></div>
@@ -238,6 +239,7 @@ export default function Navbar({ bg }) {
             )}
           </button>
         </div>
+
         {/* الشعار */}
         <div className="flex items-center">
           <Link to="/">
@@ -249,9 +251,10 @@ export default function Navbar({ bg }) {
           </Link>
         </div>
       </nav>
-      {/* القائمة المنسدلة للهواتف (الموبايل) */}
+
+      {/* القائمة المنسدلة للهواتف */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black/40" onClick={toggleMobileMenu}>
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/40" onClick={toggleMobileMenu}>
           <div
             className={`absolute top-0 ${isRTL ? 'right-0' : 'left-0'} w-full sm:w-80 bg-white shadow-2xl max-h-screen overflow-y-auto`}
             onClick={(e) => e.stopPropagation()}
@@ -326,16 +329,17 @@ export default function Navbar({ bg }) {
           </div>
         </div>
       )}
+
       {/* إغلاق القائمة المنسدلة عند الضغط خارجها */}
       {isLanguageDropdownOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-30"
           onClick={() => setIsLanguageDropdownOpen(false)}
         />
       )}
       {isAuthDropdownOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-30"
           onClick={() => setIsAuthDropdownOpen(false)}
         />
       )}

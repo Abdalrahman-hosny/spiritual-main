@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import plant from "../../assets/mandala_1265367 1.png";
 import { ProductCart } from "./ProductCart";
 import CheckoutSummary from "./Summary";
-import Footer from "../../layout/Footer/Footer";
+
 import { useTranslation } from "react-i18next"; // 👈 استدعاء i18n
 
 export default function Cart() {
@@ -19,8 +19,10 @@ export default function Cart() {
     <div>
       <div className="relative">
         <div className="image">
-          <Navbar bg={`bg-black/70`} />
+          
+          
           <div className="relative bg-black/70">
+          <div className="pt-[80px]"></div>
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <div className="text-center p-4 md:p-8 max-w-4xl">
                 <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 md:mb-6 leading-tight">
@@ -53,7 +55,7 @@ export default function Cart() {
 
       <ProductCart />
       <CheckoutSummary />
-      <Footer />
+      
     </div>
   );
 }

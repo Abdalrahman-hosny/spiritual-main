@@ -103,6 +103,7 @@ const cards = [
                             </div>
                           </div> */}
                             <div className="relative bg-black/70">
+                            <div className="pt-[80px]"></div>
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
                 variants={heroVariants}
@@ -189,6 +190,7 @@ const cards = [
       {/* Map Container */}
       <div className="relative">
         <div className="h-screen  relative overflow-hidden">
+        
          <div className="w-full h-full rounded-lg overflow-hidden shadow-lg">
       {selectedLocation ? (
         <iframe

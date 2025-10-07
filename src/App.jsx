@@ -47,10 +47,11 @@ function App() {
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/courseDetails/:id" element={<CourseDetails />} />
             <Route path="/contact-us" element={<ContactUs />} />
-            <Route path="/profile" element={<Profile />} />
           </Route>
 
           {/* 🚫 الصفحات اللي مافيهاش Navbar ولا Footer */}
+                      <Route path="/profile" element={<Profile />} />
+
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<OTPPage />} />
