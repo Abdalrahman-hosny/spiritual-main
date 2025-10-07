@@ -54,7 +54,7 @@ export default function Herosection() {
           ))}
         </div>
 
-        {/* Main content */}<div className="pt-[80px]"></div>
+        {/* Main content */}<div className="pt-[80px]"></div> 
         
         <div className="overflow-hidden min-h-[80vh] z-10 flex justify-center items-center px-4">
           <div className="text-right p-4 md:p-8 md:w-[90%] overflow-hidden">

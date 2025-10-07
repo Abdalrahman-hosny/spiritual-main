@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Lock, Mail, User, LogOut } from 'lucide-react';
+import { Camera, Lock, Mail, User, Phone, Trash2, Check, X } from 'lucide-react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: '',
   });
 
-  // جلب بيانات المستخدم عند تحميل الصفحة
   useEffect(() => {
     const storedUser = JSON.parse(sessionStorage.getItem("user"));
     if (storedUser) {
@@ -26,6 +29,7 @@ export default function Profile() {
       setFormData({
         name: storedUser.name || '',
         email: storedUser.email || '',
+        phone: storedUser.phone || '',
         currentPassword: '',
         newPassword: '',
         confirmNewPassword: '',
@@ -33,7 +37,6 @@ export default function Profile() {
     }
   }, []);
 
-  // التعامل مع رفع الصورة
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -45,7 +48,6 @@ export default function Profile() {
     }
   };
 
-  // تحديث بيانات المستخدم
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -55,6 +57,7 @@ export default function Profile() {
         {
           name: formData.name,
           email: formData.email,
+          phone: formData.phone,
         },
         {
           headers: {
@@ -76,7 +79,6 @@ export default function Profile() {
     }
   };
 
-  // تغيير كلمة السر
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (formData.newPassword !== formData.confirmNewPassword) {
@@ -117,24 +119,72 @@ export default function Profile() {
     }
   };
 
-  // تسجيل الخروج
-  const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    navigate("/login");
+  const handleDeleteAccount = async () => {
+    setIsLoading(true);
+    try {
+      await axios.delete('https://app.raw7any.com/api/delete-account', {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+      });
+      toast.success("تم حذف الحساب بنجاح!", {
+        position: "top-right",
+      });
+      sessionStorage.clear();
+      navigate('/login');
+    } catch (error) {
+      toast.error(error.response?.data?.message || "حدث خطأ أثناء حذف الحساب", {
+        position: "top-right",
+      });
+    } finally {
+      setIsLoading(false);
+      setShowDeleteAccount(false);
+    }
+  };
+
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: 0, label: '', color: '' };
+    if (password.length < 4) return { strength: 1, label: 'ضعيفة', color: 'bg-red-500' };
+    if (password.length < 8) return { strength: 2, label: 'متوسطة', color: 'bg-yellow-500' };
+    return { strength: 3, label: 'قوية', color: 'bg-green-500' };
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="pt-[80px]"></div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden"
+      >
         <div className="p-6 sm:p-8">
-          <div className="flex flex-col items-center mb-8">
-            <div className="relative w-32 h-32 mb-4">
-              <img
-                src={imagePreview || (user?.image ? `https://app.raw7any.com${user.image}` : "https://via.placeholder.com/150")}
-                alt="Profile"
-                className="w-full h-full rounded-full object-cover border-4 border-purple-100"
-              />
+          {/* معلومات المستخدم */}
+          <motion.div
+            className="flex flex-col md:flex-row items-center md:items-start mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="relative w-32 h-32 mb-4 md:mr-8 md:mb-0">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="relative w-32 h-32 rounded-full bg-purple-100 flex items-center justify-center border-4 border-purple-200 overflow-hidden"
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Profile"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                    alt="Default Profile"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                )}
+              </motion.div>
               <label
                 htmlFor="profile-image"
                 className="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full cursor-pointer hover:bg-purple-700 transition-colors"
@@ -149,13 +199,26 @@ export default function Profile() {
                 />
               </label>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">{user?.name || "مستخدم"}</h1>
-            <p className="text-gray-500">{user?.email || "example@example.com"}</p>
-          </div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex-1"
+            >
+              <h1 className="text-2xl font-bold text-gray-800">{user?.name || "مستخدم"}</h1>
+              <p className="text-gray-500">{user?.email || "example@example.com"}</p>
+              {user?.phone && <p className="text-gray-500">{user?.phone}</p>}
+            </motion.div>
+          </motion.div>
 
+          {/* تحديث البيانات الشخصية */}
           <div className="space-y-8">
-            {/* تحديث البيانات الشخصية */}
-            <div className="bg-gray-50 p-6 rounded-lg">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white p-6 rounded-lg shadow-sm"
+            >
               <h2 className="text-xl font-semibold text-gray-800 mb-4">تحديث البيانات الشخصية</h2>
               <form onSubmit={handleUpdateProfile} className="space-y-4">
                 <div>
@@ -164,7 +227,8 @@ export default function Profile() {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                    required
                   />
                 </div>
                 <div>
@@ -173,74 +237,185 @@ export default function Profile() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                    required
                   />
                 </div>
-                <button
+                <div>
+                  <label className="block text-gray-700 font-medium mb-1">رقم الهاتف</label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                  />
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={isLoading}
                   className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
                 >
                   {isLoading ? "جاري التحديث..." : "تحديث البيانات"}
-                </button>
+                </motion.button>
               </form>
-            </div>
+            </motion.div>
 
-            {/* تغيير كلمة السر */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">تغيير كلمة السر</h2>
-              <form onSubmit={handleChangePassword} className="space-y-4">
-                <div>
-                  <label className="block text-gray-700 font-medium mb-1">كلمة السر الحالية</label>
-                  <input
-                    type="password"
-                    value={formData.currentPassword}
-                    onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-1">كلمة السر الجديدة</label>
-                  <input
-                    type="password"
-                    value={formData.newPassword}
-                    onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-1">تأكيد كلمة السر الجديدة</label>
-                  <input
-                    type="password"
-                    value={formData.confirmNewPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmNewPassword: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
-                >
-                  {isLoading ? "جاري التغيير..." : "تغيير كلمة السر"}
-                </button>
-              </form>
-            </div>
-
-            {/* تسجيل الخروج */}
-            <div className="bg-gray-50 p-6 rounded-lg text-center">
-              <button
-                onClick={handleLogout}
-                className="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+            {/* زر تغيير كلمة السر */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white p-6 rounded-lg shadow-sm"
+            >
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowPasswordForm(!showPasswordForm)}
+                className={`w-full py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
+                  showPasswordForm
+                    ? "bg-purple-700 text-white border-2 border-purple-500"
+                    : "bg-white text-purple-700 border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-500"
+                }`}
               >
-                <LogOut size={18} />
-                تسجيل الخروج
-              </button>
-            </div>
+                <Lock size={18} />
+                تغيير كلمة السر
+              </motion.button>
+
+              {/* نموذج تغيير كلمة السر */}
+              <AnimatePresence>
+                {showPasswordForm && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <motion.form
+                      onSubmit={handleChangePassword}
+                      className="space-y-4 pt-4"
+                    >
+                      <div>
+                        <label className="block text-gray-700 font-medium mb-1">كلمة السر الحالية</label>
+                        <input
+                          type="password"
+                          value={formData.currentPassword}
+                          onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 font-medium mb-1">كلمة السر الجديدة</label>
+                        <input
+                          type="password"
+                          value={formData.newPassword}
+                          onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                          required
+                        />
+                        <div className="mt-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className={`h-2.5 rounded-full ${getPasswordStrength(formData.newPassword).color}`}
+                              style={{ width: `${(getPasswordStrength(formData.newPassword).strength / 3) * 100}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-xs mt-1 text-gray-500">
+                            {getPasswordStrength(formData.newPassword).label}
+                          </p>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 font-medium mb-1">تأكيد كلمة السر الجديدة</label>
+                        <input
+                          type="password"
+                          value={formData.confirmNewPassword}
+                          onChange={(e) => setFormData({ ...formData, confirmNewPassword: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                          required
+                        />
+                      </div>
+                      <motion.button
+                        whileTap={{ scale: 0.98 }}
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+                      >
+                        {isLoading ? "جاري التغيير..." : "تغيير كلمة السر"}
+                      </motion.button>
+                    </motion.form>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* زر حذف الحساب */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="bg-white p-6 rounded-lg shadow-sm"
+            >
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowDeleteAccount(true)}
+                className="w-full bg-red-100 text-red-700 py-3 px-4 rounded-lg hover:bg-red-200 transition-colors flex items-center justify-center gap-2"
+              >
+                <Trash2 size={18} />
+                حذف الحساب
+              </motion.button>
+            </motion.div>
           </div>
         </div>
-      </div>
-      <ToastContainer />
+      </motion.div>
+
+      {/* نافذة تأكيد حذف الحساب */}
+      <AnimatePresence>
+        {showDeleteAccount && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-lg p-6 max-w-md w-full"
+            >
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <Trash2 className="text-red-600" size={24} />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 text-center mb-2">حذف الحساب</h3>
+              <p className="text-gray-600 text-center mb-6">هل أنت متأكد من أنك تريد حذف حسابك؟ لن يمكنك استرجاع بياناتك بعد الحذف.</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleDeleteAccount}
+                  disabled={isLoading}
+                  className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? "جاري الحذف..." : "حذف الحساب"}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowDeleteAccount(false)}
+                  className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-2"
+                >
+                  <X size={18} />
+                  إلغاء
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ToastContainer rtl />
     </div>
   );
 }

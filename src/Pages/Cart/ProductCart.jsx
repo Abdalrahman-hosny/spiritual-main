@@ -1,25 +1,25 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import plant from "../../assets/mandala_1265367 1.png";
-import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import plant from "../../assets/mandala_1265367 1.png";
 
 export function ProductCart() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const [products, setProducts] = useState(() => {
-    // استرجاع المنتجات من localStorage إذا كانت موجودة
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
   const navigate = useNavigate();
 
-  // حفظ السلة في localStorage عند التحديث
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(products));
-  }, [products]);
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setProducts(JSON.parse(savedCart));
+    }
+  }, []);
 
   const updateQuantity = (id, change) => {
     setProducts(
@@ -31,10 +31,13 @@ export function ProductCart() {
         return product;
       })
     );
+    localStorage.setItem('cart', JSON.stringify(products));
   };
 
   const removeProduct = (id) => {
-    setProducts(products.filter((product) => product.id !== id));
+    const updatedProducts = products.filter((product) => product.id !== id);
+    setProducts(updatedProducts);
+    localStorage.setItem('cart', JSON.stringify(updatedProducts));
   };
 
   const handleCheckout = () => {
@@ -56,7 +59,7 @@ export function ProductCart() {
           transition={{ duration: 0.5 }}
           className="font-[Alexandria] font-bold text-[24px] sm:text-[30px] leading-[39px] text-right mb-6"
         >
-          قائمة المنتجات
+          {t("cart_title")}
         </motion.h1>
 
         {/* المنتجات */}
@@ -75,13 +78,11 @@ export function ProductCart() {
                 <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-col sm:flex-row'} sm:items-center sm:gap-6 gap-4`}>
                   {/* صورة المنتج */}
                   <div className="flex-shrink-0 flex justify-center sm:block">
-                    <Link to={`/product-details/${product.id}`}>
-                      <img
-                        src={product.image}
-                        className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] object-contain"
-                        alt={product.name}
-                      />
-                    </Link>
+                    <img
+                      src={product.image}
+                      className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] object-contain"
+                      alt={product.name}
+                    />
                   </div>
 
                   {/* تفاصيل المنتج */}
@@ -93,7 +94,7 @@ export function ProductCart() {
                       {product.description}
                     </p>
                     <div className="font-[Montserrat-Arabic] font-bold text-[18px] sm:text-[20px] leading-[100%] uppercase text-purple-600">
-                      {product.price.toFixed(2)} جنية
+                      {product.price.toFixed(2)} {t("currency")}
                     </div>
                   </div>
 
@@ -118,7 +119,7 @@ export function ProductCart() {
                       onClick={() => removeProduct(product.id)}
                       className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
                     >
-                      إزالة
+                      {t("remove")}
                     </button>
                   </div>
                 </div>
@@ -143,7 +144,9 @@ export function ProductCart() {
                 <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z" />
               </svg>
             </div>
-            <p className="text-gray-500 text-lg">{isRTL ? 'السلة فارغة' : 'Cart is empty'}</p>
+            <p className="text-gray-500 text-lg">
+              {t("empty_cart")}
+            </p>
           </motion.div>
         ) : (
           // زر اتمام الشراء
@@ -154,13 +157,13 @@ export function ProductCart() {
             className={`mt-8 flex ${isRTL ? 'justify-between' : 'justify-end'} items-center`}
           >
             <div className="font-[Montserrat-Arabic] font-bold text-[18px] text-purple-600">
-              الإجمالي: {totalPrice.toFixed(2)} جنية
+              {t("total")}: {totalPrice.toFixed(2)} {t("currency")}
             </div>
             <button
               onClick={handleCheckout}
               className="bg-gradient-to-r from-purple-600 to-purple-800 text-white px-6 py-2 rounded-full font-medium hover:from-purple-700 hover:to-purple-900 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              {isRTL ? 'اتمام الشراء' : 'Checkout'}
+              {t("checkout")}
             </button>
           </motion.div>
         )}
