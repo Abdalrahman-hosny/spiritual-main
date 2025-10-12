@@ -59,7 +59,7 @@ export default function ResetPassword() {
 
     try {
       const response = await axios.post(
-        'https://app.raw7any.com/api/forgot/reset-password',
+        'https://spiritual.brmjatech.uk/api/forgot/reset-password',
         {
           phone,
           password,

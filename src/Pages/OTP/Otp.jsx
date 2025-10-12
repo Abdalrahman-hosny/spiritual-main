@@ -1,18 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle, RefreshCw } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { CheckCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function OTP() {
-  const [otp, setOtp] = useState(['', '', '', '', '']); // 5 أرقام بدلاً من 6
+  const [otp, setOtp] = useState(['', '', '', '', '']); // 5 أرقام
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [phone, setPhone] = useState('+201013503789'); // رقم الهاتف الافتراضي
   const [canResend, setCanResend] = useState(false);
-  const [resendTimer, setResendTimer] = useState(60); // 60 ثانية
+  const [resendTimer, setResendTimer] = useState(60);
   const inputRefs = useRef([]);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // استخراج `phone` من `location.state`
+  const { phone } = location.state || {};
+
+  // التحقق من وجود `phone` عند دخول الصفحة
+  useEffect(() => {
+    if (!phone) {
+      toast.error("لا يوجد رقم هاتف صالح. سيتم إعادة توجيهك لتسجيل الدخول.");
+      setTimeout(() => navigate('/login'), 3000);
+    }
+  }, [phone, navigate]);
 
   // عداد الوقت لإعادة الإرسال
   useEffect(() => {
@@ -29,21 +42,23 @@ export default function OTP() {
 
   // إعادة إرسال OTP
   const handleResendOTP = async () => {
-    if (!canResend) return;
+    if (!canResend || !phone) return;
     setIsLoading(true);
     setError('');
     try {
-      const response = await axios.post('https://app.raw7any.com/api/resend-otp', {
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/resend-otp', {
         phone,
       });
-      if (response.status !== 200) {
-        throw new Error('فشل في إعادة إرسال OTP');
+      if (response.data && response.data.success) {
+        toast.success("تم إعادة إرسال رمز OTP بنجاح!");
+        setResendTimer(60);
+        setCanResend(false);
+      } else {
+        throw new Error(response.data?.message || 'فشل في إعادة إرسال OTP');
       }
-      setResendTimer(60);
-      setCanResend(false);
-      setError('');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء إعادة الإرسال');
+      toast.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +70,7 @@ export default function OTP() {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-      if (value && index < 4) { // تعديل الشرط إلى `index < 4` بدلاً من `index < 5`
+      if (value && index < 4) {
         inputRefs.current[index + 1].focus();
       }
     }
@@ -71,23 +86,31 @@ export default function OTP() {
   // التحقق من رمز OTP
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const enteredToken = otp.join('');
+    if (enteredToken.length !== 5) {
+      setError("يرجى إدخال رمز OTP الكامل (5 أرقام)");
+      return;
+    }
     setIsLoading(true);
     setError('');
-    const enteredToken = otp.join('');
     try {
-      const response = await axios.post('https://app.raw7any.com/api/verify-otp', {
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
         phone,
         token: enteredToken,
       });
-      if (response.status !== 200) {
-        throw new Error('رمز OTP غير صحيح');
+      if (response.data && response.data.success) {
+        console.log("✅ تم التحقق بنجاح:", res.data);
+        setSuccess(true);
+        toast.success("تم التحقق بنجاح!");
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } else {
+        throw new Error(response.data?.message || 'رمز OTP غير صحيح');
       }
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق');
+      toast.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -95,12 +118,25 @@ export default function OTP() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <ToastContainer rtl />
       <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-lg">
         {!success ? (
           <>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">تحقق من OTP</h2>
-              <p className="text-gray-600">تم إرسال رمز التحقق إلى رقم هاتفك</p>
+            <div className="flex items-center gap-2 mb-6">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 rounded-full hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center flex-1">
+                التحقق من رمز OTP
+              </h2>
+            </div>
+            <div className="text-center mb-8">
+              <p className="text-gray-600">
+                تم إرسال رمز التحقق إلى رقم الهاتف: <span className="font-medium">{phone}</span>
+              </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="flex justify-center gap-2">
@@ -113,22 +149,31 @@ export default function OTP() {
                     value={digit}
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-12 text-center text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-12 h-12 text-center text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 ))}
               </div>
               {error && <p className="text-red-500 text-center">{error}</p>}
-              <div className="flex justify-center mb-4">
+              <div className="mt-6 text-center">
                 <button
                   type="button"
                   onClick={handleResendOTP}
                   disabled={!canResend || isLoading}
-                  className={`flex items-center gap-2 text-purple-600 font-medium ${
+                  className={`flex items-center justify-center mx-auto gap-2 text-purple-600 font-medium ${
                     !canResend || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:text-purple-800'
                   }`}
                 >
-                  <RefreshCw className="w-4 h-4" />
-                  إعادة إرسال OTP {canResend ? '' : `(${resendTimer}s)`}
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      جاري الإرسال...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      إعادة إرسال OTP {canResend ? '' : `(${resendTimer}s)`}
+                    </>
+                  )}
                 </button>
               </div>
               <button
@@ -143,7 +188,7 @@ export default function OTP() {
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>جاري التحقق...</span>
+                    جاري التحقق...
                   </div>
                 ) : (
                   'تحقق'
@@ -152,7 +197,6 @@ export default function OTP() {
             </form>
           </>
         ) : (
-          // صفحة "تم بنجاح"
           <div className="text-center space-y-4">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">

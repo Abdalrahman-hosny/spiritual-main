@@ -1,103 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { CheckCircle, RefreshCw } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { CheckCircle, ArrowLeft, RefreshCw } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function VerifyReset() {
-  const [token, setToken] = useState(''); // كود التحقق
+export default function VerifyOTP() {
+  const [token, setToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const [resendTimer, setResendTimer] = useState(60);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendSuccess, setResendSuccess] = useState(false);
-
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { phone } = location.state || {};
 
-  // استخراج `phone` من `location.state`
-  const phone = location.state?.phone;
-
-  // إذا لم يكن هناك `phone`، قم بإعادة التوجيه إلى صفحة "نسيت كلمة المرور"
+  // التحقق من وجود `phone`
   useEffect(() => {
     if (!phone) {
-      navigate('/forgot-password');
+      toast.error("لا يوجد رقم هاتف لإكمال العملية، سيتم إعادة توجيهك لتسجيل الدخول.");
+      setTimeout(() => navigate('/login'), 3000);
     }
   }, [phone, navigate]);
 
   // عداد الوقت لإعادة الإرسال
   useEffect(() => {
-    let timer;
-    if (resendTimer > 0) {
-      timer = setInterval(() => {
-        setResendTimer(prev => prev - 1);
+    if (timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
       }, 1000);
+      return () => clearInterval(interval);
     } else {
       setCanResend(true);
     }
-    return () => clearInterval(timer);
-  }, [resendTimer]);
+  }, [timer]);
 
-  // إعادة إرسال الرسالة إلى نفس رقم الهاتف
-  const handleResendToken = async () => {
-    if (!canResend) return;
-    setResendLoading(true);
-    setError('');
-    try {
-      const response = await axios.post('https://app.raw7any.com/api/forgot/password', {
-        phone,
-      });
-      if (response.status !== 200) {
-        throw new Error('فشل في إعادة إرسال الرسالة');
-      }
-      setResendTimer(60);
-      setCanResend(false);
-      setResendSuccess(true);
-      setTimeout(() => {
-        setResendSuccess(false);
-      }, 3000);
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء إعادة الإرسال');
-    } finally {
-      setResendLoading(false);
-    }
-  };
-
-  // التحقق من `token`
+  // إرسال `token` للتحقق
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!token.trim()) {
-      setError('كود التحقق مطلوب');
+      toast.error("يرجى إدخال رمز التحقق");
       return;
     } else if (token.length !== 5) {
-      setError('كود التحقق يجب أن يتكون من 5 أرقام');
+      toast.error("رمز التحقق يجب أن يتكون من 5 أرقام");
       return;
     }
     setIsLoading(true);
-    setError('');
     try {
-      const response = await axios.post('https://app.raw7any.com/api/forgot/verify-otp', {
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
         phone,
         token,
       });
-      if (response.status !== 200) {
-        throw new Error('كود التحقق غير صحيح');
+      if (response.data.success) {
+        toast.success("تم التحقق بنجاح!");
+        setSuccess(true);
+        setTimeout(() => navigate('/dashboard'), 2000);
+      } else {
+        toast.error(response.data.message || "رمز التحقق غير صحيح");
       }
-      setSuccess(true);
-      // تمرير `phone` و `token` إلى صفحة ResetPassword
-      setTimeout(() => {
-        navigate('/reset-password', {
-          state: {
-            phone: phone,
-            token: token
-          }
-        });
-      }, 2000);
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق');
+    } catch (error) {
+      console.error("خطأ في التحقق:", error);
+      toast.error(error.response?.data?.message || "حدث خطأ أثناء التحقق");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // إعادة إرسال `token`
+  const handleResendOtp = async () => {
+    if (!canResend) return;
+    setIsResending(true);
+    try {
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/resend-otp', {
+        phone,
+      });
+      if (response.data.success) {
+        toast.success("تم إعادة إرسال رمز التحقق بنجاح!");
+        setTimer(60);
+        setCanResend(false);
+      } else {
+        toast.error(response.data.message || "فشل في إعادة إرسال الرمز");
+      }
+    } catch (error) {
+      console.error("خطأ في إعادة الإرسال:", error);
+      toast.error(error.response?.data?.message || "حدث خطأ أثناء إعادة الإرسال");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -108,29 +97,30 @@ export default function VerifyReset() {
     }
   };
 
-  // عند تحميل الصفحة، انتقل إلى الأعلى بشكل سلس
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, []);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-lg">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+      <div className="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-md">
         {!success ? (
           <>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">التحقق من كود إعادة التعيين</h2>
+            <div className="flex items-center gap-2 mb-6">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 rounded-full hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center flex-1">
+                التحقق من رمز التحقق
+              </h2>
+            </div>
+            <div className="text-center mb-8">
               <p className="text-gray-600">
-                تم إرسال كود التحقق إلى رقم هاتفك: <span className="font-bold">{phone}</span>
+                تم إرسال رمز التحقق إلى رقم الهاتف: <span className="font-medium">{phone}</span>
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* حقل كود التحقق (token) */}
               <div className="space-y-1">
-                <label className="block text-right text-gray-700 text-sm font-medium">كود التحقق</label>
+                <label className="block text-right text-gray-700 text-sm font-medium">رمز التحقق</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -139,34 +129,17 @@ export default function VerifyReset() {
                     onChange={(e) => setToken(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="12345"
-                    className={`w-full px-3 py-2 text-sm bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right`}
+                    className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
                   />
                 </div>
               </div>
-              {/* عرض رسالة الخطأ */}
-              {error && <p className="text-red-500 text-center">{error}</p>}
-              {/* زر إعادة إرسال الرسالة */}
-              <div className="flex justify-center mb-4">
-                <button
-                  type="button"
-                  onClick={handleResendToken}
-                  disabled={!canResend || resendLoading}
-                  className={`flex items-center gap-2 text-purple-600 font-medium ${
-                    !canResend || resendLoading ? 'opacity-50 cursor-not-allowed' : 'hover:text-purple-800'
-                  }`}
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  {resendLoading ? 'جاري الإرسال...' : `إعادة إرسال الرسالة ${canResend ? '' : `(${resendTimer}s)`}`}
-                </button>
-              </div>
-              {/* زر التحقق */}
               <button
                 type="submit"
                 disabled={isLoading}
                 className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
                   isLoading
                     ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800'
+                    : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                 }`}
               >
                 {isLoading ? (
@@ -175,19 +148,34 @@ export default function VerifyReset() {
                     <span>جاري التحقق...</span>
                   </div>
                 ) : (
-                  'تحقق من الكود'
+                  'تحقق'
                 )}
               </button>
-              {/* عرض رسالة نجاح إعادة الإرسال */}
-              {resendSuccess && (
-                <div className="p-3 bg-green-50 border border-green-200 text-green-600 text-sm rounded-lg text-center">
-                  تم إعادة إرسال الرسالة بنجاح.
-                </div>
-              )}
             </form>
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 text-sm">
+                لم تستلم الرمز؟
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={!canResend || isResending}
+                  className={`font-medium ml-1 ${
+                    canResend && !isResending ? 'text-purple-600 hover:text-purple-700' : 'text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  {isResending ? (
+                    <div className="flex items-center justify-center gap-1">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>جاري الإرسال...</span>
+                    </div>
+                  ) : (
+                    `أعد الإرسال (${canResend ? 'إرسال' : timer})`
+                  )}
+                </button>
+              </p>
+            </div>
           </>
         ) : (
-          // صفحة "تم بنجاح"
           <div className="text-center space-y-4">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
@@ -195,10 +183,11 @@ export default function VerifyReset() {
               </div>
             </div>
             <h2 className="text-xl font-bold text-gray-800">تم التحقق بنجاح!</h2>
-            <p className="text-gray-600">سيتم إعادة توجيهك إلى صفحة إعادة تعيين كلمة المرور...</p>
+            <p className="text-gray-600">سيتم إعادة توجيهك إلى لوحة التحكم...</p>
           </div>
         )}
       </div>
+      <ToastContainer />
     </div>
   );
 }

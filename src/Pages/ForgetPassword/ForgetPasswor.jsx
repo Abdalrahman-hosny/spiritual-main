@@ -33,7 +33,7 @@ export default function ForgetPassword() {
     setError('');
     try {
       const response = await axios.post(
-        "https://app.raw7any.com/api/forgot/password",
+        "https://spiritual.brmjatech.uk/api/forgot/password",
         {
           phone: phone.trim(),
         },

@@ -6,7 +6,17 @@ import * as Yup from 'yup';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Select from 'react-select';
 import image from "../../assets/loginimg.png";
+
+// قائمة أنواع المستخدمين الثابتة
+const userTypes = [
+  { id: 'client', label: 'دارس عادي', icon: User },
+  { id: 'energy_coach', label: 'مدرب طاقة', icon: Star },
+  { id: 'healer', label: 'معالج', icon: Shield },
+  { id: 'quran_memorizer', label: 'مُحَفِّظ قرآن', icon: Users },
+  { id: 'life_coach', label: 'مدرب حياة', icon: CheckCircle },
+];
 
 // تعريف Schema للتحقق باستخدام Yup
 const validationSchema = Yup.object().shape({
@@ -21,38 +31,41 @@ const validationSchema = Yup.object().shape({
   password_confirmation: Yup.string()
     .oneOf([Yup.ref('password'), null], 'كلمة المرور غير متطابقة')
     .required('تأكيد كلمة المرور مطلوب'),
-  birth_date: Yup.date()
-    .required('تاريخ الميلاد مطلوب')
-    .max(new Date(), 'تاريخ الميلاد يجب أن يكون في الماضي')
+  country: Yup.object().shape({
+    value: Yup.string().required('الدولة مطلوبة'),
+    label: Yup.string().required('الدولة مطلوبة'),
+  }).required('الدولة مطلوبة'),
 });
 
 export default function Register() {
   const [currentTab, setCurrentTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState({ code: '+20', flag: '🇪🇬', name: 'مصر' });
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [countries, setCountries] = useState([]);
   const [otpToken, setOtpToken] = useState('');
   const navigate = useNavigate();
 
-  // بيانات الدول
-  const countries = [
-    { code: '+20', name: 'مصر', flag: '🇪🇬' },
-    { code: '+966', name: 'السعودية', flag: '🇸🇦' },
-    { code: '+971', name: 'الإمارات', flag: '🇦🇪' },
-    { code: '+965', name: 'الكويت', flag: '🇰🇼' },
-    { code: '+973', name: 'البحرين', flag: '🇧🇭' },
-    { code: '+974', name: 'قطر', flag: '🇶🇦' },
-  ];
-
-  // أنواع المستخدمين
-  const userTypes = [
-    { id: 'regular', label: 'دارس عادي', icon: User },
-    { id: 'premium', label: "مدرب طاقة", icon: Star },
-    { id: 'expert', label: "شيخ معالج", icon: Shield },
-    { id: 'professional', label: "محفظ قرآن", icon: Users },
-    { id: 'consultant', label: "لايف كوتش", icon: CheckCircle }
-  ];
+  // جلب قائمة الدول من API
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await axios.get('https://spiritual.brmjatech.uk/api/countries');
+        if (response.data && response.data.data) {
+          const formattedCountries = response.data.data.map(country => ({
+            value: country.id,
+            label: country.name, // استخدام `country.name` بدلاً من `country.name.ar`
+          }));
+          setCountries(formattedCountries);
+        } else {
+          toast.error("لم يتم العثور على بيانات الدول");
+        }
+      } catch (error) {
+        console.error("خطأ في جلب قائمة الدول:", error);
+        toast.error("خطأ في جلب قائمة الدول، حاول مرة أخرى");
+      }
+    };
+    fetchCountries();
+  }, []);
 
   // خطوات التسجيل
   const steps = [
@@ -69,22 +82,21 @@ export default function Register() {
       phone: '',
       password: '',
       password_confirmation: '',
-      birth_date: ''
+      country: null,
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        const response = await axios.post('https://app.raw7any.com/api/register', {
+        const response = await axios.post('https://spiritual.brmjatech.uk/api/register', {
           name: values.name,
           email: values.email,
-          phone: selectedCountry.code + values.phone,
+          phone: values.phone,
           password: values.password,
           password_confirmation: values.password_confirmation,
-          birth_date: values.birth_date,
+          country_id: values.country.value,
+          account_type: selectedUserType,
         });
-        console.log("الرد من الخادم:", response.data);
-        // تخزين OTP Token إذا كان موجودًا في الاستجابة
         if (response.data.token || response.data.otp_code) {
           setOtpToken(response.data.token || response.data.otp_code);
         }
@@ -92,7 +104,7 @@ export default function Register() {
         setTimeout(() => {
           navigate('/verify-otp', {
             state: {
-              phone: selectedCountry.code + values.phone,
+              phone: values.phone,
               otpToken: otpToken || response.data.token || response.data.otp_code
             }
           });
@@ -100,15 +112,9 @@ export default function Register() {
       } catch (error) {
         console.error("خطأ في إرسال البيانات:", error);
         if (error.response && error.response.data && error.response.data.message) {
-          toast.error(error.response.data.message, {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("حدث خطأ أثناء التسجيل، حاول مرة أخرى");
         }
       } finally {
         setIsLoading(false);
@@ -122,8 +128,8 @@ export default function Register() {
   }, []);
 
   // اختيار نوع المستخدم
-  const handleUserTypeSelect = (type) => {
-    setSelectedUserType(type);
+  const handleUserTypeSelect = (typeId) => {
+    setSelectedUserType(typeId);
   };
 
   // الانتقال إلى الخطوة التالية
@@ -142,7 +148,7 @@ export default function Register() {
         <div className="absolute w-[300px] top-1/2 left-0 right-18 h-0.5 bg-gray-200 transform -translate-y-1/2 z-0"></div>
         <div
           className="absolute w-[200px] top-1/2 right-18 h-0.5 bg-gradient-to-l from-purple-600 to-purple-700 transform -translate-y-1/2 z-0 transition-all duration-500"
-          style={{ width: `${(currentTab / (steps.length)) * 100}%` }}
+          style={{ width: `${(currentTab / (steps.length - 1)) * 100}%` }}
         ></div>
         {steps.map((step, index) => {
           const StepIcon = step.icon;
@@ -277,7 +283,7 @@ export default function Register() {
             value={formik.values.email}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            placeholder="AAAA11??22333@gmail.com"
+            placeholder="example@example.com"
             className="w-full px-3 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
             dir="ltr"
           />
@@ -290,66 +296,67 @@ export default function Register() {
           <label className="block text-right text-gray-700 font-medium" dir="rtl">
             رقم التواصل
           </label>
-          <div className="relative flex" dir="rtl">
-            <div className="relative">
-              <button
-                onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                className="flex items-center gap-2 px-3 py-3 bg-gray-50 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-w-[80px]"
-              >
-                <span>{selectedCountry.flag}</span>
-                <span className="text-gray-700 font-medium text-sm">{selectedCountry.code}</span>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              </button>
-              {showCountryDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 max-h-40 overflow-y-auto">
-                  {countries.map((country) => (
-                    <button
-                      key={country.code}
-                      onClick={() => {
-                        setSelectedCountry(country);
-                        setShowCountryDropdown(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors"
-                    >
-                      <span>{country.flag}</span>
-                      <span className="text-gray-700 text-sm">{country.code}</span>
-                      <span className="text-gray-500 text-sm">{country.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <input
-              type="tel"
-              name="phone"
-              value={formik.values.phone}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="1010700700"
-              className="flex-1 px-3 py-3 bg-gray-50 border border-gray-300 border-r-0 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
-              dir="ltr"
-            />
-          </div>
+          <input
+            type="tel"
+            name="phone"
+            value={formik.values.phone}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="1010700700"
+            className="w-full px-3 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+            dir="ltr"
+          />
           {formik.touched.phone && formik.errors.phone && (
             <p className="text-red-500 text-xs mt-1">{formik.errors.phone}</p>
           )}
         </div>
-        {/* تاريخ الميلاد */}
+        {/* الدولة */}
         <div className="space-y-2">
           <label className="block text-right text-gray-700 font-medium" dir="rtl">
-            تاريخ الميلاد
+            الدولة
           </label>
-          <input
-            type="date"
-            name="birth_date"
-            value={formik.values.birth_date}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className="w-full px-3 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
-            dir="ltr"
-          />
-          {formik.touched.birth_date && formik.errors.birth_date && (
-            <p className="text-red-500 text-xs mt-1">{formik.errors.birth_date}</p>
+          {countries.length > 0 ? (
+            <Select
+              name="country"
+              options={countries}
+              value={formik.values.country}
+              onChange={(selectedOption) => formik.setFieldValue('country', selectedOption)}
+              onBlur={formik.handleBlur}
+              placeholder="اختر الدولة"
+              className="text-right"
+              classNamePrefix="react-select"
+              isSearchable={true}
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  textAlign: 'right',
+                  direction: 'rtl',
+                  borderColor: formik.touched.country && formik.errors.country ? '#ef4444' : '#d1d5db',
+                  minHeight: '48px',
+                }),
+                menu: (base) => ({
+                  ...base,
+                  textAlign: 'right',
+                  direction: 'rtl',
+                }),
+                option: (base) => ({
+                  ...base,
+                  textAlign: 'right',
+                  direction: 'rtl',
+                }),
+                placeholder: (base) => ({
+                  ...base,
+                  textAlign: 'right',
+                }),
+              }}
+            />
+          ) : (
+            <p className="text-red-500 text-xs mt-1">لا توجد دول متاحة، حاول مرة أخرى لاحقًا.</p>
+          )}
+          {formik.touched.country && formik.errors.country && (
+            <p className="text-red-500 text-xs mt-1">
+              {typeof formik.errors.country === 'string' ? formik.errors.country : 'الدولة مطلوبة'}
+            </p>
           )}
         </div>
         {/* كلمة المرور */}
@@ -478,7 +485,7 @@ export default function Register() {
           <div className='flex justify-end items-center mb-4 lg:mb-6'>
             <img
               src={image}
-              alt=""
+              alt="منصة روحاني"
               className='w-full h-auto max-w-[300px] xl:max-w-[400px] 2xl:max-w-[500px]'
             />
           </div>

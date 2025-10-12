@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import plant from "../../assets/mandala_1265367 1.png";
 
 export function ProductCart() {
   const { t, i18n } = useTranslation();
@@ -11,7 +10,6 @@ export function ProductCart() {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,16 +20,15 @@ export function ProductCart() {
   }, []);
 
   const updateQuantity = (id, change) => {
-    setProducts(
-      products.map((product) => {
-        if (product.id === id) {
-          const newQuantity = Math.max(0, product.quantity + change);
-          return { ...product, quantity: newQuantity };
-        }
-        return product;
-      })
-    );
-    localStorage.setItem('cart', JSON.stringify(products));
+    const updatedProducts = products.map((product) => {
+      if (product.id === id) {
+        const newQuantity = Math.max(0, product.quantity + change);
+        return { ...product, quantity: newQuantity };
+      }
+      return product;
+    });
+    setProducts(updatedProducts);
+    localStorage.setItem('cart', JSON.stringify(updatedProducts));
   };
 
   const removeProduct = (id) => {
@@ -59,7 +56,7 @@ export function ProductCart() {
           transition={{ duration: 0.5 }}
           className="font-[Alexandria] font-bold text-[24px] sm:text-[30px] leading-[39px] text-right mb-6"
         >
-          {t("cart_title")}
+          السلة
         </motion.h1>
 
         {/* المنتجات */}
@@ -163,7 +160,7 @@ export function ProductCart() {
               onClick={handleCheckout}
               className="bg-gradient-to-r from-purple-600 to-purple-800 text-white px-6 py-2 rounded-full font-medium hover:from-purple-700 hover:to-purple-900 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              {t("checkout")}
+              checkout
             </button>
           </motion.div>
         )}

@@ -2,20 +2,49 @@ import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import plant from "../../assets/mandala_1265367 1.png";
-import image from "../../assets/bg.png";
 import { Eye, Heart, Filter, X, Search } from 'lucide-react';
 import { FaShoppingBag } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 export default function Shop() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
+
+  // استرجاع المنتجات من API
+ useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      setLoading(true); // ✅ تأكد إننا في وضع التحميل قبل البدء
+      const response = await axios.get("https://spiritual.brmjatech.uk/api/products");
+      const items = response?.data?.data?.items;
+      if (Array.isArray(items)) {
+        setProducts(items);
+      } else {
+        console.error("Products not array:", items);
+        setProducts([]);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setError("فشل في جلب المنتجات. حاول مرة أخرى لاحقًا.");
+      setProducts([]);
+    } finally {
+      setLoading(false); // ✅ مهما حصل، وقف التحميل
+    }
+  };
+
+  fetchProducts();
+}, []);
+
 
   // حفظ السلة في localStorage
   useEffect(() => {
@@ -23,24 +52,14 @@ export default function Shop() {
   }, [cart]);
 
   // فلترة المنتجات بناءً على البحث
-  const products = Array.from({ length: 9 }, (_, index) => ({
-    id: index + 1,
-    name: t("product_name"),
-    description: t("product_desc"),
-    price: 5000.00,
-    image: image,
-  }));
-
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
+  const filteredProducts = Array.isArray(products)
+  ? products.filter((product) => {
+      const name = product?.name?.toLowerCase() || "";
+      const desc = product?.small_desc?.toLowerCase() || "";
+      const query = searchQuery.toLowerCase();
+      return name.includes(query) || desc.includes(query);
+    })
+  : [];
   // إضافة منتج إلى السلة
   const addToCart = (product) => {
     const existingProduct = cart.find((item) => item.id === product.id);
@@ -63,9 +82,24 @@ export default function Shop() {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
-      rtl: true, // للغة العربية
+      rtl: true,
     });
   };
+
+  // إذا كانت البيانات لا تزال تُسترجع
+  if (loading) {
+    return <div className="text-center py-12">جاري تحميل المنتجات...</div>;
+  }
+
+  // إذا حدث خطأ
+  if (error) {
+    return <div className="text-center py-12 text-red-500">حدث خطأ: {error}</div>;
+  }
+
+  // إذا لم توجد منتجات
+  if (filteredProducts.length === 0) {
+    return <div className="text-center py-12">لا توجد منتجات مطابقة للبحث.</div>;
+  }
 
   // Animation variants
   const heroVariants = {
@@ -103,7 +137,6 @@ export default function Shop() {
   return (
     <>
       <ToastContainer />
-      {/* محتوى الصفحة الأصلي */}
       <div className="min-h-screen bg-gray-50 overflow-hidden">
         {/* Hero Section */}
         <div className='relative'>
@@ -134,11 +167,8 @@ export default function Shop() {
                       {t("home")} / <span className='text-purple-500'>{t("shop")}</span>
                     </p>
                   </motion.div>
-
-                 
                 </motion.div>
               </div>
-
               {/* زخرفة النبات */}
               <motion.div
                 variants={plantVariants}
@@ -174,24 +204,25 @@ export default function Shop() {
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Products Grid */}
             <div className="w-full lg:flex-1">
-               {/* شريط البحث تحت العنوان */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.6 }}
-                    className="mt-8 w-full max-w-md mx-auto"
-                  >
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder={t("search_placeholder")}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full py-3 px-5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm"
-                      />
-                      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    </div>
-                  </motion.div>
+              {/* شريط البحث تحت العنوان */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="mt-8 w-full max-w-md mx-auto"
+              >
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder={t("search_placeholder")}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full py-3 px-5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm"
+                  />
+                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                </div>
+              </motion.div>
+
               {/* Results count */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

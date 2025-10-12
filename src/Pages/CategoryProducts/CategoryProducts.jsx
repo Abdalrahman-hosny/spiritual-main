@@ -1,8 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import plant from "../../assets/mandala_1265367 1.png";
-
-
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -41,9 +39,8 @@ export default function CategoryProducts() {
       {/* Hero Section */}
       <div className="relative">
         <div className="image">
-          
           <div className="relative bg-black/70">
-          <div className="pt-[80px]"></div>
+            <div className="pt-[80px]"></div>
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
                 variants={heroVariants}
@@ -74,7 +71,6 @@ export default function CategoryProducts() {
                 </motion.div>
               </motion.div>
             </div>
-
             {/* Plant Decoration */}
             <motion.div
               variants={plantVariants}
@@ -104,26 +100,38 @@ export default function CategoryProducts() {
           </div>
         </div>
       </div>
-
       {/* Contact List */}
       <ArabicContactList />
-
       {/* Footer */}
-      <div className="pt-8">
-        
-      </div>
+      <div className="pt-8"></div>
     </div>
   );
 }
 
 export function ArabicContactList() {
   const { t } = useTranslation();
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const contacts = Array(9).fill({
-    name: t("contactList.trainerName"),
-    status: t("contactList.trainerStatus"),
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-  });
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const response = await fetch("https://spiritual.brmjatech.uk/api/categories");
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const data = await response.json();
+        setContacts(data.data.items);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContacts();
+  }, []);
 
   const pageNumbers = [1, 2, 3, 4, 5];
 
@@ -135,6 +143,30 @@ export function ArabicContactList() {
       transition: { duration: 0.6 },
     },
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8" dir="rtl">
+        <div className="max-w-7xl mx-auto mb-8">
+          <h1 className="font-[Montserrat-Arabic] font-bold text-[24px] sm:text-[28px] md:text-[32px] text-right text-gray-800">
+            {t("contactList.loading")}
+          </h1>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8" dir="rtl">
+        <div className="max-w-7xl mx-auto mb-8">
+          <h1 className="font-[Montserrat-Arabic] font-bold text-[24px] sm:text-[28px] md:text-[32px] text-right text-red-500">
+            {error}
+          </h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8" dir="rtl">
@@ -176,7 +208,7 @@ export function ArabicContactList() {
         >
           {contacts.map((contact, index) => (
             <motion.div
-              key={index}
+              key={contact.id}
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
@@ -186,11 +218,11 @@ export function ArabicContactList() {
             >
               <div className="flex flex-col items-center text-center">
                 <Link
-                  to={`/trainer/${index + 1}`}
+                  to={`/trainer/${contact.id}`}
                   className="mb-4 relative group"
                 >
                   <img
-                    src={contact.avatar}
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
                     alt={contact.name}
                     className="w-32 h-32 rounded-full object-cover border-4 border-white group-hover:border-purple-500 transition-all duration-300"
                   />
@@ -204,7 +236,7 @@ export function ArabicContactList() {
                   {contact.name}
                 </h3>
                 <p className="text-sm text-purple-500 font-medium">
-                  {contact.status}
+                  {contact.slug}
                 </p>
               </div>
             </motion.div>

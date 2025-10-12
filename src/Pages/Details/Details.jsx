@@ -1,14 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import plant from "../../assets/mandala_1265367 1.png";
-
 import { Star } from 'lucide-react';
-
 import ProductDetailsSlider from './ProductDetailsSlider';
-import CommentForm from './commentForm';
-
-
+import CommentForm from './CommentForm';
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import axios from 'axios';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Details() {
   const { t } = useTranslation();
@@ -28,7 +27,7 @@ export default function Details() {
       transition: { duration: 0.8, ease: "easeOut" }
     }
   };
-/*حركه الورده*/
+
   const plantVariants = {
     hidden: { opacity: 0, x: -50, rotate: -90 },
     visible: {
@@ -39,12 +38,18 @@ export default function Details() {
     }
   };
 
+  const [reviewsUpdated, setReviewsUpdated] = useState(false);
+
+  const handleReviewSubmitted = useCallback(() => {
+    setReviewsUpdated(prev => !prev);
+  }, []);
+
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
+      <ToastContainer />
       {/* Hero Section */}
       <div className='relative'>
         <div className='image'>
-          
           <div className="relative bg-black/70">
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
@@ -72,7 +77,6 @@ export default function Details() {
                 </motion.div>
               </motion.div>
             </div>
-
             {/* Plant decoration */}
             <motion.div
               variants={plantVariants}
@@ -95,42 +99,40 @@ export default function Details() {
           </div>
         </div>
       </div>
-
       <div className='pt-24'>
         <ProductDetailsSlider />
       </div>
       <div className='pt-4'>
-        <ArabicTestimonials />
+        <ArabicTestimonials reviewsUpdated={reviewsUpdated} />
       </div>
       <div className='pt-4 pb-8'>
-        <CommentForm />
+        <CommentForm onReviewSubmitted={handleReviewSubmitted} />
       </div>
-
-    
     </div>
   );
 }
 
 // ---------------------- Testimonials Section ----------------------
-function ArabicTestimonials() {
+function ArabicTestimonials({ reviewsUpdated }) {
   const { t } = useTranslation();
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const testimonials = [
-    {
-      id: 1,
-      name: "أحمد إبراهيم",
-      date: "March 20, 2023 at 2:37 pm",
-      rating: 5,
-      comment: t("details.testimonial1"),
-    },
-    {
-      id: 2,
-      name: "أحمد إبراهيم",
-      date: "March 21, 2023 at 11:00 am",
-      rating: 5,
-      comment: t("details.testimonial2"),
-    },
-  ];
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await axios.get('https://spiritual.brmjatech.uk/api/products/1/reviews');
+        setTestimonials(response.data.data.items);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, [reviewsUpdated]);
 
   const details = [
     t("details.point1"),
@@ -140,47 +142,58 @@ function ArabicTestimonials() {
     t("details.point5"),
   ];
 
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-6 text-center">
+        <p className="text-lg text-gray-500">جاري تحميل التعليقات...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto p-6 text-center">
+        <p className="text-lg text-red-500">حدث خطأ أثناء تحميل التعليقات: {error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-6" dir="rtl">
       <div className="grid grid-cols-1 gap-8">
-        
         {/* Right Column - Details */}
-        <div className="space-y-6">
-          <div className='border-b pb-6'>
-            <h2 className="font-semibold text-[24px] mb-6 text-right">{t("details.title")}</h2>
-            <ul className="space-y-3">
-              {details.map((detail, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-[#000000] ml-2">•</span>
-                  <span className="text-[14px] text-[#212529] text-right">{detail}</span>
-                </li>
-              ))}
-            </ul>
+        <div className='border-b pb-6'>
+          <div className='flex justify-between items-center'>
+            <h3 className="font-semibold text-[24px] mb-4 text-right">{t("details.about_brand")}</h3>
+            <p className="text-red-600 font-semibold text-[24px]">فيزدل</p>
           </div>
-
-          <div className='border-b pb-6'>
-            <div className='flex justify-between items-center'>
-              <h3 className="font-semibold text-[24px] mb-4 text-right">{t("details.about_brand")}</h3>
-              <p className="text-red-600 font-semibold text-[24px]">فيزدل</p>
-            </div>
-            <p className="text-[14px] text-[#212529] text-right leading-relaxed">
-              {t("details.brand_description")}
-            </p>
-          </div>
+          <p className="text-[14px] text-[#212529] text-right leading-relaxed">
+            {t("details.brand_description")}
+          </p>
         </div>
+      </div>
 
-        {/* Left Column - Reviews */}
-        <div>
-          <h2 className="font-semibold text-[24px] mb-6 text-right">{t("details.reviews")}</h2>
-          <div className="space-y-6">
-            {testimonials.map((testimonial) => (
+      {/* Left Column - Reviews */}
+      <div>
+        <h2 className="font-semibold text-[24px] mb-6 text-right">{t("details.reviews")}</h2>
+        <div className="space-y-6">
+          {testimonials.length > 0 ? (
+            testimonials.map((testimonial) => (
               <div key={testimonial.id} className="rounded-lg p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full ml-3"></div>
+                    <div className="w-12 h-12 rounded-full ml-3 overflow-hidden">
+                      <img
+                        src={testimonial.user.image}
+                        alt={testimonial.user.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <div>
-                      <h4 className="font-semibold text-[20px] mb-2 text-right">{testimonial.name}</h4>
-                      <p className="text-[#212529] text-[14px] text-right">{testimonial.date}</p>
+                      <h4 className="font-semibold text-[20px] mb-2 text-right">{testimonial.user.name}</h4>
+                      <p className="text-[#212529] text-[14px] text-right">
+                        {testimonial.created_human}
+                      </p>
                     </div>
                   </div>
                   <div className="flex">
@@ -193,8 +206,10 @@ function ArabicTestimonials() {
                   {testimonial.comment}
                 </p>
               </div>
-            ))}
-          </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500">{t("details.no_reviews")}</p>
+          )}
         </div>
       </div>
     </div>

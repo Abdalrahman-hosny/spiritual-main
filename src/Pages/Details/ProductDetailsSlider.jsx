@@ -1,50 +1,104 @@
 import { useState, useEffect } from 'react';
 import { Heart, ShoppingCart, Plus, Minus, Facebook, Twitter, Linkedin, ChevronLeft, ChevronRight } from 'lucide-react';
-import image from "../../assets/bg.png";
-import image2 from "../../assets/register.png";
-import hero from "../../assets/hero.png";
 import { useTranslation } from "react-i18next";
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function ProductDetailsSlider() {
-  const { i18n } = useTranslation();
+export default function ProductDetailsSlider({ productId = 5 }) {
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-
   const [quantity, setQuantity] = useState(1);
   const [currentImage, setCurrentImage] = useState(0);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample images - replace with your actual images
-  const images = [
-    "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500&h=500&fit=crop",
-    image2,
-    image,
-    hero,
-  ];
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/products/${productId}`);
+        setProduct(response.data.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [productId]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
-  const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
+  const decreaseQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
-  // Auto-play functionality
   useEffect(() => {
+    if (!product || !product.images) return;
     const interval = setInterval(() => {
-      setCurrentImage(prev => (prev + 1) % images.length);
-    }, 3000); // Change image every 3 seconds
+      setCurrentImage(prev => (prev + 1) % product.images.length);
+    }, 3000);
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [product]);
 
   const nextImage = () => {
-    setCurrentImage(prev => (prev + 1) % images.length);
+    if (!product || !product.images) return;
+    setCurrentImage(prev => (prev + 1) % product.images.length);
   };
 
   const prevImage = () => {
-    setCurrentImage(prev => (prev - 1 + images.length) % images.length);
+    if (!product || !product.images) return;
+    setCurrentImage(prev => (prev - 1 + product.images.length) % product.images.length);
   };
 
   const goToImage = (index) => {
     setCurrentImage(index);
   };
 
+  const addToCart = () => {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingProduct = cart.find(item => item.id === product.id);
+
+    if (existingProduct) {
+      existingProduct.quantity += quantity;
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.images[0].image,
+        description: product.description,
+      });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    toast.success(
+      isRTL ? 'تمت إضافة المنتج للسلة!' : 'Product added to cart!',
+      { position: isRTL ? "top-left" : "top-right" }
+    );
+  };
+
+  if (loading) {
+    return <div className="text-center py-12">جاري تحميل تفاصيل المنتج...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-12 text-red-500">حدث خطأ: {error}</div>;
+  }
+
+  if (!product) {
+    return <div className="text-center py-12">لا يوجد تفاصيل للمنتج.</div>;
+  }
+
+  const images = product.images.map(img => img.image);
+
   return (
     <div className="p-4 font-sans" dir={isRTL ? 'rtl' : 'ltr'}>
+      <ToastContainer />
       <div className="max-w-6xl mx-auto bg-white rounded-lg overflow-hidden">
         <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-col lg:flex-row'}`}>
           {/* Product Image Section */}
@@ -63,16 +117,14 @@ export default function ProductDetailsSlider() {
               >
                 {isRTL ? <ChevronLeft className="w-5 h-5 text-gray-600" /> : <ChevronRight className="w-5 h-5 text-gray-600" />}
               </button>
-
               {/* Main product image */}
               <div className="bg-gray-100 rounded-lg h-[400px] flex items-center justify-center overflow-hidden">
                 <img
                   src={images[currentImage]}
                   className='w-full h-[400px] object-cover transition-opacity duration-500'
-                  alt="Product image"
+                  alt={product.name}
                 />
               </div>
-
               {/* Image indicators */}
               <div className="flex justify-center mt-4 gap-2">
                 {images.map((_, index) => (
@@ -89,7 +141,6 @@ export default function ProductDetailsSlider() {
               </div>
             </div>
           </div>
-
           {/* Product Details Section */}
           <div className="lg:w-1/2 p-6 flex flex-col justify-start">
             {/* Rating */}
@@ -103,16 +154,15 @@ export default function ProductDetailsSlider() {
                 ))}
               </div>
             </div>
-
+            {/* Product Name */}
             <h1 className="font-sans font-semibold text-[24px] leading-[28px] mb-2 text-[#212529] text-right">
-              {isRTL ? 'مسبحة بـ 99 خرزة بتصميم منقوش باسماء الله الحسنى وسيدنا محمد ص اسلامية' : 'Islamic Prayer Beads with 99 Beads'}
+              {product.name}
             </h1>
-
             {/* Price */}
             <div className="my-6">
               <div className="flex justify-center items-center gap-2 bg-white p-3 rounded-full w-[200px] shadow-[0px_0px_8px_3px_#0000000D]">
                 <p className="font-sans text-purple-600 font-bold text-[20px] leading-relaxed text-center uppercase">
-                  5,000.00 {isRTL ? 'جنية' : 'EGP'}
+                  {product.price.toFixed(2)} {isRTL ? 'جنية' : 'EGP'}
                 </p>
               </div>
               <div className='flex justify-between items-center border-b border-gray-200 py-8 my-4'>
@@ -120,11 +170,10 @@ export default function ProductDetailsSlider() {
                   {isRTL ? 'الأسعار تشمل ضريبة القيمة المضافة' : 'Prices include VAT'}
                 </p>
                 <span className="font-sans text-red-600 font-semibold text-[24px] leading-[28.8px] align-middle">
-                  فيزدل
+                  {product.brand.name}
                 </span>
               </div>
             </div>
-
             {/* Add to Cart Section */}
             <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-col md:flex-row'} justify-between items-center gap-8 md:gap-4 border-b border-gray-200 pb-8`}>
               {/* Quantity Selector */}
@@ -145,9 +194,11 @@ export default function ProductDetailsSlider() {
                   <Minus className="w-4 h-4 text-red-500" />
                 </button>
               </div>
-
               {/* Add to cart button */}
-              <button className="bg-purple-600 text-white font-sans font-medium text-[14px] leading-[100%] text-right align-middle uppercase px-6 py-3 rounded-full hover:bg-purple-700 transition-colors flex items-center gap-2">
+              <button
+                onClick={addToCart}
+                className="bg-purple-600 text-white font-sans font-medium text-[14px] leading-[100%] text-right align-middle uppercase px-6 py-3 rounded-full hover:bg-purple-700 transition-colors flex items-center gap-2"
+              >
                 {isRTL ? (
                   <>
                     <ShoppingCart className="w-5 h-5" />
@@ -160,7 +211,6 @@ export default function ProductDetailsSlider() {
                   </>
                 )}
               </button>
-
               {/* Social buttons */}
               <div className="flex items-center gap-2">
                 <button className="text-gray-600 hover:bg-gray-600 p-2 rounded-full hover:text-white transition-colors">
@@ -176,6 +226,15 @@ export default function ProductDetailsSlider() {
                   <Facebook className="w-5 h-5" />
                 </button>
               </div>
+            </div>
+            {/* Product Description */}
+            <div className="mt-6">
+              <h3 className="font-sans font-semibold text-[18px] mb-2 text-right">
+                {isRTL ? 'وصف المنتج' : 'Product Description'}
+              </h3>
+              <p className="font-sans text-[14px] text-[#212529] text-right leading-relaxed">
+                {product.description}
+              </p>
             </div>
           </div>
         </div>

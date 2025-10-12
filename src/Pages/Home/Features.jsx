@@ -27,6 +27,16 @@ export default function Features() {
     </div>
   );
 }
+// const [cards, setCards] = useState([]);
+
+
+// useEffect(() => {
+//   axios.get("https://yourapi.com/features") // 🔁 غير اللينك للـ API الحقيقي
+//     .then((res) => {
+//       setCards(res.data);
+//     })
+//     .catch((err) => console.error(err));
+// }, []);
 
 const cards = [
   { key: "features.cards.session" },
@@ -66,6 +76,10 @@ const CardsGrid = () => {
   return (
     <div className="w-[80%] mx-auto" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
+
+
+
+        
         {cards.map((card, index) => (
           <motion.div
             key={index}

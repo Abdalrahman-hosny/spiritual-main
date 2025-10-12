@@ -67,7 +67,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "https://app.raw7any.com/api/login",
+        "https://spiritual.brmjatech.uk/api/login",
         {
           phone: loginForm.phone.trim(),
           password: loginForm.password
