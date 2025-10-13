@@ -15,16 +15,18 @@ export default function Login() {
   });
   const navigate = useNavigate();
 
-  // Phone validation regex (Egyptian phone numbers)
-  const phoneRegex = /^\+201[0-9]{9}$/;
+  // Phone validation regex (Egyptian phone numbers without country code)
+  const phoneRegex = /^01[0-9]{9}$/;
 
   const validateForm = () => {
     const errors = {};
+    // Clean phone number from spaces or dashes
+    const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, '');
     // Phone validation
-    if (!loginForm.phone.trim()) {
+    if (!cleanPhoneNumber.trim()) {
       errors.phone = 'رقم الهاتف مطلوب';
-    } else if (!phoneRegex.test(loginForm.phone)) {
-      errors.phone = 'الرجاء إدخال رقم هاتف صحيح (مثال: +201012345678)';
+    } else if (!phoneRegex.test(cleanPhoneNumber)) {
+      errors.phone = 'الرجاء إدخال رقم هاتف صحيح (مثال: 01012345678)';
     }
     // Password validation
     if (!loginForm.password.trim()) {
@@ -64,12 +66,16 @@ export default function Login() {
     setLoginLoading(true);
     setLoginError('');
     setFieldErrors({});
-
     try {
+      // Clean phone number from spaces or dashes
+      const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, '');
+      console.log("Phone sent to API:", cleanPhoneNumber);
+      console.log("Password sent to API:", loginForm.password);
+
       const response = await axios.post(
         "https://spiritual.brmjatech.uk/api/login",
         {
-          phone: loginForm.phone.trim(),
+          phone: cleanPhoneNumber,
           password: loginForm.password
         },
         {
@@ -84,7 +90,6 @@ export default function Login() {
         sessionStorage.setItem("token", response.data.data.token);
         // إعادة التوجيه إلى صفحة home
         navigate("/");
-
         // Optional: Store user data if needed
         if (response.data.data.user) {
           sessionStorage.setItem("user", JSON.stringify(response.data.data.user));
@@ -97,27 +102,37 @@ export default function Login() {
       // Handle different types of errors
       if (error.response) {
         const { status, data } = error.response;
-        switch (status) {
-          case 400:
-            setLoginError(data?.message || 'رقم الهاتف أو كلمة المرور غير صحيحة');
-            break;
-          case 401:
-            setLoginError(data?.message || 'رقم الهاتف أو كلمة المرور غير صحيحة');
-            break;
-          case 403:
-            setLoginError(data?.message || 'تم رفض الوصول. الرجاء التواصل مع الدعم.');
-            break;
-          case 404:
-            setLoginError(data?.message || 'الخدمة غير متاحة. الرجاء المحاولة لاحقًا.');
-            break;
-          case 429:
-            setLoginError(data?.message || 'عدد كبير جدًا من محاولات تسجيل الدخول. الرجاء الانتظار والمحاولة مرة أخرى.');
-            break;
-          case 500:
-            setLoginError(data?.message || 'خطأ في الخادم. الرجاء المحاولة لاحقًا.');
-            break;
-          default:
-            setLoginError(data?.message || 'فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.');
+        if (status === 422) {
+          if (data.errors) {
+            // Extract all error messages from the API response
+            const errorMessages = Object.values(data.errors).flat();
+            setLoginError(errorMessages.join('\n'));
+          } else {
+            setLoginError(data.message || 'البيانات المدخلة غير صحيحة. الرجاء التحقق من رقم الهاتف وكلمة المرور.');
+          }
+        } else {
+          switch (status) {
+            case 400:
+              setLoginError(data?.message || 'رقم الهاتف أو كلمة المرور غير صحيحة');
+              break;
+            case 401:
+              setLoginError(data?.message || 'رقم الهاتف أو كلمة المرور غير صحيحة');
+              break;
+            case 403:
+              setLoginError(data?.message || 'تم رفض الوصول. الرجاء التواصل مع الدعم.');
+              break;
+            case 404:
+              setLoginError(data?.message || 'الخدمة غير متاحة. الرجاء المحاولة لاحقًا.');
+              break;
+            case 429:
+              setLoginError(data?.message || 'عدد كبير جدًا من محاولات تسجيل الدخول. الرجاء الانتظار والمحاولة مرة أخرى.');
+              break;
+            case 500:
+              setLoginError(data?.message || 'خطأ في الخادم. الرجاء المحاولة لاحقًا.');
+              break;
+            default:
+              setLoginError(data?.message || 'فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.');
+          }
         }
       } else if (error.request) {
         setLoginError('خطأ في الشبكة. الرجاء التحقق من اتصال الإنترنت والمحاولة مرة أخرى.');
@@ -140,13 +155,11 @@ export default function Login() {
       top: 0,
       behavior: "smooth",
     });
-
     // استعادة البيانات المحفوظة من sessionStorage
     const savedRegisterPhone = sessionStorage.getItem("registerPhone");
     const savedRegisterPassword = sessionStorage.getItem("registerPassword");
     const savedResetPhone = sessionStorage.getItem("resetPhone");
     const savedResetPassword = sessionStorage.getItem("resetPassword");
-
     // استخدام بيانات التسجيل إذا كانت موجودة
     if (savedRegisterPhone && savedRegisterPassword) {
       setLoginForm({
@@ -212,7 +225,7 @@ export default function Login() {
                   value={loginForm.phone}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  placeholder="+201012345678"
+                  placeholder="01012345678"
                   className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${fieldErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
                   dir="ltr"
                 />

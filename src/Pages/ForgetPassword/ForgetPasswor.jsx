@@ -11,13 +11,13 @@ export default function ForgetPassword() {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  // دالة للتحقق من رقم الهاتف
+  // دالة للتحقق من رقم الهاتف (بدون كود دولة)
   const validatePhone = () => {
     if (!phone.trim()) {
       setError('رقم الهاتف مطلوب');
       return false;
-    } else if (!phone.startsWith('+20') && !phone.startsWith('20')) {
-      setError('الرجاء إدخال رقم هاتف مصري صحيح (مثال: +201012345678)');
+    } else if (!/^(010|011|012|015)\d{8}$/.test(phone.trim())) {
+      setError('الرجاء إدخال رقم هاتف مصري صحيح (مثال: 01012345678)');
       return false;
     }
     setError('');
@@ -45,11 +45,10 @@ export default function ForgetPassword() {
       );
       if (response.status === 200) {
         setSuccess(true);
-        // تمرير رقم الهاتف و token إلى صفحة VerifyReset
         navigate("/verify-reset", {
           state: {
             phone: phone.trim(),
-            token: response.data.token // افتراضًا أن API يعيد token
+            token: response.data.token
           }
         });
       }
@@ -131,7 +130,7 @@ export default function ForgetPassword() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="+201012345678"
+                  placeholder="01012345678"
                   className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
                   dir="ltr"
                 />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaRegCircleUser, FaBars, FaGlobe } from 'react-icons/fa6';
+import { FaRegCircleUser, FaBars, FaGlobe, FaHeart } from 'react-icons/fa6';
 import { FaShoppingBag, FaTimes } from 'react-icons/fa';
 import logo from "../../assets/navbarlogo.png";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -14,7 +14,6 @@ export default function Navbar({ bg }) {
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
-
   const isRTL = i18n.language === 'ar';
 
   useEffect(() => {
@@ -131,7 +130,10 @@ export default function Navbar({ bg }) {
         {/* قائمة سطح المكتب */}
         <div className={`hidden lg:flex items-center ${isRTL ? 'space-x-reverse gap-3' : 'gap-6'}`}>
           <LanguageDropdown />
-          <Link to="/cart" className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
+          <Link to="/wishlist" className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 relative">
+            <FaHeart className="text-[15px] xl:text-[18px] text-purple-500" />
+          </Link>
+          <Link to="/cart" className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 relative">
             <FaShoppingBag className="text-[15px] xl:text-[18px] text-purple-500" />
           </Link>
           <AuthDropdown />
@@ -198,11 +200,15 @@ export default function Navbar({ bg }) {
         <div className={`hidden md:flex lg:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown />
           <div className="mx-2"></div>
-          <AuthDropdown isMobile={true} />
+          <Link to="/wishlist" className="w-8 cursor-pointer h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
+            <FaHeart className="text-[14px] text-purple-500" />
+          </Link>
           <div className="mx-2"></div>
           <Link to="/cart" className="w-8 cursor-pointer h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
             <FaShoppingBag className="text-[14px] text-purple-500" />
           </Link>
+          <div className="mx-2"></div>
+          <AuthDropdown isMobile={true} />
           <div className="mx-2"></div>
           <button
             onClick={toggleMobileMenu}
@@ -220,6 +226,10 @@ export default function Navbar({ bg }) {
         {/* قائمة الهواتف الصغيرة */}
         <div className={`flex md:hidden items-center ${isRTL ? 'space-x-reverse gap-2' : 'gap-2'}`}>
           <LanguageDropdown isMobile={true} />
+          <div className="mx-1"></div>
+          <Link to="/wishlist" className="w-7 h-7 cursor-pointer bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
+            <FaHeart className="text-[12px] text-purple-500" />
+          </Link>
           <div className="mx-1"></div>
           <Link to="/cart" className="w-7 h-7 cursor-pointer bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
             <FaShoppingBag className="text-[12px] text-purple-500" />

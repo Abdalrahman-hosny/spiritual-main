@@ -11,7 +11,6 @@ export default function VerifyOTP() {
   const [isResending, setIsResending] = useState(false);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { phone } = location.state || {};
@@ -52,10 +51,9 @@ export default function VerifyOTP() {
         phone,
         token,
       });
-      if (response.data.success) {
-        toast.success("تم التحقق بنجاح!");
-        setSuccess(true);
-        setTimeout(() => navigate('/dashboard'), 2000);
+     if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
+      toast.success("تم التحقق بنجاح!");
+      navigate('/ResetPassword');
       } else {
         toast.error(response.data.message || "رمز التحقق غير صحيح");
       }
@@ -100,92 +98,80 @@ export default function VerifyOTP() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <div className="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-md">
-        {!success ? (
-          <>
-            <div className="flex items-center gap-2 mb-6">
-              <button
-                onClick={() => navigate(-1)}
-                className="p-2 rounded-full hover:bg-gray-100"
-              >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center flex-1">
-                التحقق من رمز التحقق
-              </h2>
-            </div>
-            <div className="text-center mb-8">
-              <p className="text-gray-600">
-                تم إرسال رمز التحقق إلى رقم الهاتف: <span className="font-medium">{phone}</span>
-              </p>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-1">
-                <label className="block text-right text-gray-700 text-sm font-medium">رمز التحقق</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="token"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="12345"
-                    className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
-                  />
-                </div>
+        <>
+          <div className="flex items-center gap-2 mb-6">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-full hover:bg-gray-100"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center flex-1">
+              التحقق من رمز التحقق
+            </h2>
+          </div>
+          <div className="text-center mb-8">
+            <p className="text-gray-600">
+              تم إرسال رمز التحقق إلى رقم الهاتف: <span className="font-medium">{phone}</span>
+            </p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-1">
+              <label className="block text-right text-gray-700 text-sm font-medium">رمز التحقق</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="token"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="12345"
+                  className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+                />
               </div>
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
+                isLoading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+              }`}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>جاري التحقق...</span>
+                </div>
+              ) : (
+                'تحقق'
+              )}
+            </button>
+          </form>
+          <div className="mt-6 text-center">
+            <p className="text-gray-600 text-sm">
+              لم تستلم الرمز؟
               <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
-                  isLoading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                type="button"
+                onClick={handleResendOtp}
+                disabled={!canResend || isResending}
+                className={`font-medium ml-1 ${
+                  canResend && !isResending ? 'text-purple-600 hover:text-purple-700' : 'text-gray-400 cursor-not-allowed'
                 }`}
               >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>جاري التحقق...</span>
+                {isResending ? (
+                  <div className="flex items-center justify-center gap-1">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>جاري الإرسال...</span>
                   </div>
                 ) : (
-                  'تحقق'
+                  `أعد الإرسال (${canResend ? 'إرسال' : timer})`
                 )}
               </button>
-            </form>
-            <div className="mt-6 text-center">
-              <p className="text-gray-600 text-sm">
-                لم تستلم الرمز؟
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={!canResend || isResending}
-                  className={`font-medium ml-1 ${
-                    canResend && !isResending ? 'text-purple-600 hover:text-purple-700' : 'text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {isResending ? (
-                    <div className="flex items-center justify-center gap-1">
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>جاري الإرسال...</span>
-                    </div>
-                  ) : (
-                    `أعد الإرسال (${canResend ? 'إرسال' : timer})`
-                  )}
-                </button>
-              </p>
-            </div>
-          </>
-        ) : (
-          <div className="text-center space-y-4">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-green-600" />
-              </div>
-            </div>
-            <h2 className="text-xl font-bold text-gray-800">تم التحقق بنجاح!</h2>
-            <p className="text-gray-600">سيتم إعادة توجيهك إلى لوحة التحكم...</p>
+            </p>
           </div>
-        )}
+        </>
       </div>
       <ToastContainer />
     </div>

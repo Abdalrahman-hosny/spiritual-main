@@ -22,7 +22,7 @@ export default function CommentForm({ onReviewSubmitted }) {
 
     try {
       // الحصول على Token من localStorage
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       
 
       const response = await axios.post(

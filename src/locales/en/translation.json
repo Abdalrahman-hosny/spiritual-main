@@ -343,4 +343,13 @@
   },
   "login": "Login",
   "logout": "Logout"
-}
+,"wishlist": {
+        "title": "Wishlist",
+        "breadcrumb": "Home",
+        "my_wishlist": "My Wishlist",
+        "empty": "Your wishlist is empty",
+        "add_to_cart": "Add to Cart",
+            "remove": "Remove"
+
+      }
+    }

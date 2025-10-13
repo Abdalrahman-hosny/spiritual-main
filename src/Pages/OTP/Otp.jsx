@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function OTP() {
-  const [otp, setOtp] = useState(['', '', '', '', '']); // 5 أرقام
+  const [otp, setOtp] = useState(['', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -15,19 +15,17 @@ export default function OTP() {
   const inputRefs = useRef([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const { phone, autoVerify } = location.state || {};
 
-  // استخراج `phone` من `location.state`
-  const { phone } = location.state || {};
-
-  // التحقق من وجود `phone` عند دخول الصفحة
   useEffect(() => {
     if (!phone) {
       toast.error("لا يوجد رقم هاتف صالح. سيتم إعادة توجيهك لتسجيل الدخول.");
       setTimeout(() => navigate('/login'), 3000);
+    } else if (autoVerify) {
+      handleAutoVerify(autoVerify);
     }
-  }, [phone, navigate]);
+  }, [phone, navigate, autoVerify]);
 
-  // عداد الوقت لإعادة الإرسال
   useEffect(() => {
     let timer;
     if (resendTimer > 0) {
@@ -40,7 +38,6 @@ export default function OTP() {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
-  // إعادة إرسال OTP
   const handleResendOTP = async () => {
     if (!canResend || !phone) return;
     setIsLoading(true);
@@ -64,7 +61,6 @@ export default function OTP() {
     }
   };
 
-  // التركيز تلقائيًا على الحقل التالي
   const handleChange = (index, value) => {
     if (/^\d*$/.test(value) && value.length <= 1) {
       const newOtp = [...otp];
@@ -76,45 +72,43 @@ export default function OTP() {
     }
   };
 
-  // التركيز على الحقل السابق عند الحذف
   const handleKeyDown = (index, e) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1].focus();
     }
   };
 
-  // التحقق من رمز OTP
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const enteredToken = otp.join('');
-    if (enteredToken.length !== 5) {
-      setError("يرجى إدخال رمز OTP الكامل (5 أرقام)");
-      return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const enteredToken = otp.join('');
+  if (enteredToken.length !== 5) {
+    setError("يرجى إدخال رمز OTP الكامل (5 أرقام)");
+    toast.error("يرجى إدخال رمز OTP الكامل (5 أرقام)");
+    return;
+  }
+  setIsLoading(true);
+  setError('');
+  try {
+    const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
+      phone,
+      token: enteredToken,
+    });
+
+    if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
+      toast.success("تم التحقق بنجاح!");
+      navigate('/login');
+    } else {
+      throw new Error(response.data?.message || 'رمز OTP غير صحيح');
     }
-    setIsLoading(true);
-    setError('');
-    try {
-      const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
-        phone,
-        token: enteredToken,
-      });
-      if (response.data && response.data.success) {
-        console.log("✅ تم التحقق بنجاح:", res.data);
-        setSuccess(true);
-        toast.success("تم التحقق بنجاح!");
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else {
-        throw new Error(response.data?.message || 'رمز OTP غير صحيح');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق');
-      toast.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق';
+    setError(errorMessage);
+    toast.error(errorMessage);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">

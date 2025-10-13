@@ -20,6 +20,7 @@ import ForgetPassword from './Pages/ForgetPassword/ForgetPasswor';
 import VerifyReset from './Pages/verifyReset/verifyReset';
 import ResetPassword from './Pages/ResetPassword/ResetPassword';
 import Profile from './Pages/profile/profile';
+import Wishlist from './Pages/wishlist/wishlist'; 
 import i18n from './locales/i18n';
 
 // ✅ استدعاء الـ Layout
@@ -48,6 +49,8 @@ function App() {
             <Route path="/courseDetails/:id" element={<CourseDetails />} />
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/profile" element={<Profile />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+
 
           </Route>
 

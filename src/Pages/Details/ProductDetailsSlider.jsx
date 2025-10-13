@@ -13,6 +13,7 @@ export default function ProductDetailsSlider({ productId = 5 }) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [inWishlist, setInWishlist] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -20,6 +21,7 @@ export default function ProductDetailsSlider({ productId = 5 }) {
         setLoading(true);
         const response = await axios.get(`https://spiritual.brmjatech.uk/api/products/${productId}`);
         setProduct(response.data.data);
+        checkIfInWishlist(response.data.data.id);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -32,6 +34,72 @@ export default function ProductDetailsSlider({ productId = 5 }) {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  const checkIfInWishlist = async (productId) => {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        return;
+      }
+      const response = await axios.get(
+        `https://spiritual.brmjatech.uk/api/wishlist/check?product_id=${productId}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        }
+      );
+      setInWishlist(response.data.is_in_wishlist);
+    } catch (error) {
+      console.error("Error checking if product is in wishlist:", error);
+    }
+  };
+
+  const toggleWishlist = async () => {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        toast.error(isRTL ? 'الرجاء تسجيل الدخول أولا' : 'Please login first', {
+          position: isRTL ? "top-left" : "top-right"
+        });
+        return;
+      }
+
+      if (inWishlist) {
+        await axios.post(
+          "https://spiritual.brmjatech.uk/api/wishlist/remove",
+          { product_id: product.id },
+          {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success(isRTL ? 'تمت إزالة المنتج من قائمة الرغبات' : 'Product removed from wishlist', {
+          position: isRTL ? "top-left" : "top-right"
+        });
+      } else {
+        await axios.post(
+          "https://spiritual.brmjatech.uk/api/wishlist",
+          { product_id: product.id },
+          {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success(isRTL ? 'تمت إضافة المنتج إلى قائمة الرغبات' : 'Product added to wishlist', {
+          position: isRTL ? "top-left" : "top-right"
+        });
+      }
+      setInWishlist(!inWishlist);
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      toast.error(isRTL ? 'حدث خطأ أثناء إضافة المنتج إلى قائمة الرغبات' : 'Error adding product to wishlist', {
+        position: isRTL ? "top-left" : "top-right"
+      });
+    }
+  };
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
@@ -61,7 +129,6 @@ export default function ProductDetailsSlider({ productId = 5 }) {
   const addToCart = () => {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const existingProduct = cart.find(item => item.id === product.id);
-
     if (existingProduct) {
       existingProduct.quantity += quantity;
     } else {
@@ -74,7 +141,6 @@ export default function ProductDetailsSlider({ productId = 5 }) {
         description: product.description,
       });
     }
-
     localStorage.setItem('cart', JSON.stringify(cart));
     toast.success(
       isRTL ? 'تمت إضافة المنتج للسلة!' : 'Product added to cart!',
@@ -83,15 +149,15 @@ export default function ProductDetailsSlider({ productId = 5 }) {
   };
 
   if (loading) {
-    return <div className="text-center py-12">جاري تحميل تفاصيل المنتج...</div>;
+    return <div className="text-center py-12">{isRTL ? 'جاري تحميل تفاصيل المنتج...' : 'Loading product details...'}</div>;
   }
 
   if (error) {
-    return <div className="text-center py-12 text-red-500">حدث خطأ: {error}</div>;
+    return <div className="text-center py-12 text-red-500">{isRTL ? 'حدث خطأ:' : 'Error:'} {error}</div>;
   }
 
   if (!product) {
-    return <div className="text-center py-12">لا يوجد تفاصيل للمنتج.</div>;
+    return <div className="text-center py-12">{isRTL ? 'لا يوجد تفاصيل للمنتج.' : 'No product details available.'}</div>;
   }
 
   const images = product.images.map(img => img.image);
@@ -213,16 +279,19 @@ export default function ProductDetailsSlider({ productId = 5 }) {
               </button>
               {/* Social buttons */}
               <div className="flex items-center gap-2">
-                <button className="text-gray-600 hover:bg-gray-600 p-2 rounded-full hover:text-white transition-colors">
-                  <Heart className="w-5 h-5" />
+                <button
+                  onClick={toggleWishlist}
+                  className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-red-500' : 'text-gray-600'} hover:bg-gray-100`}
+                >
+                  <Heart className="w-5 h-5" fill={inWishlist ? 'red' : 'none'} />
                 </button>
-                <button className="text-gray-600 hover:bg-gray-600 p-2 rounded-full hover:text-white transition-colors">
+                <button className="text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors">
                   <Linkedin className="w-5 h-5" />
                 </button>
-                <button className="text-gray-600 hover:bg-gray-600 p-2 rounded-full hover:text-white transition-colors">
+                <button className="text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors">
                   <Twitter className="w-5 h-5" />
                 </button>
-                <button className="text-gray-600 hover:bg-gray-600 p-2 rounded-full hover:text-white transition-colors">
+                <button className="text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors">
                   <Facebook className="w-5 h-5" />
                 </button>
               </div>
