@@ -21,10 +21,16 @@ import VerifyReset from './Pages/verifyReset/verifyReset';
 import ResetPassword from './Pages/ResetPassword/ResetPassword';
 import Profile from './Pages/profile/profile';
 import Wishlist from './Pages/wishlist/wishlist'; 
+import TermsAndConditions from './Pages/TermsAndConditions/terms-and-conditions';
+import PrivacyPolicy from './Pages/PrivacyPolicy/privacy-policy';
+import FAQs from './Pages/FAQS/faqs.JSX';
+
+
 import i18n from './locales/i18n';
 
 // ✅ استدعاء الـ Layout
 import MainLayout from './layout/MainLayout';
+
 
 function App() {
   useEffect(() => {
@@ -49,7 +55,12 @@ function App() {
             <Route path="/courseDetails/:id" element={<CourseDetails />} />
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/profile" element={<Profile />} />
-                    <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/faqs" element={<FAQs />} />
+
+
 
 
           </Route>

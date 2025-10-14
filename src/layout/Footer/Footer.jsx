@@ -2,8 +2,9 @@ import { Facebook, Linkedin, Twitter, Youtube } from "lucide-react";
 import { FaBehance, FaFacebook } from "react-icons/fa6";
 import logo from "../../assets/loginimg.png";
 import { useTranslation } from 'react-i18next';
-import phone  from "../../assets/telephone-call2.svg fill.png";
-import chat  from "../../assets/bubble-chat2.svg fill.png";
+import phone from "../../assets/telephone-call2.svg fill.png";
+import chat from "../../assets/bubble-chat2.svg fill.png";
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -19,7 +20,6 @@ const Footer = () => {
             {t("footer.description")}
           </p>
         </div>
-
         {/* العمود 2 */}
         <div className="space-y-3">
           <h3 className="text-lg font-bold text-purple-500">{t("footer.quickLinks.title")}</h3>
@@ -29,32 +29,74 @@ const Footer = () => {
             ))}
           </ul>
         </div>
-
         {/* العمود 3 */}
         <div className="space-y-3">
-          <h3 className="text-lg font-bold text-purple-500">{t("footer.myAccount.title")}</h3>
-          <ul className="space-y-2 text-sm">
-            {t("footer.myAccount.links", { returnObjects: true }).map((item, idx) => (
-              <li key={idx}><a href="#">{item}</a></li>
-            ))}
+          <h3 className="text-lg font-bold text-purple-500">{t("footer.legal.title")}</h3>
+          <ul className="space-y-2 text-sm"> 
+             <li>
+              <Link to="/about-us" className="hover:text-purple-500 transition-colors">
+                {t("footer.legal.aboutus")}
+              </Link>
+            </li>
+
+
+            <li>
+              <Link to="/terms-and-conditions" className="hover:text-purple-500 transition-colors">
+                {t("footer.legal.terms")}
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/privacy-policy" className="hover:text-purple-500 transition-colors">
+                {t("footer.legal.privacy")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/faqs" className="hover:text-purple-500 transition-colors">
+                {t("footer.legal.faqs")}
+              </Link>
+            </li>
           </ul>
         </div>
-
         {/* العمود 4 */}
         <div className="space-y-3">
           <h3 className="text-lg font-bold text-purple-500">{t("footer.socialMedia.title")}</h3>
           <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2"> <FaFacebook className="w-3 h-3 text-purple-500" />  {t("footer.socialMedia.platforms.0")}</li>
-            <li className="flex items-center gap-2"><Linkedin className="w-3 h-3 text-purple-500" /> {t("footer.socialMedia.platforms.1")}</li>
-            <li className="flex items-center gap-2"><Twitter  className="w-3 h-3 text-purple-500"/> {t("footer.socialMedia.platforms.2")}</li>
-            <li className="flex items-center gap-2"><FaBehance  className="w-3 h-3 text-purple-500"/> {t("footer.socialMedia.platforms.3")}</li>
-            <li className="flex items-center gap-2"><Youtube  className="w-3 h-3 text-purple-500"/> {t("footer.socialMedia.platforms.4")}</li>
+            <li className="flex items-center gap-2">
+              <FaFacebook className="w-3 h-3 text-purple-500" />
+              <a href="#" className="hover:text-purple-500 transition-colors">
+                {t("footer.socialMedia.platforms.0")}
+              </a>
+            </li>
+            <li className="flex items-center gap-2">
+              <Linkedin className="w-3 h-3 text-purple-500" />
+              <a href="#" className="hover:text-purple-500 transition-colors">
+                {t("footer.socialMedia.platforms.1")}
+              </a>
+            </li>
+            <li className="flex items-center gap-2">
+              <Twitter className="w-3 h-3 text-purple-500" />
+              <a href="#" className="hover:text-purple-500 transition-colors">
+                {t("footer.socialMedia.platforms.2")}
+              </a>
+            </li>
+            <li className="flex items-center gap-2">
+              <FaBehance className="w-3 h-3 text-purple-500" />
+              <a href="#" className="hover:text-purple-500 transition-colors">
+                {t("footer.socialMedia.platforms.3")}
+              </a>
+            </li>
+            <li className="flex items-center gap-2">
+              <Youtube className="w-3 h-3 text-purple-500" />
+              <a href="#" className="hover:text-purple-500 transition-colors">
+                {t("footer.socialMedia.platforms.4")}
+              </a>
+            </li>
           </ul>
         </div>
       </div>
-
       {/* أسفل الفوتر */}
-      <div className="border-t relative z-50  border-white/20 mt-8 py-4 text-center text-sm flex flex-col md:flex-row items-center justify-between px-6">
+      <div className="border-t relative z-50 border-white/20 mt-8 py-4 text-center text-sm flex flex-col md:flex-row items-center justify-between px-6">
         <p className="font-montserratArabic font-normal text-[15px] leading-[25px] tracking-[0] text-center align-middle">
           {t("footer.copyright")}
           <span className="text-orange-500 font-semibold"> {t("footer.poweredBy")}</span>
@@ -69,19 +111,18 @@ const Footer = () => {
                 {t("footer.support.email")}
               </a>
             </div>
-            <img src={chat} alt="" />
+            <img src={chat} alt="Chat" />
           </div>
-
-          <div className="flex  gap-2">
+          <div className="flex gap-2">
             <div className="text-end">
               <p className="font-montserratArabic font-normal text-[14px] leading-[20px] tracking-[0] text-right align-middle">
                 {t("footer.contact.title")}
               </p>
-              <span className="text-purple-500 font-montserratArabic font-normal text-[14px] leading-[20px] tracking-[0] text-right align-middle">
+              <a href={`tel:${t("footer.contact.phone")}`} className="text-purple-500 font-montserratArabic font-normal text-[14px] leading-[20px] tracking-[0] text-right align-middle">
                 {t("footer.contact.phone")}
-              </span>
+              </a>
             </div>
-            <img src={phone} alt="" />
+            <img src={phone} alt="Phone" />
           </div>
         </div>
       </div>

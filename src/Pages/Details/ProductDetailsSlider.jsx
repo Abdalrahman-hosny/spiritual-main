@@ -166,7 +166,7 @@ export default function ProductDetailsSlider({ productId = 5 }) {
   };
 
   if (loading) {
-    return <div className="text-center py-12">{isRTL ? 'جاري تحميل تفاصيل المنتج...' : 'Loading product details...'}</div>;
+    return <div className="text-center  py-12">{isRTL ? 'جاري تحميل تفاصيل المنتج...' : 'Loading product details...'}</div>;
   }
 
   if (error) {
@@ -182,7 +182,7 @@ export default function ProductDetailsSlider({ productId = 5 }) {
   return (
     <div className="p-4 font-sans" dir={isRTL ? 'rtl' : 'ltr'}>
       <ToastContainer />
-      <div className="max-w-6xl mx-auto bg-white rounded-lg overflow-hidden">
+      <div className="max-w-6xl  mx-auto bg-white rounded-lg overflow-hidden">
         <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-col lg:flex-row'}`}>
           {/* Product Image Section */}
           <div className="lg:w-1/2 p-6">

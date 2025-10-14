@@ -51,7 +51,7 @@ export default function Details() {
       <div className='relative'>
         <div className='image'>
           <div className="relative bg-black/70">
-            <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
+            <div className="relative mt-5 overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
                 variants={heroVariants}
                 initial="hidden"

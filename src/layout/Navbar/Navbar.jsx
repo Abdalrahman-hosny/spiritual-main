@@ -82,7 +82,7 @@ export default function Navbar({ bg }) {
   const AuthDropdown = ({ isMobile = false }) => {
     const isLoggedIn = !!sessionStorage.getItem("token");
     return (
-      <div className="relative">
+      <div className="relative  ">
         <button
           onClick={() => setIsAuthDropdownOpen(!isAuthDropdownOpen)}
           className={`${isMobile ? 'w-7 h-7' : 'w-9 xl:w-10 h-9 xl:h-10'} bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200`}
@@ -125,7 +125,7 @@ export default function Navbar({ bg }) {
   };
 
   return (
-    <div className={`fixed top-0 left-0 w-full z-[9999] bg-transparent backdrop-blur-sm ${bg ? bg : 'bg-black/70'}`}>
+    <div className={`fixed mb-3 top-0 left-0 w-full z-[9999] bg-transparent backdrop-blur-sm ${bg ? bg : 'bg-black/70'}`}>
       <nav className="w-[95%] lg:w-[90%] xl:w-[85%] 2xl:w-[80%] mx-auto flex items-center justify-between px-2 sm:px-4 py-3 sm:py-4 h-full">
         {/* قائمة سطح المكتب */}
         <div className={`hidden lg:flex items-center ${isRTL ? 'space-x-reverse gap-3' : 'gap-6'}`}>

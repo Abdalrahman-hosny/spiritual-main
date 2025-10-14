@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -6,24 +6,51 @@ import { motion } from "framer-motion";
 import { AiFillStar } from "react-icons/ai";
 import { BiVideo } from "react-icons/bi";
 import { LuFile } from "react-icons/lu";
-import image1 from "../../assets/bg.png";
-import image2 from "../../assets/bg-login.png";
-import image3 from "../../assets/hero.png";
-import user from "../../assets/user.png";
+import { FaUserCircle } from "react-icons/fa"; // أيكون افتراضي للمدرب
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const CourseSlider = ({ isTrue = true }) => {
   const { t } = useTranslation();
   const isRTL = true;
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const courses = [
-    { id: 1, name: t("courses.items.course1.name"), instructor: t("courses.items.course1.instructor"), logo: image1, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-    { id: 2, name: t("courses.items.course2.name"), instructor: t("courses.items.course2.instructor"), logo: image2, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-    { id: 3, name: t("courses.items.course3.name"), instructor: t("courses.items.course3.instructor"), logo: image3, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-    { id: 4, name: t("courses.items.course4.name"), instructor: t("courses.items.course4.instructor"), logo: image2, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-    { id: 5, name: t("courses.items.course5.name"), instructor: t("courses.items.course5.instructor"), logo: image1, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-  ];
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch("https://spiritual.brmjatech.uk/api/courses/1");
+        const data = await response.json();
+        if (data.code === 200) {
+          const formattedCourses = [
+            {
+              id: data.data.id,
+              name: data.data.title,
+              instructor: data.data.trainer.name,
+              logo: data.data.image,
+              rating: 5,
+              reviews: 21,
+              price: data.data.price,
+              files: data.data.files_count,
+              videos: data.data.lectures_count,
+              trainerImage: data.data.trainer.image, // إضافة صورة المدرب
+            },
+          ];
+          setCourses(formattedCourses);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-10">جاري تحميل الكورسات...</div>;
+  }
 
   return (
     <motion.div className="py-10 bg-white">
@@ -69,7 +96,11 @@ const CourseSlider = ({ isTrue = true }) => {
                   {course.price} {t("courses.currency")}
                 </motion.div>
                 <motion.div className="flex justify-center items-center bg-gray-100 overflow-hidden">
-                  <img src={course.logo} alt="course logo" className="object-cover w-full h-48" />
+                  <img
+                    src={course.logo}
+                    alt="course logo"
+                    className="object-cover w-full h-48"
+                  />
                 </motion.div>
                 <div className="p-4">
                   <motion.div className="flex items-center text-yellow-400 text-sm mb-1">
@@ -95,7 +126,15 @@ const CourseSlider = ({ isTrue = true }) => {
                     </motion.div>
                   </motion.div>
                   <motion.div className="flex items-center text-gray-700 text-sm font-medium">
-                    <motion.img src={user} className="w-[50px] h-[50px] rounded-full ml-2" alt="" />
+                    {course.trainerImage ? (
+                      <img
+                        src={course.trainerImage}
+                        className="w-[50px] h-[50px] rounded-full ml-2"
+                        alt="trainer"
+                      />
+                    ) : (
+                      <FaUserCircle className="w-[50px] h-[50px] text-gray-400 ml-2" />
+                    )}
                     {course.instructor}
                   </motion.div>
                 </div>

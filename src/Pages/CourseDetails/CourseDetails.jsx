@@ -2,29 +2,42 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import preview from "../../assets/hero.png";
 import plant from "../../assets/mandala_1265367 1.png";
-
 import { useTranslation } from "react-i18next";
 import { CiFileOn, CiPlay1 } from "react-icons/ci";
 import { IoMdTime } from "react-icons/io";
-import { FaLinkedinIn, FaYoutube } from "react-icons/fa6";
+import { FaLinkedinIn, FaYoutube, FaStar } from "react-icons/fa6";
 import { GrFacebookOption } from "react-icons/gr";
 import pdf from "../../assets/extentions/pdf-svgrepo-com.svg";
 import { motion, AnimatePresence } from "framer-motion";
 import CourseSlider from "../Home/CourseSlider";
-
+import axios from "axios";
 
 const CourseDetails = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
+  const [course, setCourse] = useState(null);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
 
-  // تحديث اتجاه الصفحة عند تغيير اللغة
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
     document.documentElement.lang = i18n.language;
   }, [isRTL, i18n.language]);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses");
+        if (response.data.code === 200) {
+          setCourse(response.data.data.result[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching course data:", error);
+      }
+    };
+    fetchCourse();
+  }, []);
 
   const handleTabChange = (tabId) => {
     if (tabId === activeTab) return;
@@ -47,7 +60,7 @@ const CourseDetails = () => {
       id: "courses",
       label: t("course.files"),
       color: "blue",
-      badge: 3,
+      badge: course?.files_count || 0,
     },
   ];
 
@@ -84,14 +97,18 @@ const CourseDetails = () => {
     },
   };
 
+  if (!course) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Hero Section */}
-      <div className="relative">
+ <div className="relative">
         <div className="image">
           
           <div className="relative bg-black/70">
-            <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
+            <div className="relative overflow-hidden mt-5 min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
                 variants={heroVariants}
                 initial="hidden"
@@ -146,6 +163,7 @@ const CourseDetails = () => {
           </div>
         </div>
       </div>
+
       {/* Main Content */}
       <div className="pt-24 bg-white">
         <div className="w-full md:w-[80%] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
@@ -163,7 +181,7 @@ const CourseDetails = () => {
               {/* Course Schedule */}
               <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
-                  الاحد 10:00 صباحا
+                  {course.schedule}
                 </span>
                 <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
                   {t("course.time")}
@@ -173,7 +191,7 @@ const CourseDetails = () => {
               {/* Files */}
               <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
-                  10
+                  {course.files_count}
                 </span>
                 <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
                   {t("course.files")}
@@ -183,7 +201,7 @@ const CourseDetails = () => {
               {/* Duration */}
               <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
-                  1 Hours
+                  {course.duration}
                 </span>
                 <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
                   {t("course.duration")}
@@ -193,11 +211,22 @@ const CourseDetails = () => {
               {/* Lectures */}
               <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
-                  4
+                  {course.lectures_count}
                 </span>
                 <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
                   {t("course.lectures")}
                   {isRTL ? <CiPlay1 className="mr-1 text-purple-500 font-bold text-md" /> : <CiPlay1 className="ml-1 text-purple-500 font-bold text-md" />}
+                </span>
+              </div>
+              {/* Reviews */}
+              <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <FaStar key={i} className="text-yellow-400" />
+                  ))}
+                </div>
+                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
+                  {t("course.reviews")}
                 </span>
               </div>
             </div>
@@ -209,7 +238,7 @@ const CourseDetails = () => {
               className="mt-6"
             >
               <p className="font-[Montserrat-Arabic] font-semibold text-[20px] text-center mb-3">
-                500 {t("course.currency")}
+                {course.price} {t("course.currency")}
               </p>
               <div className="flex justify-center items-center">
                 <motion.button
@@ -244,6 +273,7 @@ const CourseDetails = () => {
               </p>
             </motion.div>
           </motion.div>
+
           {/* Video Preview and Trainer Info */}
           <div className="col-span-3 lg:col-span-2">
             <motion.div
@@ -255,7 +285,7 @@ const CourseDetails = () => {
               {/* Video Preview */}
               <div className="relative">
                 <img
-                  src={preview}
+                  src={course.image || preview}
                   alt={t("course.previewAlt")}
                   className="w-full h-[450px] rounded-md object-cover"
                 />
@@ -287,7 +317,7 @@ const CourseDetails = () => {
                       {t("course.instructor")}
                     </h4>
                     <p className="font-[Montserrat-Arabic] font-semibold text-[16px] text-[#444444]">
-                      {t("course.instructorName")}
+                      {course.trainer?.name}
                     </p>
                   </div>
                 </div>
@@ -296,12 +326,13 @@ const CourseDetails = () => {
                     {t("course.category")}
                   </span>
                   <p className="font-[Montserrat-Arabic] font-semibold text-[16px] text-purple-600">
-                    {t("course.categoryName")}
+                    {course.category}
                   </p>
                 </div>
               </motion.div>
             </motion.div>
           </div>
+
           {/* Course Title and Tabs */}
           <div className="col-span-3 pt-3">
             <motion.h2
@@ -310,7 +341,7 @@ const CourseDetails = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="font-[Montserrat-Arabic] font-medium text-[24px] sm:text-[36px] leading-[36px] text-right"
             >
-              {t("course.courseName")}
+              {course.title}
             </motion.h2>
             {/* Dynamic Tab Navigation */}
             <motion.div
@@ -378,20 +409,14 @@ const CourseDetails = () => {
                         className="space-y-6 bg-gray-50 p-6 rounded-xl shadow-sm"
                       >
                         <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] text-right text-[#555555]">
-                          {t("course.bio1")}
-                        </p>
-                        <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] text-right text-[#555555]">
-                          {t("course.bio2")}
-                        </p>
-                        <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] text-right text-[#555555]">
-                          {t("course.bio3")}
+                          {course.description}
                         </p>
                       </motion.div>
                     </div>
                   )}
                   {activeTab === "courses" && (
                     <div className="space-y-6">
-                      <TrainerFiles />
+                      <TrainerFiles files={course.files} />
                     </div>
                   )}
                 </motion.div>
@@ -399,6 +424,7 @@ const CourseDetails = () => {
             )}
           </div>
         </div>
+
         {/* Related Courses */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -412,31 +438,13 @@ const CourseDetails = () => {
           <CourseSlider isTrue={false} />
         </motion.div>
       </div>
-      
     </div>
   );
 };
 
-const TrainerFiles = () => {
+const TrainerFiles = ({ files }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-
-  const files = [
-    {
-      id: 1,
-      name: t("course.fileName"),
-      date: "March 20, 2023 at 2:37 pm",
-      size: "15.6MB",
-      logo: pdf,
-    },
-    {
-      id: 2,
-      name: t("course.fileName"),
-      date: "March 20, 2023 at 2:37 pm",
-      size: "15.6MB",
-      logo: pdf,
-    },
-  ];
 
   return (
     <div className="py-10 bg-white" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -449,7 +457,7 @@ const TrainerFiles = () => {
             className="flex gap-4 items-center shadow-md rounded-lg px-4 py-3 bg-white border border-gray-100 hover:shadow-lg transition-shadow duration-300"
           >
             <img
-              src={file.logo}
+              src={pdf}
               alt={t("course.pdfAlt")}
               className="w-[80px] h-[80px]"
             />
@@ -458,19 +466,22 @@ const TrainerFiles = () => {
                 {file.name}
               </h3>
               <p className="font-[Montserrat-Arabic] font-light text-[12px] text-[#000000]">
-                {file.date}
+                {file.created_at || "N/A"}
               </p>
               <p className="text-sm text-green-600 font-[Montserrat-Arabic] font-medium text-[10px] leading-[20px] mt-1">
                 {file.size}
               </p>
             </div>
-            <motion.button
+            <motion.a
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
+              href={file.file}
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-purple-500/90 hover:bg-purple-600 text-white p-2 rounded-lg transition-colors duration-300"
             >
               {t("course.download")}
-            </motion.button>
+            </motion.a>
           </motion.div>
         ))}
       </div>

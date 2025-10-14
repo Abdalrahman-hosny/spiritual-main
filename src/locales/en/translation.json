@@ -110,6 +110,14 @@
       "title": "My Account",
       "links": ["Contact Us", "Privacy Policy", "Terms and Conditions"]
     },
+    "legal": {
+      "title": "Legal",
+      "terms": "Terms and Conditions",
+      "privacy": "Privacy Policy",
+      "faqs": "FAQs" ,
+      "aboutus": "AboutUs"
+    },
+
     "socialMedia": {
       "title": "Social Media",
       "platforms": ["Facebook", "LinkedIn", "Twitter", "Behance", "YouTube"]
@@ -268,6 +276,8 @@
     "pdfAlt": "PDF File",
     "download": "Download",
     "relatedCourses": "Related Courses",
+     "reviews": "Reviews",
+     "currency": "EGP",
     "plantAlt": "Decorative Plant"
   },
   "trainer": {
@@ -366,6 +376,81 @@
     "product_added_to_cart": "Added to cart",
     "failed_to_add_to_cart": "Failed to add product to cart",
     "please_login_first": "Please login first"
+  },
+
+  "termsAndConditions": {
+    "title": "Terms and Conditions",
+    "metaDescription": "Read our terms and conditions for using our services.",
+    "introductionTitle": "Introduction",
+    "introductionText": "Welcome to our website. These terms and conditions outline the rules and regulations for the use of our services. By accessing this website, we assume you accept these terms and conditions in full.",
+    "usageTitle": "Usage of the Website",
+    "usageText1": "You must not use this website in any way that causes, or may cause, damage to the website or impairment of the availability or accessibility of the website.",
+    "usageText2": "You must not use this website for any purposes other than those for which it was designed.",
+    "privacyTitle": "Privacy Policy",
+    "privacyText": "Your privacy is important to us. Please read our Privacy Policy to understand how we collect, use, and protect your information.",
+    "returnsTitle": "Returns and Refunds",
+    "returnsText": "We offer a 30-day return policy for most items. Please contact us for more information about returns and refunds.",
+    "liabilityTitle": "Limitation of Liability",
+    "liabilityText": "We will not be liable for any loss or damage arising from your use of this website or any information provided on it.",
+    "changesTitle": "Changes to Terms",
+    "changesText": "We reserve the right to modify these terms and conditions at any time. Any changes will be posted on this page.",
+    "contactTitle": "Contact Us",
+    "contactText": "If you have any questions about these terms and conditions, please contact us at support@example.com."
+  }
+,
+
+  "privacyPolicy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: October 15, 2025",
+    "introductionTitle": "Introduction",
+    "introductionText": "We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services. Please read this policy carefully. If you do not agree with the terms of this policy, please do not access the site.",
+    "informationWeCollectTitle": "Information We Collect",
+    "personalInformationTitle": "Personal Information",
+    "personalInformationText": "We may collect personally identifiable information that you voluntarily provide to us when you register, place an order, subscribe to our newsletter, or contact us. This information may include:",
+    "personalInfoList": [
+      "Full name",
+      "Email address",
+      "Phone number",
+      "Billing and shipping addresses"
+    ],
+    "usageDataTitle": "Usage Data",
+    "usageDataText": "We may also collect information about how you access and use our website. This data may include your IP address, browser type, operating system, the pages you visit, and other usage information.",
+    "howWeUseYourInformationTitle": "How We Use Your Information",
+    "howWeUseYourInformationText": "We use the information we collect in various ways, including to:",
+    "usageList": [
+      "Provide, operate, and maintain our website and services",
+      "Improve, personalize, and expand our website and services",
+      "Understand and analyze how you use our website and services",
+      "Communicate with you, either directly or through one of our partners"
+    ],
+    "dataProtectionTitle": "Data Protection",
+    "dataProtectionText": "We implement a variety of security measures to maintain the safety of your personal information when you place an order or enter, submit, or access your personal information. All transactions are processed through a secure payment gateway.",
+    "cookiesTitle": "Cookies",
+    "cookiesText": "We use cookies to enhance your experience on our website. Cookies are small files that a site or its service provider transfers to your computer's hard drive through your web browser. These cookies enable the site to recognize your browser and capture certain information.",
+    "yourRightsTitle": "Your Rights",
+    "yourRightsText": "You have certain data protection rights. We aim to take reasonable steps to allow you to correct, amend, delete, or limit the use of your personal data. If you wish to be informed about what personal data we hold about you and if you want it to be removed from our systems, please contact us.",
+    "rightsList": [
+      "The right to access, update, or delete the information we have on you",
+      "The right of rectification",
+      "The right to object",
+      "The right of restriction"
+    ],
+    "contactUsTitle": "Contact Us",
+    "contactUsText": "If you have any questions about this Privacy Policy, please contact us:",
+    "contactEmail": "Email"
+  }
+,
+
+  "faqs": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to common questions about our services and products.",
+    "noFAQs": "No FAQs found.",
+    "contactTitle": "Still have questions?",
+    "contactDescription": "Feel free to contact us for more help.",
+    "contactButton": "Contact Us",
+    "loading": "Loading...",
+    "error": "Error"
   }
 }
+
 
