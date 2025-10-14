@@ -14,6 +14,7 @@ export default function ProductDetailsSlider({ productId = 5 }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [inWishlist, setInWishlist] = useState(false);
+  const [inCart, setInCart] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -22,6 +23,7 @@ export default function ProductDetailsSlider({ productId = 5 }) {
         const response = await axios.get(`https://spiritual.brmjatech.uk/api/products/${productId}`);
         setProduct(response.data.data);
         checkIfInWishlist(response.data.data.id);
+        checkIfInCart(response.data.data.id);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -38,20 +40,30 @@ export default function ProductDetailsSlider({ productId = 5 }) {
   const checkIfInWishlist = async (productId) => {
     try {
       const token = sessionStorage.getItem('token');
-      if (!token) {
-        return;
-      }
+      if (!token) return;
       const response = await axios.get(
         `https://spiritual.brmjatech.uk/api/wishlist/check?product_id=${productId}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        }
+        { headers: { "Authorization": `Bearer ${token}` } }
       );
       setInWishlist(response.data.is_in_wishlist);
     } catch (error) {
       console.error("Error checking if product is in wishlist:", error);
+    }
+  };
+
+  const checkIfInCart = async (productId) => {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) return;
+      const response = await axios.get(
+        `https://spiritual.brmjatech.uk/api/cart`,
+        { headers: { "Authorization": `Bearer ${token}` } }
+      );
+      const items = response.data.data?.items || [];
+      const isInCart = items.some(item => item.product.id === productId);
+      setInCart(isInCart);
+    } catch (error) {
+      console.error("Error checking if product is in cart:", error);
     }
   };
 
@@ -64,16 +76,11 @@ export default function ProductDetailsSlider({ productId = 5 }) {
         });
         return;
       }
-
       if (inWishlist) {
         await axios.post(
           "https://spiritual.brmjatech.uk/api/wishlist/remove",
           { product_id: product.id },
-          {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-            },
-          }
+          { headers: { "Authorization": `Bearer ${token}` } }
         );
         toast.success(isRTL ? 'تمت إزالة المنتج من قائمة الرغبات' : 'Product removed from wishlist', {
           position: isRTL ? "top-left" : "top-right"
@@ -82,11 +89,7 @@ export default function ProductDetailsSlider({ productId = 5 }) {
         await axios.post(
           "https://spiritual.brmjatech.uk/api/wishlist",
           { product_id: product.id },
-          {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-            },
-          }
+          { headers: { "Authorization": `Bearer ${token}` } }
         );
         toast.success(isRTL ? 'تمت إضافة المنتج إلى قائمة الرغبات' : 'Product added to wishlist', {
           position: isRTL ? "top-left" : "top-right"
@@ -126,26 +129,40 @@ export default function ProductDetailsSlider({ productId = 5 }) {
     setCurrentImage(index);
   };
 
-  const addToCart = () => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const existingProduct = cart.find(item => item.id === product.id);
-    if (existingProduct) {
-      existingProduct.quantity += quantity;
-    } else {
-      cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: quantity,
-        image: product.images[0].image,
-        description: product.description,
+  const addToCart = async () => {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        toast.error(isRTL ? 'الرجاء تسجيل الدخول أولا' : 'Please login first', {
+          position: isRTL ? "top-left" : "top-right"
+        });
+        return;
+      }
+
+      if (inCart) {
+        toast.warning(isRTL ? 'المنتج موجود بالفعل في السلة' : 'Product is already in cart', {
+          position: isRTL ? "top-left" : "top-right"
+        });
+        return;
+      }
+
+      await axios.post(
+        "https://spiritual.brmjatech.uk/api/cart/add",
+        { product_id: product.id, quantity },
+        { headers: { "Authorization": `Bearer ${token}` } }
+      );
+
+      toast.success(isRTL ? 'تمت إضافة المنتج إلى السلة' : 'Product added to cart', {
+        position: isRTL ? "top-left" : "top-right"
+      });
+
+      setInCart(true);
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      toast.error(isRTL ? 'حدث خطأ أثناء إضافة المنتج إلى السلة' : 'Error adding product to cart', {
+        position: isRTL ? "top-left" : "top-right"
       });
     }
-    localStorage.setItem('cart', JSON.stringify(cart));
-    toast.success(
-      isRTL ? 'تمت إضافة المنتج للسلة!' : 'Product added to cart!',
-      { position: isRTL ? "top-left" : "top-right" }
-    );
   };
 
   if (loading) {

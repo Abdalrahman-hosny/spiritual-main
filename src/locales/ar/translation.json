@@ -365,6 +365,22 @@
     "remove": "إزالة",
     "add_to_cart": "أضف إلى السلة"
   }
+, "cart": {
+    "title": "سلتي",
+    "breadcrumb": "الرئيسية",
+
+    "my_cart": "سلتي",
+    "loading": "جاري تحميل المنتجات...",
+    "empty": "سلتك فارغة!",
+    "total": "الإجمالي",
+    "currency": "ج.م",
+    "remove": "إزالة",
+    "clear": "تفريغ السلة",
+    "checkout": "اتمام الشراء",
+    "product_added_to_cart": "تمت الإضافة إلى السلة",
+    "failed_to_add_to_cart": "فشل إضافة المنتج إلى السلة",
+    "please_login_first": "الرجاء تسجيل الدخول أولاً"
+  }
 }
 
 

@@ -228,7 +228,7 @@ export function ArabicContactList() {
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <span className="text-white font-medium text-lg">
-                      {t("contactList.viewProfile")}
+                      {t("viewProfile")}
                     </span>
                   </div>
                 </Link>

@@ -15,10 +15,6 @@ export default function Shop() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
   const [wishlist, setWishlist] = useState([]);
 
   // جلب قائمة الرغبات من الـ API
@@ -34,14 +30,11 @@ export default function Shop() {
           "Authorization": `Bearer ${token}`,
         },
       });
-
-      // التأكد من أن البيانات هي مصفوفة
       const wishlistData = Array.isArray(response.data)
         ? response.data
         : Array.isArray(response.data.data)
           ? response.data.data
           : [];
-
       setWishlist(wishlistData);
     } catch (error) {
       console.error("Error fetching wishlist:", error.response ? error.response.data : error.message);
@@ -87,7 +80,7 @@ export default function Shop() {
           progress: undefined,
           rtl: true,
         });
-        fetchWishlist(); // إعادة جلب قائمة الرغبات بعد الإضافة
+        fetchWishlist();
       } else {
         console.error("API response not successful:", response.data);
         toast.error(t("failed_to_add_to_wishlist"), {
@@ -154,7 +147,7 @@ export default function Shop() {
           progress: undefined,
           rtl: true,
         });
-        fetchWishlist(); // إعادة جلب قائمة الرغبات بعد الحذف
+        fetchWishlist();
       } else {
         console.error("API response not successful:", response.data);
         toast.error(t("failed_to_remove_from_wishlist"), {
@@ -193,6 +186,77 @@ export default function Shop() {
     }
   };
 
+  // إضافة منتج إلى السلة باستخدام API
+  const addToCart = async (product) => {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        toast.error(t("please_login_first"), {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          rtl: true,
+        });
+        return;
+      }
+
+      const response = await axios.post(
+        "https://spiritual.brmjatech.uk/api/cart/add",
+        {
+          product_id: product.id,
+          quantity: 1,
+        },
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.data.items ) {
+        toast.success(`${product.name} ${t("product_added_to_cart")}`, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          rtl: true,
+        });
+      } else {
+        console.error("API response not successful:", response.data);
+        toast.error(t("failed_to_add_to_cart"), {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          rtl: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error.response ? error.response.data : error.message);
+      toast.error(t("failed_to_add_to_cart"), {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        rtl: true,
+      });
+    }
+  };
+
   // استرجاع المنتجات من API
   useEffect(() => {
     const fetchProducts = async () => {
@@ -215,13 +279,8 @@ export default function Shop() {
       }
     };
     fetchProducts();
-    fetchWishlist(); // جلب قائمة الرغبات عند تحميل الصفحة
+    fetchWishlist();
   }, []);
-
-  // حفظ السلة في localStorage
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
 
   // فلترة المنتجات بناءً على البحث
   const filteredProducts = Array.isArray(products)
@@ -232,47 +291,6 @@ export default function Shop() {
         return name.includes(query) || desc.includes(query);
       })
     : [];
-
-  // إضافة منتج إلى السلة
-  const addToCart = (product) => {
-    const existingProduct = cart.find((item) => item.id === product.id);
-    if (existingProduct) {
-      setCart(
-        cart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      );
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
-    toast.success(`${product.name} ${t("product_added_to_cart")}`, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      rtl: true,
-    });
-  };
-
-  // إذا كانت البيانات لا تزال تُسترجع
-  if (loading) {
-    return <div className="text-center py-12">جاري تحميل المنتجات...</div>;
-  }
-
-  // إذا حدث خطأ
-  if (error) {
-    return <div className="text-center py-12 text-red-500">حدث خطأ: {error}</div>;
-  }
-
-  // إذا لم توجد منتجات
-  if (filteredProducts.length === 0) {
-    return <div className="text-center py-12">لا توجد منتجات مطابقة للبحث.</div>;
-  }
 
   // Animation variants
   const heroVariants = {
@@ -306,6 +324,21 @@ export default function Shop() {
     visible: { opacity: 1, scale: 1 },
     hover: { scale: 1.1, color: "#8B5CF6" },
   };
+
+  // إذا كانت البيانات لا تزال تُسترجع
+  if (loading) {
+    return <div className="text-center py-12">جاري تحميل المنتجات...</div>;
+  }
+
+  // إذا حدث خطأ
+  if (error) {
+    return <div className="text-center py-12 text-red-500">حدث خطأ: {error}</div>;
+  }
+
+  // إذا لم توجد منتجات
+  if (filteredProducts.length === 0) {
+    return <div className="text-center py-12">لا توجد منتجات مطابقة للبحث.</div>;
+  }
 
   return (
     <>

@@ -352,4 +352,20 @@
             "remove": "Remove"
 
       }
-    }
+    , "cart": {
+    "title": "My Cart",
+    "my_cart": "My Cart",
+    "breadcrumb": "Home",
+    "loading": "Loading products...",
+    "empty": "Your cart is empty!",
+    "total": "Total",
+    "currency": "EGP",
+    "remove": "Remove",
+    "clear": "Clear Cart",
+    "checkout": "Checkout",
+    "product_added_to_cart": "Added to cart",
+    "failed_to_add_to_cart": "Failed to add product to cart",
+    "please_login_first": "Please login first"
+  }
+}
+
