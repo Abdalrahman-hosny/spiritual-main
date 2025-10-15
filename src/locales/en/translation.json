@@ -115,7 +115,11 @@
       "terms": "Terms and Conditions",
       "privacy": "Privacy Policy",
       "faqs": "FAQs" ,
-      "aboutus": "AboutUs"
+      "aboutus": "AboutUs",
+      "home" : "Home",
+      "ContactUs" : "ContactUs",
+      "shop" : "shop"
+
     },
 
     "socialMedia": {
@@ -451,6 +455,9 @@
     "loading": "Loading...",
     "error": "Error"
   }
+,
+"reviews":{
+  "title": "review"
 }
 
-
+}

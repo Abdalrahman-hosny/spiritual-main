@@ -24,9 +24,27 @@ const Footer = () => {
         <div className="space-y-3">
           <h3 className="text-lg font-bold text-purple-500">{t("footer.quickLinks.title")}</h3>
           <ul className="space-y-2 text-sm">
-            {t("footer.quickLinks.links", { returnObjects: true }).map((item, idx) => (
-              <li key={idx}><a href="#">{item}</a></li>
-            ))}
+            <li>
+              <Link to="/" className="hover:text-purple-500 transition-colors">
+                {t("footer.legal.home")}
+              </Link>
+            </li>
+             <li>
+              <Link to="/about-us" className="hover:text-purple-500 transition-colors">
+                {t("footer.legal.aboutus")}
+              </Link>
+            </li>
+
+             <li>
+              <Link to="/contact-us" className="hover:text-purple-500 transition-colors">
+                {t("footer.legal.ContactUs")}
+              </Link>
+            </li>
+             <li>
+              <Link to="/shop" className="hover:text-purple-500 transition-colors">
+                {t("footer.legal.shop")}
+              </Link>
+            </li>
           </ul>
         </div>
         {/* العمود 3 */}

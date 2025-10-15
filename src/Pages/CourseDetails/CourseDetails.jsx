@@ -11,66 +11,172 @@ import pdf from "../../assets/extentions/pdf-svgrepo-com.svg";
 import { motion, AnimatePresence } from "framer-motion";
 import CourseSlider from "../Home/CourseSlider";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+// CommentForm Component
+const CommentForm = ({ onReviewSubmitted }) => {
+  const [rating, setRating] = useState(5);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const token = sessionStorage.getItem('token');
+      const response = await axios.post(
+        "https://spiritual.brmjatech.uk/api/courses/1/reviews",
+        { rating, comment, name, email },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.success) {
+        setName("");
+        setEmail("");
+        setComment("");
+        setRating(5);
+        toast.success(
+          isRTL ? "تم إضافة تعليقك بنجاح!" : "Your review has been added successfully!",
+          { position: isRTL ? "top-left" : "top-right", autoClose: 3000 }
+        );
+        onReviewSubmitted();
+      }
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message;
+      setError(errorMessage);
+      toast.error(
+        isRTL ? `حدث خطأ: ${errorMessage}` : `Error: ${errorMessage}`,
+        { position: isRTL ? "top-left" : "top-right", autoClose: 3000 }
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto p-6 bg-white">
+      <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px] text-right align-middle mb-6">
+        {t("commentForm.title")}
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t("commentForm.email")}
+            className="w-full border font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
+          />
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t("commentForm.name")}
+            className="w-full font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
+          />
+        </div>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder={t("commentForm.comment")}
+          rows="4"
+          className="w-full border font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+          required
+        ></textarea>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-1">
+            {[...Array(5)].map((_, i) => {
+              const starValue = i + 1;
+              return (
+                <FaStar
+                  key={i}
+                  size={20}
+                  className={`cursor-pointer ${
+                    starValue <= rating ? "text-orange-400" : "text-gray-300"
+                  }`}
+                  onClick={() => setRating(starValue)}
+                />
+              );
+            })}
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-8 py-2 font-[Montserrat-Arabic] font-medium text-[14px] leading-[19.5px] text-center bg-purple-600 text-white rounded-full hover:bg-purple-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? t("commentForm.submitting") : t("commentForm.submit")}
+          </button>
+        </div>
+        {error && <p className="text-red-500 text-right mt-2">{error}</p>}
+      </form>
+    </div>
+  );
+};
+
+// ReviewsSection Component
+const ReviewsSection = ({ reviews }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
+  return (
+    <div className="max-w-6xl mx-auto p-6 bg-white">
+      <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px] text-right align-middle mb-6">
+        {t("reviews.title")}
+      </h2>
+      <div className="space-y-6">
+        {reviews.map((review, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="bg-gray-50 p-6 rounded-xl shadow-sm"
+          >
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <FaStar
+                      key={i}
+                      size={16}
+                      className={i < review.rating ? "text-orange-400" : "text-gray-300"}
+                    />
+                  ))}
+                </div>
+              </div>
+              <p className="font-[Montserrat-Arabic] font-light text-[14px] text-[#555555]">
+                {review.name}
+              </p>
+            </div>
+            <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] text-right text-[#555555]">
+              {review.comment}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// CourseDetails Component
 const CourseDetails = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
   const [course, setCourse] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
 
-  useEffect(() => {
-    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-    document.documentElement.lang = i18n.language;
-  }, [isRTL, i18n.language]);
-
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses");
-        if (response.data.code === 200) {
-          setCourse(response.data.data.result[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching course data:", error);
-      }
-    };
-    fetchCourse();
-  }, []);
-
-  const handleTabChange = (tabId) => {
-    if (tabId === activeTab) return;
-    setIsLoading(true);
-    setTimeout(() => {
-      setActiveTab(tabId);
-      setAnimationKey((prev) => prev + 1);
-      setIsLoading(false);
-      window.scrollTo({ top: 400, behavior: "smooth" });
-    }, 300);
-  };
-
-  const tabs = [
-    {
-      id: "profile",
-      label: t("course.aboutCourse"),
-      color: "purple",
-    },
-    {
-      id: "courses",
-      label: t("course.files"),
-      color: "blue",
-      badge: course?.files_count || 0,
-    },
-  ];
-
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, []);
-
+  // تعريف heroVariants و plantVariants هنا
   const heroVariants = {
     hidden: { opacity: 0, scale: 0.9 },
     visible: {
@@ -97,16 +203,76 @@ const CourseDetails = () => {
     },
   };
 
-  if (!course) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = i18n.language;
+  }, [isRTL, i18n.language]);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses");
+        if (response.data.code === 200) {
+          setCourse(response.data.data.result[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching course data:", error);
+      }
+    };
+    fetchCourse();
+  }, []);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses/1/reviews");
+        if (response.data.success) {
+          setReviews(response.data.reviews);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  const handleTabChange = (tabId) => {
+    if (tabId === activeTab) return;
+    setIsLoading(true);
+    setTimeout(() => {
+      setActiveTab(tabId);
+      setAnimationKey((prev) => prev + 1);
+      setIsLoading(false);
+      window.scrollTo({ top: 400, behavior: "smooth" });
+    }, 300);
+  };
+
+  const handleReviewSubmitted = () => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get("https://spiritual.brmjatech.uk/api/products/1/reviews");
+        if (response.data.success) {
+          setReviews(response.data.reviews);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+    fetchReviews();
+  };
+
+  const tabs = [
+    { id: "profile", label: t("course.aboutCourse"), color: "purple" },
+    { id: "courses", label: t("course.files"), color: "blue", badge: course?.files_count || 0 },
+  ];
+
+  if (!course) return <div>Loading...</div>;
 
   return (
     <div dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Hero Section */}
- <div className="relative">
+      <div className="relative">
         <div className="image">
-          
           <div className="relative bg-black/70">
             <div className="relative overflow-hidden mt-5 min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
@@ -425,7 +591,7 @@ const CourseDetails = () => {
           </div>
         </div>
 
-        {/* Related Courses */}
+              {/* Related Courses */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -437,15 +603,22 @@ const CourseDetails = () => {
           </h3>
           <CourseSlider isTrue={false} />
         </motion.div>
+        {/* Reviews Section */}
+        <ReviewsSection reviews={reviews} />
+
+        {/* Comment Form */}
+        <CommentForm onReviewSubmitted={handleReviewSubmitted} />
+
+      
       </div>
     </div>
   );
 };
 
+// TrainerFiles Component
 const TrainerFiles = ({ files }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-
   return (
     <div className="py-10 bg-white" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="space-y-6">

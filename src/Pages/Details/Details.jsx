@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import plant from "../../assets/mandala_1265367 1.png";
 import { Star } from 'lucide-react';
 import ProductDetailsSlider from './ProductDetailsSlider';
-import CommentForm from './CommentForm';
+import CommentForm from './commentForm';
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import axios from 'axios';
