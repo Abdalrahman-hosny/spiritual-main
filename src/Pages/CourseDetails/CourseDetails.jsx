@@ -173,10 +173,10 @@ const CourseDetails = () => {
   const [animationKey, setAnimationKey] = useState(0);
   const [course, setCourse] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [relatedCourses, setRelatedCourses] = useState([]);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
 
-  // تعريف heroVariants و plantVariants هنا
   const heroVariants = {
     hidden: { opacity: 0, scale: 0.9 },
     visible: {
@@ -236,6 +236,20 @@ const CourseDetails = () => {
     fetchReviews();
   }, []);
 
+  useEffect(() => {
+    const fetchRelatedCourses = async () => {
+      try {
+        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses/1/related");
+        if (response.data.success) {
+          setRelatedCourses(response.data.courses);
+        }
+      } catch (error) {
+        console.error("Error fetching related courses:", error);
+      }
+    };
+    fetchRelatedCourses();
+  }, []);
+
   const handleTabChange = (tabId) => {
     if (tabId === activeTab) return;
     setIsLoading(true);
@@ -250,7 +264,7 @@ const CourseDetails = () => {
   const handleReviewSubmitted = () => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/products/1/reviews");
+        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses/1/reviews");
         if (response.data.success) {
           setReviews(response.data.reviews);
         }
@@ -329,7 +343,6 @@ const CourseDetails = () => {
           </div>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="pt-24 bg-white">
         <div className="w-full md:w-[80%] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
@@ -439,7 +452,6 @@ const CourseDetails = () => {
               </p>
             </motion.div>
           </motion.div>
-
           {/* Video Preview and Trainer Info */}
           <div className="col-span-3 lg:col-span-2">
             <motion.div
@@ -498,7 +510,6 @@ const CourseDetails = () => {
               </motion.div>
             </motion.div>
           </div>
-
           {/* Course Title and Tabs */}
           <div className="col-span-3 pt-3">
             <motion.h2
@@ -590,8 +601,7 @@ const CourseDetails = () => {
             )}
           </div>
         </div>
-
-              {/* Related Courses */}
+        {/* Related Courses */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -601,15 +611,12 @@ const CourseDetails = () => {
           <h3 className="font-[Montserrat-Arabic] font-semibold text-[20px] leading-[38px] text-right text-purple-500">
             {t("course.relatedCourses")}
           </h3>
-          <CourseSlider isTrue={false} />
+          <CourseSlider courses={relatedCourses} />
         </motion.div>
         {/* Reviews Section */}
         <ReviewsSection reviews={reviews} />
-
         {/* Comment Form */}
         <CommentForm onReviewSubmitted={handleReviewSubmitted} />
-
-      
       </div>
     </div>
   );
@@ -619,10 +626,11 @@ const CourseDetails = () => {
 const TrainerFiles = ({ files }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+
   return (
     <div className="py-10 bg-white" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="space-y-6">
-        {files.map((file) => (
+        {files?.map((file) => (
           <motion.div
             key={file.id}
             whileHover={{ y: -5, scale: 1.01 }}
