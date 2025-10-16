@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaRegCircleUser, FaBars, FaGlobe, FaHeart } from 'react-icons/fa6';
 import { FaShoppingBag, FaTimes } from 'react-icons/fa';
+import axios from 'axios';
 import logo from "../../assets/navbarlogo.png";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,12 +15,28 @@ export default function Navbar({ bg }) {
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
   const isRTL = i18n.language === 'ar';
 
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
     document.documentElement.lang = i18n.language;
   }, [isRTL, i18n.language]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('https://spiritual.brmjatech.uk/api/categories');
+        
+          setCategories(response.data.data.items);
+        
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -82,7 +99,7 @@ export default function Navbar({ bg }) {
   const AuthDropdown = ({ isMobile = false }) => {
     const isLoggedIn = !!sessionStorage.getItem("token");
     return (
-      <div className="relative  ">
+      <div className="relative">
         <button
           onClick={() => setIsAuthDropdownOpen(!isAuthDropdownOpen)}
           className={`${isMobile ? 'w-7 h-7' : 'w-9 xl:w-10 h-9 xl:h-10'} bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200`}
@@ -146,48 +163,43 @@ export default function Navbar({ bg }) {
                   onMouseEnter={handleDropdownMouseEnter}
                   onMouseLeave={handleDropdownMouseLeave}
                 >
-                  {link.hasDropdown ? <div
-                    className={`font-montserrat-arabic font-medium text-[14px] lg:text-[15px] xl:text-[17px] transition-colors duration-200 px-2 py-1 rounded-md`}
-                  >
-                    {link.label}
-                  </div> : <Link
-                    to={link.path}
-                    className={`font-montserrat-arabic font-medium text-[14px] lg:text-[15px] xl:text-[17px] transition-colors duration-200 px-2 py-1 rounded-md
-                      ${location.pathname === link.path
-                        ? "text-purple-500"
-                        : "hover:text-purple-600 text-black hover:bg-purple-50"
-                      }`}
-                  >
-                    {link.label}
-                  </Link>}
-                  <div className={`absolute top-full ${isRTL ? 'right-0' : 'left-0'} mt-1 w-44 bg-white shadow-xl rounded-lg border border-gray-100 transition-all duration-200 z-50
-                    ${isDesktopDropdownOpen
-                      ? "opacity-100 visible transform translate-y-0"
-                      : "opacity-0 invisible transform -translate-y-2"
-                    }`}>
-                    <div className="py-2">
-                      {t('categoriesSubLinks', { returnObjects: true }).map((sublink, index) => (
-                        <Link
-                          key={sublink.path}
-                          to={sublink.path}
-                          className={`block px-4 py-2.5 ${isRTL ? 'text-right' : 'text-left'} text-sm font-montserrat-arabic text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150
-                            ${index !== t('categoriesSubLinks', { returnObjects: true }).length - 1 ? 'border-b border-gray-50' : ''}`}
-                        >
-                          {sublink.label}
-                        </Link>
-                      ))}
+                  {link.hasDropdown ? (
+                    <div className={`font-montserrat-arabic font-medium text-[14px] lg:text-[15px] xl:text-[17px] transition-colors duration-200 px-2 py-1 rounded-md`}>
+                      {link.label}
                     </div>
-                  </div>
+                  ) : (
+                    <Link
+                      to={link.path}
+                      className={`font-montserrat-arabic font-medium text-[14px] lg:text-[15px] xl:text-[17px] transition-colors duration-200 px-2 py-1 rounded-md
+                        ${location.pathname === link.path ? "text-purple-500" : "hover:text-purple-600 text-black hover:bg-purple-50"}`}
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                  {link.hasDropdown && (
+                    <div className={`absolute top-full ${isRTL ? 'right-0' : 'left-0'} mt-1 w-44 bg-white shadow-xl rounded-lg border border-gray-100 transition-all duration-200 z-50
+                      ${isDesktopDropdownOpen ? "opacity-100 visible transform translate-y-0" : "opacity-0 invisible transform -translate-y-2"}`}>
+                      <div className="py-2">
+                        {categories.map((category, index) => (
+                          <Link
+                            key={category.slug}
+                            to={`/categoryProducts/${category.id}`}
+                            className={`block px-4 py-2.5 ${isRTL ? 'text-right' : 'text-left'} text-sm font-montserrat-arabic text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150
+                              ${index !== categories.length - 1 ? 'border-b border-gray-50' : ''}`}
+                          >
+                            {category.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <Link
                   key={link.path}
                   to={link.path}
                   className={`font-montserrat-arabic font-medium text-[14px] lg:text-[15px] xl:text-[17px] transition-colors duration-200 px-2 py-1 rounded-md
-                    ${location.pathname === link.path
-                      ? "text-purple-500 bg-purple-50"
-                      : "hover:text-purple-600 text-black hover:bg-purple-50"
-                    }`}
+                    ${location.pathname === link.path ? "text-purple-500 bg-purple-50" : "hover:text-purple-600 text-black hover:bg-purple-50"}`}
                 >
                   {link.label}
                 </Link>
@@ -286,10 +298,7 @@ export default function Navbar({ bg }) {
                     <button
                       onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
                       className={`w-full ${isRTL ? 'text-right' : 'text-left'} px-6 py-4 font-montserrat-arabic font-medium text-[16px] sm:text-[18px] transition-all duration-200 flex items-center justify-between
-                        ${isCategoriesOpen
-                          ? "text-purple-600 bg-purple-50"
-                          : "text-gray-800 hover:text-purple-600 hover:bg-gray-50"
-                        }`}
+                        ${isCategoriesOpen ? "text-purple-600 bg-purple-50" : "text-gray-800 hover:text-purple-600 hover:bg-gray-50"}`}
                     >
                       <span className={`transform transition-transform duration-200 ${isCategoriesOpen ? 'rotate-180' : ''}`}>
                         ⌄
@@ -300,16 +309,16 @@ export default function Navbar({ bg }) {
                       isCategoriesOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                     }`}>
                       <div className="bg-gray-50 border-t border-gray-100">
-                        {t('categoriesSubLinks', { returnObjects: true }).map((sublink, index) => (
+                        {categories.map((category, index) => (
                           <Link
-                            key={sublink.path}
-                            to={sublink.path}
+                            key={category.slug}
+                            to={`/category/${category.slug}`}
                             onClick={toggleMobileMenu}
                             className={`block px-8 py-3 font-montserrat-arabic text-[14px] sm:text-[16px] text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200 ${isRTL ? 'text-right' : 'text-left'}
-                              ${location.pathname === sublink.path ? 'text-purple-600 bg-purple-100' : ''}
-                              ${index !== t('categoriesSubLinks', { returnObjects: true }).length - 1 ? 'border-b border-gray-100' : ''}`}
+                              ${location.pathname === `/category/${category.slug}` ? 'text-purple-600 bg-purple-100' : ''}
+                              ${index !== categories.length - 1 ? 'border-b border-gray-100' : ''}`}
                           >
-                            {sublink.label}
+                            {category.name}
                           </Link>
                         ))}
                       </div>
@@ -321,10 +330,7 @@ export default function Navbar({ bg }) {
                     to={link.path}
                     onClick={toggleMobileMenu}
                     className={`block px-6 py-4 font-montserrat-arabic font-medium text-[16px] sm:text-[18px] transition-all duration-200 border-b border-gray-100 ${isRTL ? 'text-right' : 'text-left'}
-                      ${location.pathname === link.path
-                        ? "text-purple-500 bg-purple-50 border-purple-200"
-                        : "hover:text-purple-600 hover:bg-gray-50 text-gray-800"
-                      }`}
+                      ${location.pathname === link.path ? "text-purple-500 bg-purple-50 border-purple-200" : "hover:text-purple-600 hover:bg-gray-50 text-gray-800"}`}
                   >
                     {link.label}
                   </Link>

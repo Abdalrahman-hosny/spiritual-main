@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Star, MessageCircle, BookOpen, Package, User, Clock, Users, Award, CheckCircle, ShoppingCart, Calendar, Heart, Eye } from 'lucide-react';
-
 import plant from "../../assets/mandala_1265367 1.png";
 import { AiFillStar } from "react-icons/ai";
 import { BiVideo } from "react-icons/bi";
@@ -10,7 +10,6 @@ import image2 from "../../assets/bg-login.png";
 import image3 from "../../assets/hero.png";
 import user from "../../assets/user.png";
 import { Link } from "react-router-dom";
-
 import { FaShoppingBag } from 'react-icons/fa';
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -20,12 +19,63 @@ export default function TrainerProfile() {
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
+  const [trainerData, setTrainerData] = useState(null);
+  const [trainerCourses, setTrainerCourses] = useState([]);
+  const [trainerProducts, setTrainerProducts] = useState([]);
 
   useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
+  }, []);
+
+  // جلب بيانات المدرب
+  useEffect(() => {
+    const fetchTrainerData = async () => {
+      try {
+        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/2');
+        if (response.data.code === 200) {
+          setTrainerData(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching trainer data:", error);
+      }
+    };
+
+    fetchTrainerData();
+  }, []);
+
+  // جلب بيانات الكورسات
+  useEffect(() => {
+    const fetchTrainerCourses = async () => {
+      try {
+        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/1/courses');
+        if (response.data.code === 200) {
+          setTrainerCourses(response.data.data.result);
+        }
+      } catch (error) {
+        console.error("Error fetching trainer courses:", error);
+      }
+    };
+
+    fetchTrainerCourses();
+  }, []);
+
+  // جلب بيانات المنتجات
+  useEffect(() => {
+    const fetchTrainerProducts = async () => {
+      try {
+        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/1/products');
+        if (response.data.code === 200) {
+          setTrainerProducts(response.data.data.result);
+        }
+      } catch (error) {
+        console.error("Error fetching trainer products:", error);
+      }
+    };
+
+    fetchTrainerProducts();
   }, []);
 
   // Tab configuration
@@ -41,14 +91,14 @@ export default function TrainerProfile() {
       label: t("trainerProfile.tabs.courses"),
       icon: BookOpen,
       color: 'blue',
-      badge: 3
+      badge: trainerCourses.length
     },
     {
       id: 'products',
       label: t("trainerProfile.tabs.products"),
       icon: Package,
       color: 'green',
-      badge: 6
+      badge: trainerProducts.length
     }
   ];
 
@@ -90,22 +140,13 @@ export default function TrainerProfile() {
     }
   };
 
-  const products = new Array(9).fill({
-    id: 1,
-    name: t("trainerProfile.productName"),
-    description: t("trainerProfile.productDescription"),
-    price: "5000.00",
-    image: image1,
-  });
-
   return (
     <div>
       {/* Hero Section */}
       <div className='relative'>
         <div className='image'>
-          
           <div className="relative bg-black/70">
-          <div className="pt-[80px]"></div>
+            <div className="pt-[80px]"></div>
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
               <motion.div
                 variants={heroVariants}
@@ -177,7 +218,7 @@ export default function TrainerProfile() {
           >
             <div className="md:w-[232px] md:h-[232px] w-20 h-20 rounded-full overflow-hidden ring-4 ring-purple-100 relative group">
               <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                src={trainerData?.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"}
                 alt={t("trainerProfile.trainerAlt")}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -199,7 +240,7 @@ export default function TrainerProfile() {
               <span className="">(215)</span>
             </div>
             <h1 className="font-[Montserrat-Arabic] font-bold text-[14px] md:text-[40px] leading-[1] tracking-[0%]">
-              {t("trainerProfile.trainerName")}
+              {trainerData?.name || t("trainerProfile.trainerName")}
             </h1>
             <div className='h-[3px] bg-purple-600 my-3 md:my-8'></div>
             <div className="flex items-center gap-2">
@@ -288,13 +329,13 @@ export default function TrainerProfile() {
               )}
               {activeTab === 'courses' && (
                 <div className="space-y-6">
-                  <TrainerCourses />
+                  <TrainerCourses courses={trainerCourses} />
                 </div>
               )}
               {activeTab === 'products' && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                    {products.map((product, idx) => (
+                    {trainerProducts.map((product, idx) => (
                       <motion.div
                         key={idx}
                         whileHover={{ y: -5, scale: 1.02 }}
@@ -303,7 +344,7 @@ export default function TrainerProfile() {
                       >
                         <div className="relative overflow-hidden">
                           <img
-                            src={product.image}
+                            src={product.image || image1}
                             alt={product.name}
                             className="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -317,7 +358,7 @@ export default function TrainerProfile() {
                                 <FaShoppingBag className="w-4 h-4" />
                               </motion.button>
                               <Link
-                                to={`/product-details/1`}
+                                to={`/product-details/${product.id}`}
                                 className="bg-purple-500/90 backdrop-blur-sm hover:bg-white p-2.5 rounded-full text-white hover:text-purple-700 transition-all shadow-lg"
                               >
                                 <Eye className="w-4 h-4" />
@@ -363,21 +404,12 @@ export default function TrainerProfile() {
           animation: fadeIn 0.5s ease-out forwards;
         }
       `}</style>
-
-      
     </div>
   );
 }
 
-const TrainerCourses = () => {
+const TrainerCourses = ({ courses }) => {
   const { t } = useTranslation();
-  const courses = [
-    { id: 1, name: t("trainerProfile.courseName"), instructor: t("trainerProfile.instructor1"), logo: image1, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-    { id: 2, name: t("trainerProfile.courseName"), instructor: t("trainerProfile.instructor2"), logo: image2, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-    { id: 3, name: t("trainerProfile.courseName"), instructor: t("trainerProfile.instructor3"), logo: image3, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-    { id: 4, name: t("trainerProfile.courseName"), instructor: t("trainerProfile.instructor4"), logo: image2, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-    { id: 5, name: t("trainerProfile.courseName"), instructor: t("trainerProfile.instructor5"), logo: image1, rating: 5, reviews: 21, price: 1000, files: 4, videos: 2 },
-  ];
 
   return (
     <div className="py-10 bg-white">
@@ -389,7 +421,7 @@ const TrainerCourses = () => {
             transition={{ duration: 0.3 }}
             className="bg-white rounded-xl shadow-md overflow-hidden relative border border-gray-100 hover:shadow-lg transition-shadow duration-300"
           >
-            <Link to={"/courseDetails/1"} className="w-full block">
+            <Link to={`/courseDetails/${course.id}`} className="w-full block">
               {/* Price Badge */}
               <div className="absolute top-3 right-3 bg-purple-500 text-white text-sm px-4 py-1 rounded-full">
                 {course.price} {t("trainerProfile.currency")}
@@ -397,7 +429,7 @@ const TrainerCourses = () => {
               {/* Course Logo/Image */}
               <div className="flex justify-center items-center bg-gray-100 h-40 overflow-hidden">
                 <motion.img
-                  src={course.logo}
+                  src={course.logo || image1}
                   alt={t("trainerProfile.courseLogoAlt")}
                   className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
                   whileHover={{ scale: 1.05 }}

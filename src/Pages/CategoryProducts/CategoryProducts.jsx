@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import plant from "../../assets/mandala_1265367 1.png";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 export default function CategoryProducts() {
   const { t } = useTranslation();
+  
 
   useEffect(() => {
     window.scrollTo({
@@ -110,29 +112,35 @@ export default function CategoryProducts() {
 
 export function ArabicContactList() {
   const { t } = useTranslation();
+  const { id } = useParams();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); 
 
-  useEffect(() => {
-    const fetchContacts = async () => {
-      try {
-        const response = await fetch("https://spiritual.brmjatech.uk/api/categories");
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const data = await response.json();
-        setContacts(data.data.items);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchContacts = async () => {
+    try {
+      const response = await axios.get(`https://spiritual.brmjatech.uk/api/home/categories/${id}/trainers`);
+      
+      // axios بيدي status، ممكن تتحقق كده لو حبيت:
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
       }
-    };
 
-    fetchContacts();
-  }, []);
+      setContacts(response?.data?.data?.result);
+      console.log(response);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  fetchContacts();
+}, [id]);
+
+
+   
   const pageNumbers = [1, 2, 3, 4, 5];
 
   const cardVariants = {
@@ -206,7 +214,7 @@ export function ArabicContactList() {
           animate="visible"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {contacts.map((contact, index) => (
+          {contacts?.map((contact, index) => (
             <motion.div
               key={contact.id}
               variants={cardVariants}
@@ -236,7 +244,7 @@ export function ArabicContactList() {
                   {contact.name}
                 </h3>
                 <p className="text-sm text-purple-500 font-medium">
-                  {contact.slug}
+                  {contact.account_type}
                 </p>
               </div>
             </motion.div>
