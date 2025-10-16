@@ -245,7 +245,7 @@ export default function TrainerProfile() {
             <div className='h-[3px] bg-purple-600 my-3 md:my-8'></div>
             <div className="flex items-center gap-2">
               <span className="font-[Montserrat-Arabic] font-normal text-purple-600 text-[14px] md:text-[32px] leading-[1] tracking-[0%]">
-                {t("trainerProfile.specialty")}
+                 {trainerData?.account_type }
               </span>
             </div>
           </motion.div>
