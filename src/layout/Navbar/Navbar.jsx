@@ -312,10 +312,10 @@ export default function Navbar({ bg }) {
                         {categories.map((category, index) => (
                           <Link
                             key={category.slug}
-                            to={`/category/${category.slug}`}
+                            to={`/categoryProducts/${category.slug}`}
                             onClick={toggleMobileMenu}
                             className={`block px-8 py-3 font-montserrat-arabic text-[14px] sm:text-[16px] text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200 ${isRTL ? 'text-right' : 'text-left'}
-                              ${location.pathname === `/category/${category.slug}` ? 'text-purple-600 bg-purple-100' : ''}
+                              ${location.pathname === `/categoryProducts/${category.slug}` ? 'text-purple-600 bg-purple-100' : ''}
                               ${index !== categories.length - 1 ? 'border-b border-gray-100' : ''}`}
                           >
                             {category.name}

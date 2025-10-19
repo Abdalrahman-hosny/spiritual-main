@@ -15,7 +15,7 @@ import TrainerProfile from './Pages/TrainerProfile/TrainerProfile';
 import CourseDetails from './Pages/CourseDetails/CourseDetails';
 import ContactUs from './Pages/ContactUs/ContactUs';
 import OTPPage from './Pages/OTP/Otp';
-import ForgetPassword from './Pages/ForgetPassword/ForgetPassword';
+import ForgetPassword from './Pages/ForgetPassword/ForgetPasswor';
 import VerifyReset from './Pages/verifyReset/verifyReset';
 import ResetPassword from './Pages/ResetPassword/ResetPassword';
 import Profile from './Pages/profile/profile';
@@ -42,7 +42,7 @@ function App() {
             <Route path="/product-details/:id" element={<Details />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<CheckOut />} />
-            <Route path="/categoryProducts/:slug/:id" element={<CategoryProducts />} />
+            <Route path="/categoryProducts/:id" element={<CategoryProducts />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/courseDetails/:id" element={<CourseDetails />} />
             <Route path="/contact-us" element={<ContactUs />} />
