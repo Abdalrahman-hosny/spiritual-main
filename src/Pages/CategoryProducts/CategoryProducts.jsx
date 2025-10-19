@@ -8,14 +8,28 @@ import axios from "axios";
 
 export default function CategoryProducts() {
   const { t } = useTranslation();
-  
+  const { id, slug } = useParams();
+  const [categoryName, setCategoryName] = useState("");
 
   useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  }, []);
+    const fetchCategoryName = async () => {
+      try {
+        const response = await axios.get("https://spiritual.brmjatech.uk/api/categories");
+        const categories = response.data.data.items;
+        const category = categories.find((cat) => cat.id == id || cat.slug === slug);
+        if (category) {
+          setCategoryName(category.name);
+        }
+      } catch (err) {
+        console.error("Failed to fetch category name:", err);
+      }
+    };
+    fetchCategoryName();
+  }, [id, slug]);
 
   const heroVariants = {
     hidden: { opacity: 0, scale: 0.9 },
@@ -56,7 +70,7 @@ export default function CategoryProducts() {
                   transition={{ duration: 0.6, delay: 0.2 }}
                   className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 md:mb-6 leading-tight"
                 >
-                  {t("categoryProducts.title")}
+                  {categoryName || t("categoryProducts.title")}
                 </motion.h1>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -67,7 +81,7 @@ export default function CategoryProducts() {
                     {t("categoryProducts.breadcrumbHome")} /
                     <span className="text-purple-500">
                       {" "}
-                      {t("categoryProducts.breadcrumbCurrent")}
+                      {categoryName || t("categoryProducts.breadcrumbCurrent")}
                     </span>
                   </p>
                 </motion.div>
@@ -115,34 +129,26 @@ export function ArabicContactList() {
   const { id } = useParams();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
 
-useEffect(() => {
-  const fetchContacts = async () => {
-    try {
-      const response = await axios.get(`https://spiritual.brmjatech.uk/api/home/categories/${id}/trainers`);
-      
-      // axios بيدي status، ممكن تتحقق كده لو حبيت:
-      if (response.status !== 200) {
-        throw new Error("Failed to fetch data");
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/home/categories/${id}/trainers`);
+        if (response.status !== 200) {
+          throw new Error("Failed to fetch data");
+        }
+        setContacts(response?.data?.data?.result);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchContacts();
+  }, [id]);
 
-      setContacts(response?.data?.data?.result);
-      console.log(response);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchContacts();
-}, [id]);
-
-
-   
   const pageNumbers = [1, 2, 3, 4, 5];
-
   const cardVariants = {
     hidden: { opacity: 0, y: 40 },
     visible: {
@@ -189,7 +195,6 @@ useEffect(() => {
           {t("contactList.title")}
         </motion.h1>
       </div>
-
       {/* Search Bar */}
       <div className="max-w-7xl mx-auto mb-8">
         <motion.div
@@ -206,7 +211,6 @@ useEffect(() => {
           />
         </motion.div>
       </div>
-
       {/* Contact Grid */}
       <div className="max-w-7xl mx-auto">
         <motion.div
@@ -251,7 +255,6 @@ useEffect(() => {
           ))}
         </motion.div>
       </div>
-
       {/* Pagination */}
       <div className="max-w-7xl mx-auto mt-12 flex justify-center">
         <motion.div

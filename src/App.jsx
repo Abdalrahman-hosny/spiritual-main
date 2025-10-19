@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-
 import NotFound from "./Pages/NotFound/NotFound";
 import Login from "./Pages/Login/Login";
 import Register from "./Pages/Register/Register";
@@ -16,14 +15,18 @@ import TrainerProfile from "./Pages/TrainerProfile/TrainerProfile";
 import CourseDetails from "./Pages/CourseDetails/CourseDetails";
 import ContactUs from "./Pages/ContactUs/ContactUs";
 import OTPPage from "./Pages/OTP/Otp";
-import ForgetPassword from "./Pages/ForgetPassword/ForgetPasswor";
+import ForgetPassword from "./Pages/ForgetPassword/ForgetPassword";
 import VerifyReset from "./Pages/verifyReset/verifyReset";
 import ResetPassword from "./Pages/ResetPassword/ResetPassword";
 import Profile from "./Pages/profile/profile";
 import Wishlist from "./Pages/wishlist/wishlist";
 import TermsAndConditions from "./Pages/TermsAndConditions/terms-and-conditions";
 import PrivacyPolicy from "./Pages/PrivacyPolicy/privacy-policy";
-import FAQs from "./Pages/FAQS/faqs.JSX";
+import FAQs from "./Pages/FAQS/faqs";
+import i18n from "./locales/i18n";
+import MainLayout from "./layout/MainLayout";
+import "./App.css";
+
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import Courses from "./Pages/Dashboard/Courses/Courses";
 import AddCourse from "./Pages/Dashboard/Courses/AddCourse";
@@ -32,10 +35,6 @@ import StudentDetails from "./Pages/Dashboard/Students/StudentDetails";
 import Store from "./Pages/Dashboard/Store/Store";
 import AddProduct from "./Pages/Dashboard/Store/AddProduct";
 import Orders from "./Pages/Dashboard/Orders/Orders";
-
-import i18n from "./locales/i18n";
-
-import MainLayout from "./layout/MainLayout";
 
 function App() {
   useEffect(() => {
@@ -55,6 +54,10 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<CheckOut />} />
             <Route
+              path="/categoryProducts/:slug/:id"
+              element={<CategoryProducts />}
+            />
+            <Route
               path="/categoryProducts/:id"
               element={<CategoryProducts />}
             />
@@ -72,13 +75,14 @@ function App() {
           </Route>
 
           {/* 🚫 الصفحات اللي مافيهاش Navbar ولا Footer */}
-
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<OTPPage />} />
           <Route path="/forget-password" element={<ForgetPassword />} />
           <Route path="/verify-reset" element={<VerifyReset />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+
+          {/* Dashboard Pages */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/courses" element={<Courses />} />
           <Route path="/dashboard/courses/add" element={<AddCourse />} />
