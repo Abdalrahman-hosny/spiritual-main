@@ -3,6 +3,7 @@
     { "path": "/contact-us", "label": "تواصل معنا" },
     { "path": "/about-us", "label": "من نحن" },
     { "path": "/shop", "label": "المتجر" },
+    { "path": "/dashboard", "label": "لوحة التحكم" },
     { "path": "/", "label": "الفئات", "hasDropdown": true },
     { "path": "/", "label": "الرئيسية" }
   ],
@@ -110,15 +111,15 @@
       "title": "حسابي",
       "links": ["تواصل معنا", "سياسة الخصوصية", "الشروط والأحكام"]
     },
-     "legal": {
+    "legal": {
       "title": "القوانين",
       "terms": "الشروط والأحكام",
       "privacy": "سياسة الخصوصية",
       "faqs": "الأسئلة الشائعة",
-      "aboutus" : "من نحن",
-       "home" : "الرئيسية",
-      "ContactUs" : "تواصل معنا",
-      "shop" : "المتجر"
+      "aboutus": "من نحن",
+      "home": "الرئيسية",
+      "ContactUs": "تواصل معنا",
+      "shop": "المتجر"
     },
     "socialMedia": {
       "title": "التواصل الاجتماعي",
@@ -174,8 +175,6 @@
     "empty": "السلة فارغة",
     "currency": "جنية",
     "breadcrumb": "الرئيسية"
-    
-    
   },
   "product": {
     "name": "فيزدل",
@@ -343,7 +342,7 @@
     "instructorAlt": "صورة المدرب",
     "plantAlt": "نبات زخرفي"
   },
-  
+
   "AboutUs": {
     "subtitle": "تعرف علينا أكثر",
     "title": "من نحن",
@@ -365,8 +364,7 @@
     }
   },
   "login": "تسجيل الدخول",
-  "logout": "تسجيل الخروج"
-,
+  "logout": "تسجيل الخروج",
   "wishlist": {
     "title": "قائمة الرغبات",
     "breadcrumb": "الرئيسية",
@@ -374,8 +372,8 @@
     "empty": "قائمة الرغبات فارغة",
     "remove": "إزالة",
     "add_to_cart": "أضف إلى السلة"
-  }
-, "cart": {
+  },
+  "cart": {
     "title": "سلتي",
     "breadcrumb": "الرئيسية",
 
@@ -390,9 +388,7 @@
     "product_added_to_cart": "تمت الإضافة إلى السلة",
     "failed_to_add_to_cart": "فشل إضافة المنتج إلى السلة",
     "please_login_first": "الرجاء تسجيل الدخول أولاً"
-  }
-,
-
+  },
   "termsAndConditions": {
     "title": "الشروط والأحكام",
     "metaDescription": "اقرأ شروط وأحكام استخدام خدماتنا.",
@@ -411,9 +407,7 @@
     "changesText": "نحتفظ بالحق في تعديل هذه الشروط والأحكام في أي وقت. سيتم نشر أي تغييرات على هذه الصفحة.",
     "contactTitle": "اتصل بنا",
     "contactText": "إذا كان لديك أي أسئلة حول هذه الشروط والأحكام، يرجى الاتصال بنا على support@example.com."
-  }
-,
-
+  },
   "privacyPolicy": {
     "title": "سياسة الخصوصية",
     "lastUpdated": "آخر تحديث: 15 أكتوبر 2025",
@@ -453,9 +447,7 @@
     "contactUsTitle": "اتصل بنا",
     "contactUsText": "إذا كان لديك أي أسئلة حول سياسة الخصوصية هذه، يرجى الاتصال بنا:",
     "contactEmail": "البريد الإلكتروني"
-  }
-,
-
+  },
   "faqs": {
     "title": "الأسئلة الشائعة",
     "subtitle": "ابحث عن إجابات للأسئلة الشائعة حول خدماتنا ومنتجاتنا.",
@@ -465,12 +457,159 @@
     "contactButton": "تواصل معنا",
     "loading": "جاري التحميل...",
     "error": "خطأ"
+  },
+  "reviews": {
+    "title": "التعليقات"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحبا محمد . اهلا بك في منصة روحاني",
+    "search": "بحث ...",
+    "sidebar": {
+      "logo": "روحاني",
+      "home": "الرئيسية",
+      "courses": "الكورسات",
+      "students": "الطلاب",
+      "store": "المتجر",
+      "orders": "الطلبات والمبيعات",
+      "settings": "الإعدادات",
+      "logout": "تسجيل الخروج"
+    },
+    "stats": {
+      "totalSales": "إجمالي المبيعات",
+      "customers": "عدد العملاء",
+      "orders": "عدد الطلبات",
+      "courseRevenue": "دخل الكورسات",
+      "students": "عدد الطلاب",
+      "courses": "عدد الكورسات",
+      "currency": "ج.م"
+    },
+    "charts": {
+      "totalIncome": "إجمالي الدخل",
+      "courseRevenue": "دخل الكورسات",
+      "salesRevenue": "دخل المبيعات",
+      "mostRequestedSections": "الأقسام الأكثر طلباً",
+      "weekly": "أسبوعي",
+      "monthly": "شهري",
+      "yearly": "سنوي",
+      "courses": "الكورسات",
+      "products": "المنتجات",
+      "section": "القسم",
+      "ordersCount": "عدد الطلبات",
+      "percentage": "النسبة %"
+    },
+    "ordersTable": {
+      "title": "الطلبات",
+      "orders": "الطلبات",
+      "customers": "العملاء",
+      "price": "السعر",
+      "payment": "الدفع",
+      "date": "التاريخ",
+      "status": "الحالة",
+      "action": "إجراء",
+      "paid": "تم الدفع",
+      "unpaid": "لم يدفع",
+      "delivered": "تم التوصيل",
+      "inDelivery": "جاري التوصيل",
+      "pending": "في الانتظار",
+      "edit": "تعديل",
+      "delete": "حذف"
+    }
+  },
+  "courses": {
+    "addNewCourse": "إضافة كورس جديد",
+    "search": "بحث...",
+    "currency": "جنيه",
+    "files": "ملفات",
+    "videoShare": "فيديو شير",
+    "students": "طالب"
+  },
+  "addCourse": {
+    "courseDetails": "تفاصيل الكورس",
+    "courseDetailsDesc": "تفاصيل الكورس الكاملة تظهر هنا لسهولة المراجعة والتعديل.",
+    "courseName": "اسم الكورس",
+    "courseDescription": "وصف الكورس",
+    "section": "القسم",
+    "chooseSection": "اختار القسم",
+    "liveDuration": "مدة اللايف",
+    "date": "المعاد",
+    "price": "السعر",
+    "numberOfLectures": "عدد المحاضرات",
+    "status": "الحالة",
+    "published": "منشور",
+    "draft": "مسودة",
+    "stopped": "موقوف",
+    "mainImageVideo": "الصوره الرئيسيه / فيديو",
+    "imageVideoNote": "ملاحظة: تنسيق ملف الصورة أو الفيديو (الحجم الأقصى 4 جيجا)",
+    "image1": "صورة 1",
+    "pdfName": "اسم PDF",
+    "pdfNote": "ملاحظة: تنسيق ملف PDF (الحجم الأقصى 4 جيجا)",
+    "uploadPdf": "رفع PDF",
+    "saveCourse": "حفظ الكورس"
+  },
+  "students": {
+    "filter": "فلتره",
+    "search": "بحث...",
+    "allStudents": "كل الطلاب",
+    "currentSubscribers": "المشتركين حاليا",
+    "formerStudents": "طلاب سابقين",
+    "lastLogin": "آخر دخول"
+  },
+  "studentDetails": {
+    "backToStudents": "العودة للطلاب",
+    "courses": "كورسات",
+    "personalInfo": "معلومات شخصيه",
+    "enrollmentDate": "تاريخ الانضمام",
+    "email": "البريد الإلكتروني",
+    "phoneNumber": "رقم الهاتف",
+    "registrationDate": "تاريخ التسجيل في المنصة",
+    "location": "الدولة / المدينة (اختياري)",
+    "gender": "النوع",
+    "status": "الحالة"
+  },
+  "store": {
+    "addNewProduct": "إضافة منتج جديد",
+    "search": "بحث...",
+    "allProducts": "كل المنتجات",
+    "outOfStock": "إنتهى من المخزن",
+    "available": "متاح",
+    "unavailable": "غير متوفر",
+    "inStock": "في المخزن",
+    "numberOfOrders": "عدد الطلبات"
+  },
+  "addProduct": {
+    "productDetails": "تفاصيل المنتج",
+    "productDetailsDesc": "تفاصيل المنتج الكاملة تظهر هنا لسهولة المراجعة والتعديل.",
+    "productName": "اسم المنتج",
+    "productDescription": "وصف المنتج",
+    "brandName": "اسم العلامة التجاريه",
+    "brandDescription": "وصف العلامة التجاريه",
+    "section": "القسم",
+    "chooseSection": "اختار القسم",
+    "price": "السعر",
+    "inventory": "المخزون",
+    "mainImageVideo": "الصورة الرئيسيه / فيديو",
+    "imageVideoNote": "ملاحظة: تنسيق ملف الصورة أو الفيديو (الحجم الأقصى 4 جيجا)",
+    "image": "صوره",
+    "saveProduct": "حفظ المنتج"
+  },
+  "orders": {
+    "filter": "فلتره",
+    "searchPlaceholder": "بحث الاسم ، رقم الطلب...",
+    "myFiles": "ملفي",
+    "underReview": "قيد المراجعة",
+    "completed": "مكتمل",
+    "inProgress": "قيد التنفيذ",
+    "orders": "الطلبات",
+    "customers": "العملاء",
+    "price": "السعر",
+    "payment": "الدفع",
+    "date": "التاريخ",
+    "status": "الحاله",
+    "action": "اجراء",
+    "paid": "تم الدفع",
+    "unpaid": "لم يدفع",
+    "delivered": "تم التوصيل",
+    "inDelivery": "جاري التوصيل"
   }
-,
-
-"reviews":{
-  "title": "التعليقات"
 }
-
-}
-
