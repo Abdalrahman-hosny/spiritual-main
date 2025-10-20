@@ -1,10 +1,15 @@
 {
   "navLinks": [
-    { "path": "/contact-us", "label": "Contact Us" },
-    { "path": "/about-us", "label": "About Us" },
-    { "path": "/shop", "label": "Shop" },
+    { "path": "/", "label": "Home" },
     { "path": "/", "label": "Categories", "hasDropdown": true },
-    { "path": "/", "label": "Home" }
+    { "path": "/dashboard", "label": "Dashboard" },
+        { "path": "/shop", "label": "Shop" },
+            { "path": "/about-us", "label": "About Us" },
+
+
+    { "path": "/contact-us", "label": "Contact Us" }
+    
+    
   ],
   "categoriesSubLinks": [
     { "path": "/categoryProducts", "label": "Spiritual" },
@@ -114,12 +119,11 @@
       "title": "Legal",
       "terms": "Terms and Conditions",
       "privacy": "Privacy Policy",
-      "faqs": "FAQs" ,
+      "faqs": "FAQs",
       "aboutus": "AboutUs",
-      "home" : "Home",
-      "ContactUs" : "ContactUs",
-      "shop" : "shop"
-
+      "home": "Home",
+      "ContactUs": "ContactUs",
+      "shop": "shop"
     },
 
     "socialMedia": {
@@ -160,7 +164,6 @@
     "empty": "Cart is empty",
     "currency": "EGP",
     "breadcrumb": "Home"
-    
   },
   "product": {
     "name": "Fizdel",
@@ -280,8 +283,8 @@
     "pdfAlt": "PDF File",
     "download": "Download",
     "relatedCourses": "Related Courses",
-     "reviews": "Reviews",
-     "currency": "EGP",
+    "reviews": "Reviews",
+    "currency": "EGP",
     "plantAlt": "Decorative Plant"
   },
   "trainer": {
@@ -356,17 +359,16 @@
     }
   },
   "login": "Login",
-  "logout": "Logout"
-,"wishlist": {
-        "title": "Wishlist",
-        "breadcrumb": "Home",
-        "my_wishlist": "My Wishlist",
-        "empty": "Your wishlist is empty",
-        "add_to_cart": "Add to Cart",
-            "remove": "Remove"
-
-      }
-    , "cart": {
+  "logout": "Logout",
+  "wishlist": {
+    "title": "Wishlist",
+    "breadcrumb": "Home",
+    "my_wishlist": "My Wishlist",
+    "empty": "Your wishlist is empty",
+    "add_to_cart": "Add to Cart",
+    "remove": "Remove"
+  },
+  "cart": {
     "title": "My Cart",
     "my_cart": "My Cart",
     "breadcrumb": "Home",
@@ -400,9 +402,7 @@
     "changesText": "We reserve the right to modify these terms and conditions at any time. Any changes will be posted on this page.",
     "contactTitle": "Contact Us",
     "contactText": "If you have any questions about these terms and conditions, please contact us at support@example.com."
-  }
-,
-
+  },
   "privacyPolicy": {
     "title": "Privacy Policy",
     "lastUpdated": "Last updated: October 15, 2025",
@@ -442,9 +442,7 @@
     "contactUsTitle": "Contact Us",
     "contactUsText": "If you have any questions about this Privacy Policy, please contact us:",
     "contactEmail": "Email"
-  }
-,
-
+  },
   "faqs": {
     "title": "Frequently Asked Questions",
     "subtitle": "Find answers to common questions about our services and products.",
@@ -454,10 +452,167 @@
     "contactButton": "Contact Us",
     "loading": "Loading...",
     "error": "Error"
+  },
+  "reviews": {
+    "title": "review"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Hello Mohamed. Welcome to Rouhani platform",
+    "search": "Search...",
+    "sidebar": {
+      "logo": "Rouhani",
+      "home": "Home",
+      "courses": "Courses",
+      "students": "Students",
+      "store": "Store",
+      "orders": "Orders & Sales",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "stats": {
+      "totalSales": "Total Sales",
+      "customers": "Number of Customers",
+      "orders": "Number of Orders",
+      "courseRevenue": "Course Revenue",
+      "students": "Number of Students",
+      "courses": "Number of Courses",
+      "currency": "EGP"
+    },
+    "charts": {
+      "totalIncome": "Total Income",
+      "courseRevenue": "Course Revenue",
+      "salesRevenue": "Sales Revenue",
+      "mostRequestedSections": "Most Requested Sections",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "courses": "Courses",
+      "products": "Products",
+      "section": "Section",
+      "ordersCount": "Number of Orders",
+      "percentage": "Percentage %"
+    },
+    "ordersTable": {
+      "title": "Orders",
+      "orders": "Orders",
+      "customers": "Customers",
+      "price": "Price",
+      "payment": "Payment",
+      "date": "Date",
+      "status": "Status",
+      "action": "Action",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "delivered": "Delivered",
+      "inDelivery": "In Delivery",
+      "pending": "Pending",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "courses": {
+    "addNewCourse": "Add New Course",
+    "search": "Search...",
+    "currency": "EGP",
+    "files": "files",
+    "videoShare": "Video Share",
+    "students": "students"
+  },
+  "addCourse": {
+    "courseDetails": "Course Details",
+    "courseDetailsDesc": "Full course details appear here for easy review and editing.",
+    "courseName": "Course Name",
+    "courseDescription": "Course Description",
+    "section": "Section",
+    "chooseSection": "Choose Section",
+    "liveDuration": "Live Duration",
+    "date": "Date",
+    "price": "Price",
+    "numberOfLectures": "Number of Lectures",
+    "status": "Status",
+    "published": "Published",
+    "draft": "Draft",
+    "stopped": "Stopped",
+    "mainImageVideo": "Main Image / Video",
+    "imageVideoNote": "Note: Image or video file format (max size 4 GB)",
+    "image1": "Image 1",
+    "pdfName": "PDF Name",
+    "pdfNote": "Note: PDF file format (max size 4 GB)",
+    "uploadPdf": "Upload PDF",
+    "saveCourse": "Save Course"
+  },
+  "students": {
+    "filter": "Filter",
+    "search": "Search...",
+    "allStudents": "All Students",
+    "currentSubscribers": "Current Subscribers",
+    "formerStudents": "Former Students",
+    "lastLogin": "Last login"
+  },
+  "studentDetails": {
+    "backToStudents": "Back to Students",
+    "courses": "Courses",
+    "personalInfo": "Personal Information",
+    "enrollmentDate": "Enrollment Date",
+    "email": "Email",
+    "phoneNumber": "Phone Number",
+    "registrationDate": "Registration Date",
+    "location": "Country / City (Optional)",
+    "gender": "Gender",
+    "status": "Status"
+  },
+  "store": {
+    "addNewProduct": "Add New Product",
+    "search": "Search...",
+    "allProducts": "All Products",
+    "outOfStock": "Out of Stock",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "inStock": "in stock",
+    "numberOfOrders": "number of orders"
+  },
+  "addProduct": {
+    "productDetails": "Product Details",
+    "productDetailsDesc": "Full product details appear here for easy review and editing.",
+    "productName": "Product Name",
+    "productDescription": "Product Description",
+    "brandName": "Brand Name",
+    "brandDescription": "Brand Description",
+    "section": "Section",
+    "chooseSection": "Choose Section",
+    "price": "Price",
+    "inventory": "Inventory",
+    "mainImageVideo": "Main Image / Video",
+    "imageVideoNote": "Note: Image or video file format (max size 4 GB)",
+    "image": "Image",
+    "saveProduct": "Save Product"
+  },
+  "orders": {
+    "filter": "Filter",
+    "searchPlaceholder": "Search Name, Order Number...",
+    "myFiles": "My Files",
+    "underReview": "Under Review",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "orders": "Orders",
+    "customers": "Customers",
+    "price": "Price",
+    "payment": "Payment",
+    "date": "Date",
+    "status": "Status",
+    "action": "Action",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "delivered": "Delivered",
+    "inDelivery": "In Delivery"
   }
 ,
-"reviews":{
-  "title": "review"
-}
-
+  "courses": {
+    "smallTitle": "Courses",
+    "bigTitle": "Spirituality Courses",
+    "currency": "EGP",
+    "videos": "Videos",
+    "files": "Files"
+  }
 }

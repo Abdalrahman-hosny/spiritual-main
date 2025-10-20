@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-
 import Herosection from './Herosection';
 import Features from './Features';
 import CourseSlider from './CourseSlider';
 import HowWork from './HowWork';
+import axios from 'axios';
 
-
-const VideoSection = () => {
+const VideoSection = ({ videoUrl }) => {
   return (
     <div className="flex justify-center items-center w-full px-4 py-10">
       <div className="w-[1241px] max-w-full h-[600px]">
         <iframe
           className="w-full h-full rounded-[30px]"
-          src="https://www.youtube.com/embed/jK75iRv33mI?si=2TR3A2QE7CL4WBCB"
+          src={videoUrl || "https://www.youtube.com/embed/jK75iRv33mI?si=2TR3A2QE7CL4WBCB"}
           title="YouTube video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -26,6 +25,7 @@ const VideoSection = () => {
 
 export default function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
+  const [videoUrl, setVideoUrl] = useState(null);
 
   const toggleVisibility = () => {
     if (window.pageYOffset > 300) {
@@ -44,6 +44,31 @@ export default function HomePage() {
 
   useEffect(() => {
     window.addEventListener('scroll', toggleVisibility);
+
+    // استدعاء الـ API لاسترجاع رابط الفيديو
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get('https://spiritual.brmjatech.uk/api/settings');
+        if (response.data.code === 200 && response.data.data.length > 0) {
+          const promotionUrl = response.data.data[0].promotion;
+          // تحويل رابط اليوتيوب إلى رابط embed إذا كان رابطًا مباشرًا
+          let embedUrl = promotionUrl;
+          if (promotionUrl && promotionUrl.includes("youtu.be")) {
+            const videoId = promotionUrl.split("youtu.be/")[1];
+            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+          } else if (promotionUrl && promotionUrl.includes("youtube.com/watch")) {
+            const videoId = promotionUrl.split("v=")[1].split("&")[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+          }
+          setVideoUrl(embedUrl);
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+
+    fetchSettings();
+
     return () => {
       window.removeEventListener('scroll', toggleVisibility);
     };
@@ -51,13 +76,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen overflow-hidden relative">
-      
       <Herosection />
       <Features />
       <CourseSlider />
-      <VideoSection />
+      <VideoSection videoUrl={videoUrl} />
       <HowWork />
-      
 
       {/* زر Scroll to Top */}
       {isVisible && (

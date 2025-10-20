@@ -20,15 +20,13 @@ export default function Login() {
 
   const validateForm = () => {
     const errors = {};
-    // Clean phone number from spaces or dashes
     const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, '');
-    // Phone validation
     if (!cleanPhoneNumber.trim()) {
       errors.phone = 'رقم الهاتف مطلوب';
-    } else if (!phoneRegex.test(cleanPhoneNumber)) {
-      errors.phone = 'الرجاء إدخال رقم هاتف صحيح (مثال: 01012345678)';
     }
-    // Password validation
+    //  else if (!phoneRegex.test(cleanPhoneNumber)) {
+    //   errors.phone = 'الرجاء إدخال رقم هاتف صحيح (مثال: 01012345678)';
+    // }
     if (!loginForm.password.trim()) {
       errors.password = 'كلمة المرور مطلوبة';
     } else if (loginForm.password.length < 6) {
@@ -44,14 +42,12 @@ export default function Login() {
       ...prev,
       [name]: value
     }));
-    // Clear specific field error when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
         ...prev,
         [name]: ''
       }));
     }
-    // Clear general login error
     if (loginError) {
       setLoginError('');
     }
@@ -59,19 +55,15 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    // Validate form before submitting
     if (!validateForm()) {
       return;
     }
     setLoginLoading(true);
     setLoginError('');
     setFieldErrors({});
-    try {
-      // Clean phone number from spaces or dashes
-      const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, '');
-      console.log("Phone sent to API:", cleanPhoneNumber);
-      console.log("Password sent to API:", loginForm.password);
 
+    try {
+      const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, '');
       const response = await axios.post(
         "https://spiritual.brmjatech.uk/api/login",
         {
@@ -85,26 +77,31 @@ export default function Login() {
         }
       );
 
-      // Check if response is successful and contains a token inside response.data.data
-      if (response.data.data && response.data.data.token) {
-        sessionStorage.setItem("token", response.data.data.token);
-        // إعادة التوجيه إلى صفحة home
-        navigate("/");
+      if (response.data.data ) {
+        const { token, user } = response.data.data;
+        sessionStorage.setItem("token", token);
+        console.log(user)        
+
+        // Check account_type and redirect accordingly
+        if (user && user.type === 'client') {
+          navigate("/");
+        } else {
+          navigate("/dashboard");
+        }
+
         // Optional: Store user data if needed
-        if (response.data.data.user) {
-          sessionStorage.setItem("user", JSON.stringify(response.data.data.user));
+        if (user) {
+          sessionStorage.setItem("user", JSON.stringify(user));
         }
       } else {
         setLoginError('لم يتم استقبال بيانات تسجيل الدخول. الرجاء المحاولة مرة أخرى.');
       }
     } catch (error) {
       console.log('Login error:', error);
-      // Handle different types of errors
       if (error.response) {
         const { status, data } = error.response;
         if (status === 422) {
           if (data.errors) {
-            // Extract all error messages from the API response
             const errorMessages = Object.values(data.errors).flat();
             setLoginError(errorMessages.join('\n'));
           } else {
@@ -155,12 +152,10 @@ export default function Login() {
       top: 0,
       behavior: "smooth",
     });
-    // استعادة البيانات المحفوظة من sessionStorage
     const savedRegisterPhone = sessionStorage.getItem("registerPhone");
     const savedRegisterPassword = sessionStorage.getItem("registerPassword");
     const savedResetPhone = sessionStorage.getItem("resetPhone");
     const savedResetPassword = sessionStorage.getItem("resetPassword");
-    // استخدام بيانات التسجيل إذا كانت موجودة
     if (savedRegisterPhone && savedRegisterPassword) {
       setLoginForm({
         phone: savedRegisterPhone,
@@ -168,9 +163,7 @@ export default function Login() {
       });
       sessionStorage.removeItem("registerPhone");
       sessionStorage.removeItem("registerPassword");
-    }
-    // استخدام بيانات إعادة تعيين كلمة المرور إذا كانت موجودة
-    else if (savedResetPhone && savedResetPassword) {
+    } else if (savedResetPhone && savedResetPassword) {
       setLoginForm({
         phone: savedResetPhone,
         password: savedResetPassword,
