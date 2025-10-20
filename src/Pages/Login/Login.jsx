@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Lock, Phone, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import image from "../../assets/loginimg.png";
@@ -10,23 +10,21 @@ export default function Login() {
   const [loginError, setLoginError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [loginForm, setLoginForm] = useState({
-    phone: '',
+    email: '', // تغيير من phone إلى email
     password: ''
   });
   const navigate = useNavigate();
 
-  // Phone validation regex (Egyptian phone numbers without country code)
-  const phoneRegex = /^01[0-9]{9}$/;
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const validateForm = () => {
     const errors = {};
-    const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, '');
-    if (!cleanPhoneNumber.trim()) {
-      errors.phone = 'رقم الهاتف مطلوب';
+    if (!loginForm.email.trim()) {
+      errors.email = 'البريد الإلكتروني مطلوب'; // تغيير من رقم الهاتف إلى البريد الإلكتروني
+    } else if (!emailRegex.test(loginForm.email)) {
+      errors.email = 'الرجاء إدخال بريد إلكتروني صحيح';
     }
-    //  else if (!phoneRegex.test(cleanPhoneNumber)) {
-    //   errors.phone = 'الرجاء إدخال رقم هاتف صحيح (مثال: 01012345678)';
-    // }
     if (!loginForm.password.trim()) {
       errors.password = 'كلمة المرور مطلوبة';
     } else if (loginForm.password.length < 6) {
@@ -61,13 +59,11 @@ export default function Login() {
     setLoginLoading(true);
     setLoginError('');
     setFieldErrors({});
-
     try {
-      const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, '');
       const response = await axios.post(
         "https://spiritual.brmjatech.uk/api/login",
         {
-          phone: cleanPhoneNumber,
+          email: loginForm.email, // تغيير من phone إلى email
           password: loginForm.password
         },
         {
@@ -76,19 +72,16 @@ export default function Login() {
           }
         }
       );
-
-      if (response.data.data ) {
+      if (response.data.data) {
         const { token, user } = response.data.data;
         sessionStorage.setItem("token", token);
-        console.log(user)        
-
+        console.log(user)
         // Check account_type and redirect accordingly
         if (user && user.type === 'client') {
           navigate("/");
         } else {
           navigate("/dashboard");
         }
-
         // Optional: Store user data if needed
         if (user) {
           sessionStorage.setItem("user", JSON.stringify(user));
@@ -105,15 +98,15 @@ export default function Login() {
             const errorMessages = Object.values(data.errors).flat();
             setLoginError(errorMessages.join('\n'));
           } else {
-            setLoginError(data.message || 'البيانات المدخلة غير صحيحة. الرجاء التحقق من رقم الهاتف وكلمة المرور.');
+            setLoginError(data.message || 'البيانات المدخلة غير صحيحة. الرجاء التحقق من البريد الإلكتروني وكلمة المرور.');
           }
         } else {
           switch (status) {
             case 400:
-              setLoginError(data?.message || 'رقم الهاتف أو كلمة المرور غير صحيحة');
+              setLoginError(data?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
               break;
             case 401:
-              setLoginError(data?.message || 'رقم الهاتف أو كلمة المرور غير صحيحة');
+              setLoginError(data?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
               break;
             case 403:
               setLoginError(data?.message || 'تم رفض الوصول. الرجاء التواصل مع الدعم.');
@@ -152,23 +145,23 @@ export default function Login() {
       top: 0,
       behavior: "smooth",
     });
-    const savedRegisterPhone = sessionStorage.getItem("registerPhone");
+    const savedRegisterEmail = sessionStorage.getItem("registerEmail"); // تغيير من registerPhone إلى registerEmail
     const savedRegisterPassword = sessionStorage.getItem("registerPassword");
-    const savedResetPhone = sessionStorage.getItem("resetPhone");
+    const savedResetEmail = sessionStorage.getItem("resetEmail"); // تغيير من resetPhone إلى resetEmail
     const savedResetPassword = sessionStorage.getItem("resetPassword");
-    if (savedRegisterPhone && savedRegisterPassword) {
+    if (savedRegisterEmail && savedRegisterPassword) { // تغيير من savedRegisterPhone إلى savedRegisterEmail
       setLoginForm({
-        phone: savedRegisterPhone,
+        email: savedRegisterEmail, // تغيير من phone إلى email
         password: savedRegisterPassword,
       });
-      sessionStorage.removeItem("registerPhone");
+      sessionStorage.removeItem("registerEmail"); // تغيير من registerPhone إلى registerEmail
       sessionStorage.removeItem("registerPassword");
-    } else if (savedResetPhone && savedResetPassword) {
+    } else if (savedResetEmail && savedResetPassword) { // تغيير من savedResetPhone إلى savedResetEmail
       setLoginForm({
-        phone: savedResetPhone,
+        email: savedResetEmail, // تغيير من phone إلى email
         password: savedResetPassword,
       });
-      sessionStorage.removeItem("resetPhone");
+      sessionStorage.removeItem("resetEmail"); // تغيير من resetPhone إلى resetEmail
       sessionStorage.removeItem("resetPassword");
     }
   }, []);
@@ -206,24 +199,24 @@ export default function Login() {
             </div>
           )}
           <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4 lg:space-y-6">
-            {/* Phone Field */}
+            {/* Email Field */}
             <div className="space-y-1 sm:space-y-2">
               <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
-                رقم الهاتف
+                البريد الإلكتروني
               </div>
               <div className="relative">
                 <input
-                  type="text"
-                  name="phone"
-                  value={loginForm.phone}
+                  type="email" // تغيير من text إلى email
+                  name="email" // تغيير من phone إلى email
+                  value={loginForm.email} // تغيير من phone إلى email
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  placeholder="01012345678"
-                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${fieldErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
+                  placeholder="example@email.com" // تغيير من رقم الهاتف إلى البريد الإلكتروني
+                  className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${fieldErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
                   dir="ltr"
                 />
-                {fieldErrors.phone && (
-                  <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>
+                {fieldErrors.email && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
                 )}
               </div>
             </div>
