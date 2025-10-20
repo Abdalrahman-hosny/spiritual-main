@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import plant from '../../assets/Moon.png';
-import './home.css';
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import plant from "../../assets/Moon.png";
+import "./home.css";
 
 export default function Herosection() {
   const { t, i18n } = useTranslation();
@@ -44,70 +44,93 @@ export default function Herosection() {
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 50}%`,
-                animationName: 'shootingStar',
-                animationDuration: '3s',
-                animationTimingFunction: 'linear',
+                animationName: "shootingStar",
+                animationDuration: "3s",
+                animationTimingFunction: "linear",
                 animationDelay: `${i * 2}s`,
-                animationIterationCount: 'infinite',
+                animationIterationCount: "infinite",
               }}
             />
           ))}
         </div>
 
-        {/* Main content */}<div className="pt-[80px]"></div> 
-        
+        {/* Main content */}
+        <div className="pt-[80px]"></div>
+
         <div className="overflow-hidden min-h-[80vh] z-10 flex justify-center items-center px-4">
-          <div className="text-right p-4 md:p-8 md:w-[90%] overflow-hidden">
+          <div
+            className={`${
+              i18n.language === "ar" ? "text-right" : "text-left"
+            } p-4 md:p-8 md:w-[90%] overflow-hidden`}
+          >
             <h1
               className={`text-white text-4xl md:text-6xl font-[Montserrat-Arabic] font-bold mb-6 leading-tight transition-all duration-1000 transform ${
-                isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                isLoaded
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0"
               }`}
-              style={{ transitionDelay: '0.2s' }}
+              style={{ transitionDelay: "0.2s" }}
             >
               <span
                 className={`block transition-all duration-800 transform ${
-                  isLoaded ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'
+                  isLoaded
+                    ? "translate-x-0 opacity-100"
+                    : "translate-x-10 opacity-0"
                 }`}
-                style={{ transitionDelay: '0.4s' }}
+                style={{ transitionDelay: "0.4s" }}
               >
-                {t('hero.title1')}
+                {t("hero.title1")}
               </span>
               <span
                 className={`block transition-all duration-800 transform ${
-                  isLoaded ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'
+                  isLoaded
+                    ? "translate-x-0 opacity-100"
+                    : "translate-x-10 opacity-0"
                 }`}
-                style={{ transitionDelay: '0.6s' }}
+                style={{ transitionDelay: "0.6s" }}
               >
-                {t('hero.title2')}
+                {t("hero.title2")}
               </span>
             </h1>
             <p
               className={`text-gray-300 text-lg md:text-xl font-[Montserrat-Arabic] lg:text-2xl mb-8 leading-relaxed transition-all duration-1000 transform ${
-                isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                isLoaded
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0"
               }`}
-              style={{ transitionDelay: '0.8s' }}
+              style={{ transitionDelay: "0.8s" }}
             >
-              {t('hero.description')}
+              {t("hero.description")}
             </p>
-            <button
-              onClick={() => navigate('/about-us')}
-              className={`bg-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-500 transform hover:scale-105 hover:bg-purple-700 shadow-2xl hover:shadow-purple-500/25 relative overflow-hidden group ${
-                isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+            <div
+              className={`flex ${
+                i18n.language === "ar" ? "justify-end" : "justify-start"
               }`}
-              style={{ transitionDelay: '1s' }}
             >
-              <div className="absolute inset-0 -top-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform group-hover:animate-[shimmer_0.8s_ease-in-out] pointer-events-none" />
-              {t('hero.button')}
-            </button>
+              <button
+                onClick={() => navigate("/about-us")}
+                className={`bg-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-500 transform hover:scale-105 hover:bg-purple-700 shadow-2xl hover:shadow-purple-500/25 relative overflow-hidden group ${
+                  isLoaded
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-10 opacity-0"
+                }`}
+                style={{ transitionDelay: "1s" }}
+              >
+                <div className="absolute inset-0 -top-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform group-hover:animate-[shimmer_0.8s_ease-in-out] pointer-events-none" />
+                {t("hero.button")}
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Planet */}
         <div
           className={`absolute -bottom-4 left-0 transform -translate-x-1/3 translate-y-1/3 sm:-translate-x-1/4 sm:translate-y-1/4 md:-translate-x-1/5 md:translate-y-1/5 lg:-translate-x-1/3 lg:translate-y-1/3 transition-all duration-1500 ease-out ${
-            isLoaded ? 'translate-x-[-33.333333%] opacity-100' : 'translate-x-[-50%] opacity-0'
+            isLoaded
+              ? "translate-x-[-33.333333%] opacity-100"
+              : "translate-x-[-50%] opacity-0"
           }`}
-          style={{ transitionDelay: '1.2s' }}
+          style={{ transitionDelay: "1.2s" }}
         >
           <div className="relative">
             <div className="absolute -top-16 left-4 w-32 h-32 sm:w-40 sm:h-40 sm:-top-20 sm:left-6 md:w-56 md:h-56 md:-top-28 md:left-6 lg:w-72 lg:h-72 lg:-top-36 lg:left-8 xl:w-96 xl:h-96 xl:-top-40 rounded-full bg-purple-500/10 animate-pulse" />
@@ -131,10 +154,10 @@ export default function Herosection() {
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animationName: 'floatParticle',
+                animationName: "floatParticle",
                 animationDuration: `${3 + Math.random() * 4}s`,
-                animationTimingFunction: 'ease-in-out',
-                animationIterationCount: 'infinite',
+                animationTimingFunction: "ease-in-out",
+                animationIterationCount: "infinite",
                 animationDelay: `${Math.random() * 2}s`,
               }}
             />
