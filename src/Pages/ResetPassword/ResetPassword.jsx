@@ -15,15 +15,11 @@ export default function ResetPassword() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // استخراج `phone` و `token` من `location.state`
-  const { phone, token: otp } = location.state || {};
+  // استخراج `email` و `token` من `location.state`
+  const { email } = location.state || {};
 
-  // إذا لم يكن هناك `phone` أو `otp`، قم بإعادة التوجيه إلى صفحة "نسيت كلمة المرور"
-  useEffect(() => {
-    if (!phone || !otp) {
-      navigate('/forgot-password');
-    }
-  }, [phone, otp, navigate]);
+  // إذا لم يكن هناك `email` أو `otp`، قم بإعادة التوجيه إلى صفحة "نسيت كلمة المرور"
+
 
   // دالة للتعامل مع ضغط زر Enter
   const handleKeyPress = (e) => {
@@ -61,7 +57,7 @@ export default function ResetPassword() {
       const response = await axios.post(
         'https://spiritual.brmjatech.uk/api/forgot/reset-password',
         {
-          phone,
+          email, // تغيير من phone إلى email
           password,
           password_confirmation: passwordConfirmation,
           otp,
@@ -73,6 +69,7 @@ export default function ResetPassword() {
       }
 
       setSuccess(true);
+
       // إعادة التوجيه إلى صفحة تسجيل الدخول بعد 2 ثانية
       setTimeout(() => {
         navigate('/login');

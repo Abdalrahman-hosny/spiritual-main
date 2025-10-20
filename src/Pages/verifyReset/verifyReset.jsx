@@ -13,27 +13,28 @@ export default function VerifyOTP() {
   const [canResend, setCanResend] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { phone } = location.state || {};
+  const { email } = location.state || {}; // تغيير من phone إلى email
 
-  // التحقق من وجود `phone`
+  // التحقق من وجود `email`
   useEffect(() => {
-    if (!phone) {
-      toast.error("لا يوجد رقم هاتف لإكمال العملية، سيتم إعادة توجيهك لتسجيل الدخول.");
+    if (!email) { // تغيير من phone إلى email
+      toast.error("لا يوجد بريد إلكتروني لإكمال العملية، سيتم إعادة توجيهك لتسجيل الدخول.");
       setTimeout(() => navigate('/login'), 3000);
     }
-  }, [phone, navigate]);
+  }, [email, navigate]); // تغيير من phone إلى email
 
   // عداد الوقت لإعادة الإرسال
   useEffect(() => {
-    if (timer > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(interval);
-    } else {
-      setCanResend(true);
-    }
-  }, [timer]);
+  if (timer > 0 && !canResend) {
+    const countdown = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  } else if (timer === 0) {
+    setCanResend(true);
+  }
+}, [timer, canResend]);
 
   // إرسال `token` للتحقق
   const handleSubmit = async (e) => {
@@ -48,12 +49,17 @@ export default function VerifyOTP() {
     setIsLoading(true);
     try {
       const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
-        phone,
-        token,
+        email, // تغيير من phone إلى email
+        
       });
-     if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
-      toast.success("تم التحقق بنجاح!");
-      navigate('/ResetPassword');
+      if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
+        toast.success("تم التحقق بنجاح!");
+        navigate('/reset-password', {
+          state: {
+            email,
+            token, // تمرير رمز التحقق إلى صفحة إعادة تعيين كلمة المرور
+          }
+        });
       } else {
         toast.error(response.data.message || "رمز التحقق غير صحيح");
       }
@@ -71,10 +77,10 @@ export default function VerifyOTP() {
     setIsResending(true);
     try {
       const response = await axios.post('https://spiritual.brmjatech.uk/api/resend-otp', {
-        phone,
+        email, // تغيير من phone إلى email
       });
       if (response.data.success) {
-        toast.success("تم إعادة إرسال رمز التحقق بنجاح!");
+        toast.success("تم إعادة إرسال رمز التحقق بنجاح إلى بريدك الإلكتروني!");
         setTimer(60);
         setCanResend(false);
       } else {
@@ -112,7 +118,7 @@ export default function VerifyOTP() {
           </div>
           <div className="text-center mb-8">
             <p className="text-gray-600">
-              تم إرسال رمز التحقق إلى رقم الهاتف: <span className="font-medium">{phone}</span>
+              تم إرسال رمز التحقق إلى بريدك الإلكتروني: <span className="font-medium">{email}</span>
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
