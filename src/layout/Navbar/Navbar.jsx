@@ -28,7 +28,7 @@ export default function Navbar({ bg }) {
       try {
         const response = await axios.get('https://spiritual.brmjatech.uk/api/categories');
         
-          setCategories(response.data.data.items);
+          setCategories(response.data.data.result);
         
       } catch (error) {
         console.error('Error fetching categories:', error);

@@ -9,13 +9,14 @@ import image1 from "../../assets/bg.png";
 import image2 from "../../assets/bg-login.png";
 import image3 from "../../assets/hero.png";
 import user from "../../assets/user.png";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FaShoppingBag } from 'react-icons/fa';
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 export default function TrainerProfile() {
   const { t } = useTranslation();
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
@@ -30,11 +31,11 @@ export default function TrainerProfile() {
     });
   }, []);
 
-  // جلب بيانات المدرب
+  // جلب بيانات المدرب باستخدام id ديناميكي
   useEffect(() => {
     const fetchTrainerData = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/2');
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/home/trainers/${id}`);
         if (response.data.code === 200) {
           setTrainerData(response.data.data);
         }
@@ -42,15 +43,14 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer data:", error);
       }
     };
-
     fetchTrainerData();
-  }, []);
+  }, [id]);
 
-  // جلب بيانات الكورسات
+  // جلب بيانات الكورسات باستخدام id ديناميكي
   useEffect(() => {
     const fetchTrainerCourses = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/1/courses');
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/home/trainers/${id}/courses`);
         if (response.data.code === 200) {
           setTrainerCourses(response.data.data.result);
         }
@@ -58,15 +58,14 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer courses:", error);
       }
     };
-
     fetchTrainerCourses();
-  }, []);
+  }, [id]);
 
-  // جلب بيانات المنتجات
+  // جلب بيانات المنتجات باستخدام id ديناميكي
   useEffect(() => {
     const fetchTrainerProducts = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/1/products');
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/home/trainers/${id}/products`);
         if (response.data.code === 200) {
           setTrainerProducts(response.data.data.result);
         }
@@ -74,9 +73,8 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer products:", error);
       }
     };
-
     fetchTrainerProducts();
-  }, []);
+  }, [id]);
 
   // Tab configuration
   const tabs = [
@@ -105,7 +103,6 @@ export default function TrainerProfile() {
   // Simulate content loading
   const handleTabChange = (tabId) => {
     if (tabId === activeTab) return;
-
     setIsLoading(true);
     setTimeout(() => {
       setActiveTab(tabId);
@@ -175,7 +172,6 @@ export default function TrainerProfile() {
                 </motion.div>
               </motion.div>
             </div>
-
             {/* Plant Decoration */}
             <motion.div
               variants={plantVariants}
@@ -227,7 +223,6 @@ export default function TrainerProfile() {
               </div>
             </div>
           </motion.div>
-
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -245,7 +240,7 @@ export default function TrainerProfile() {
             <div className='h-[3px] bg-purple-600 my-3 md:my-8'></div>
             <div className="flex items-center gap-2">
               <span className="font-[Montserrat-Arabic] font-normal text-purple-600 text-[14px] md:text-[32px] leading-[1] tracking-[0%]">
-                 {trainerData?.account_type }
+                {trainerData?.account_type}
               </span>
             </div>
           </motion.div>
@@ -316,13 +311,7 @@ export default function TrainerProfile() {
                     className="space-y-6 bg-gray-50 p-6 rounded-xl shadow-sm"
                   >
                     <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] tracking-[0%] text-right text-[#555555]">
-                      {t("trainerProfile.bio1")}
-                    </p>
-                    <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] tracking-[0%] text-right text-[#555555]">
-                      {t("trainerProfile.bio2")}
-                    </p>
-                    <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] tracking-[0%] text-right text-[#555555]">
-                      {t("trainerProfile.bio3")}
+                      {trainerData?.bio || t("trainerProfile.bio1")}
                     </p>
                   </motion.div>
                 </div>
@@ -410,7 +399,6 @@ export default function TrainerProfile() {
 
 const TrainerCourses = ({ courses }) => {
   const { t } = useTranslation();
-
   return (
     <div className="py-10 bg-white">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

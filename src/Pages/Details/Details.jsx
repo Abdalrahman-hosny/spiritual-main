@@ -123,7 +123,7 @@ function ArabicTestimonials({ reviewsUpdated }) {
     const fetchTestimonials = async () => {
       try {
         const response = await axios.get('https://spiritual.brmjatech.uk/api/products/1/reviews');
-        setTestimonials(response.data.data.items);
+        setTestimonials(response.data.data.result);
       } catch (err) {
         setError(err.message);
       } finally {
