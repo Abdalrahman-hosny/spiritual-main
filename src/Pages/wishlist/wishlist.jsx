@@ -29,7 +29,7 @@ export default function Wishlist() {
         }
       );
       // تأكد من أن البيانات هي مصفوفة من `response.data.data.items`
-      const items = response.data.data && response.data.data.items ? response.data.data.items : [];
+      const items = response.data.data && response.data.data.result ? response.data.data.result : [];
       setWishlistItems(items);
       console.log("Wishlist items:", items); // للتأكد من البيانات
     } catch (error) {
