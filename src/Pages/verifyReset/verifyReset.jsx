@@ -13,28 +13,27 @@ export default function VerifyOTP() {
   const [canResend, setCanResend] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { email } = location.state || {}; // تغيير من phone إلى email
+  const { email } = location.state || {};
 
   // التحقق من وجود `email`
   useEffect(() => {
-    if (!email) { // تغيير من phone إلى email
+    if (!email) {
       toast.error("لا يوجد بريد إلكتروني لإكمال العملية، سيتم إعادة توجيهك لتسجيل الدخول.");
       setTimeout(() => navigate('/login'), 3000);
     }
-  }, [email, navigate]); // تغيير من phone إلى email
+  }, [email, navigate]);
 
   // عداد الوقت لإعادة الإرسال
   useEffect(() => {
-  if (timer > 0 && !canResend) {
-    const countdown = setInterval(() => {
-      setTimer((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(countdown);
-  } else if (timer === 0) {
-    setCanResend(true);
-  }
-}, [timer, canResend]);
+    if (timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setCanResend(true);
+    }
+  }, [timer]);
 
   // إرسال `token` للتحقق
   const handleSubmit = async (e) => {
@@ -48,16 +47,19 @@ export default function VerifyOTP() {
     }
     setIsLoading(true);
     try {
-      const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
-        email, // تغيير من phone إلى email
-        
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/forgot/verify-otp', {
+        email,
+         token,
       });
+
       if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
         toast.success("تم التحقق بنجاح!");
+        // حفظ `token` في `sessionStorage`
+        sessionStorage.setItem('otp', token);
         navigate('/reset-password', {
           state: {
             email,
-            token, // تمرير رمز التحقق إلى صفحة إعادة تعيين كلمة المرور
+            otp: token,
           }
         });
       } else {
@@ -76,11 +78,11 @@ export default function VerifyOTP() {
     if (!canResend) return;
     setIsResending(true);
     try {
-      const response = await axios.post('https://spiritual.brmjatech.uk/api/resend-otp', {
-        email, // تغيير من phone إلى email
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/forgot/resend-otp', {
+        email,
       });
       if (response.data.success) {
-        toast.success("تم إعادة إرسال رمز التحقق بنجاح إلى بريدك الإلكتروني!");
+        toast.success("تم إعادة إرسال رمز التحقق بنجاح!");
         setTimer(60);
         setCanResend(false);
       } else {

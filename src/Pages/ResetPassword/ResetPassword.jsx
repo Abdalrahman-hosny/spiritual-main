@@ -11,15 +11,18 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
-
   const navigate = useNavigate();
   const location = useLocation();
 
-  // استخراج `email` و `token` من `location.state`
+  // استخراج `email` من `location.state`
   const { email } = location.state || {};
 
-  // إذا لم يكن هناك `email` أو `otp`، قم بإعادة التوجيه إلى صفحة "نسيت كلمة المرور"
-
+  // إذا لم يكن هناك `email`، قم بإعادة التوجيه إلى صفحة "نسيت كلمة المرور"
+  useEffect(() => {
+    if (!email) {
+      navigate('/forgot-password');
+    }
+  }, [email, navigate]);
 
   // دالة للتعامل مع ضغط زر Enter
   const handleKeyPress = (e) => {
@@ -49,18 +52,15 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validatePasswords()) return;
-
     setIsLoading(true);
     setError('');
-
     try {
       const response = await axios.post(
         'https://spiritual.brmjatech.uk/api/forgot/reset-password',
         {
-          email, // تغيير من phone إلى email
+          email,
           password,
           password_confirmation: passwordConfirmation,
-          otp,
         }
       );
 
@@ -69,7 +69,6 @@ export default function ResetPassword() {
       }
 
       setSuccess(true);
-
       // إعادة التوجيه إلى صفحة تسجيل الدخول بعد 2 ثانية
       setTimeout(() => {
         navigate('/login');
@@ -135,7 +134,6 @@ export default function ResetPassword() {
                   </button>
                 </div>
               </div>
-
               {/* حقل تأكيد كلمة المرور */}
               <div className="space-y-1">
                 <label className="block text-right text-gray-700 text-sm font-medium">
@@ -166,10 +164,8 @@ export default function ResetPassword() {
                   </button>
                 </div>
               </div>
-
               {/* عرض رسالة الخطأ */}
               {error && <p className="text-red-500 text-center">{error}</p>}
-
               {/* زر إعادة تعيين كلمة المرور */}
               <button
                 type="submit"
