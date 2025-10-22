@@ -60,6 +60,12 @@ export default function Shop() {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [sortOption, setSortOption] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paginationInfo, setPaginationInfo] = useState({
+    last_page: 1,
+    per_page: 12,
+    total: 0,
+  });
 
   // جلب قائمة الرغبات من الـ API
   const fetchWishlist = async () => {
@@ -126,7 +132,7 @@ export default function Shop() {
         });
         fetchWishlist();
       } else {
-        console.error("API response not successful:", response.data);
+        
         toast.error(t("failed_to_add_to_wishlist"), {
           position: "top-right",
           autoClose: 2000,
@@ -193,7 +199,6 @@ export default function Shop() {
         });
         fetchWishlist();
       } else {
-        console.error("API response not successful:", response.data);
         toast.error(t("failed_to_remove_from_wishlist"), {
           position: "top-right",
           autoClose: 2000,
@@ -272,7 +277,7 @@ export default function Shop() {
           rtl: true,
         });
       } else {
-        console.error("API response not successful:", response.data);
+        
         toast.error(t("failed_to_add_to_cart"), {
           position: "top-right",
           autoClose: 2000,
@@ -309,14 +314,24 @@ export default function Shop() {
       if (sortOption) params.sort = sortOption;
       if (priceRange[0] > 0) params.min = priceRange[0];
       if (priceRange[1] < 1000) params.max = priceRange[1];
+      params.page = currentPage;
 
       const response = await axios.get("https://spiritual.brmjatech.uk/api/products", { params });
       const items = response?.data?.data?.result;
       if (Array.isArray(items)) {
         setProducts(items);
       } else {
-        console.error("Products not array:", items);
+        
         setProducts([]);
+      }
+
+      // تحديث معلومات الـ Pagination
+      if (response?.data?.data?.meta) {
+        setPaginationInfo({
+          last_page: response.data.data.meta.last_page,
+          per_page: response.data.data.meta.per_page,
+          total: response.data.data.meta.total,
+        });
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -330,7 +345,7 @@ export default function Shop() {
   useEffect(() => {
     fetchProducts();
     fetchWishlist();
-  }, [selectedCategory, searchQuery, sortOption, priceRange]);
+  }, [currentPage, selectedCategory, searchQuery, sortOption, priceRange]);
 
   // فلترة المنتجات بناءً على البحث
   const filteredProducts = Array.isArray(products)
@@ -464,6 +479,7 @@ export default function Shop() {
             </div>
           </div>
         </div>
+
         {/* Main Content */}
         <div className="container mx-auto p-4 py-8">
           <div className="flex flex-col lg:flex-row-reverse gap-6 lg:gap-8">
@@ -481,6 +497,7 @@ export default function Shop() {
                   {t("show_products", { count: filteredProducts.length })}
                 </p>
               </motion.div>
+
               {/* Products Grid */}
               <motion.div
                 variants={containerVariants}
@@ -491,6 +508,12 @@ export default function Shop() {
               >
                 {filteredProducts.map((product) => {
                   const isInWishlist = Array.isArray(wishlist) && wishlist.some((item) => item.id === product.id);
+
+                  // تحديد مصدر الصورة
+                  const productImage =
+                    product.image ||
+                    (product.images && product.images.length > 0 ? product.images[0].image : "https://via.placeholder.com/300");
+
                   return (
                     <motion.div
                       key={product.id}
@@ -500,7 +523,7 @@ export default function Shop() {
                     >
                       <div className="relative overflow-hidden">
                         <motion.img
-                          src={product.image}
+                          src={productImage}
                           alt={product.name}
                           className="w-full h-48 sm:h-56 md:h-64 object-cover"
                           whileHover={{ scale: 1.05 }}
@@ -587,6 +610,7 @@ export default function Shop() {
                   );
                 })}
               </motion.div>
+
               {/* Pagination */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -596,30 +620,56 @@ export default function Shop() {
                 className="mt-8 flex justify-center"
               >
                 <div className="flex gap-2">
+                  {/* زر الصفحة السابقة */}
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-3 py-2 rounded-lg bg-purple-600 text-white text-sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    className={`px-3 py-2 rounded-lg text-sm ${
+                      currentPage === 1
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
                   >
-                    1
+                    السابق
                   </motion.button>
+
+                  {/* عرض أرقام الصفحات */}
+                  {Array.from({ length: paginationInfo.last_page }, (_, i) => i + 1).map((page) => (
+                    <motion.button
+                      key={page}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg text-sm ${
+                        currentPage === page
+                          ? "bg-purple-600 text-white"
+                          : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {page}
+                    </motion.button>
+                  ))}
+
+                  {/* زر الصفحة التالية */}
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
+                    disabled={currentPage === paginationInfo.last_page}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    className={`px-3 py-2 rounded-lg text-sm ${
+                      currentPage === paginationInfo.last_page
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
                   >
-                    2
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
-                  >
-                    3
+                    التالي
                   </motion.button>
                 </div>
               </motion.div>
             </div>
+
             {/* Desktop Sidebar */}
             <motion.div
               variants={sidebarVariants}
@@ -642,9 +692,12 @@ export default function Shop() {
                     transition={{ duration: 0.2 }}
                   />
                 </motion.div>
+
                 {/* Sort Options */}
                 <motion.div variants={filterVariants} dir='rtl' className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'>
-                  <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px] text-right align-middle text-[#000000] mb-8">ترتيب حسب</h3>
+                  <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px] text-right align-middle text-[#000000] mb-8">
+                    ترتيب حسب
+                  </h3>
                   <div className="space-y-3">
                     <motion.label
                       whileHover={{ x: 5 }}
@@ -700,12 +753,16 @@ export default function Shop() {
                     </motion.label>
                   </div>
                 </motion.div>
+
                 <motion.div variants={filterVariants}>
                   <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
                 </motion.div>
+
                 {/* Categories */}
                 <motion.div variants={filterVariants} dir='rtl' className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'>
-                  <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px] text-right align-middle mb-6">تصنيفات المنتج</h3>
+                  <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px] text-right align-middle mb-6">
+                    تصنيفات المنتج
+                  </h3>
                   <ul className="space-y-3">
                     {[
                       { id: 1, name: 'روحانيات' },
@@ -736,6 +793,7 @@ export default function Shop() {
             </motion.div>
           </div>
         </div>
+
         {/* Mobile Filter Button */}
         <motion.div
           initial={{ opacity: 0, scale: 0 }}
@@ -764,6 +822,7 @@ export default function Shop() {
             <Filter className="w-5 h-5" />
           </motion.button>
         </motion.div>
+
         {/* Mobile Sidebar Overlay */}
         <AnimatePresence>
           {isSidebarOpen && (
@@ -797,6 +856,7 @@ export default function Shop() {
                     <X className="w-5 h-5 text-gray-600" />
                   </motion.button>
                 </motion.div>
+
                 {/* Content */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -815,6 +875,7 @@ export default function Shop() {
                       className="w-full p-2 border-none rounded bg-white focus:outline-none focus:ring-2 focus:ring-purple-400"
                     />
                   </div>
+
                   {/* Sort Options */}
                   <div dir='rtl' className='p-8 rounded-[20px] bg-[#4F46E50D]'>
                     <h3 className="font-semibold text-[16px] mb-8">ترتيب حسب</h3>
@@ -861,10 +922,14 @@ export default function Shop() {
                       </label>
                     </div>
                   </div>
+
                   <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
+
                   {/* Categories */}
                   <div dir='rtl' className='p-8 rounded-[20px] bg-[#4F46E50D]'>
-                    <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px] text-right align-middle mb-6">تصنيفات المنتج</h3>
+                    <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px] text-right align-middle mb-6">
+                      تصنيفات المنتج
+                    </h3>
                     <ul className="space-y-3 text-[#676666] font-[Alexandria] font-light text-[14px] leading-relaxed tracking-[0px] text-right align-middle">
                       {[
                         { id: 1, name: 'روحانيات' },
@@ -887,6 +952,7 @@ export default function Shop() {
                       ))}
                     </ul>
                   </div>
+
                   {/* Apply Button */}
                   <motion.button
                     onClick={() => setIsSidebarOpen(false)}

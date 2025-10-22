@@ -9,7 +9,14 @@ export default function Wishlist() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paginationInfo, setPaginationInfo] = useState({
+    last_page: 1,
+    per_page: 10,
+    total: 0,
+  });
   const navigate = useNavigate();
 
   const fetchWishlistItems = async () => {
@@ -26,12 +33,28 @@ export default function Wishlist() {
           headers: {
             "Authorization": `Bearer ${token}`,
           },
+          params: {
+            page: currentPage, // إرسال رقم الصفحة
+
+          },
         }
       );
-      // تأكد من أن البيانات هي مصفوفة من `response.data.data.items`
+     
+
+
       const items = response.data.data && response.data.data.result ? response.data.data.result : [];
       setWishlistItems(items);
-      console.log("Wishlist items:", items); // للتأكد من البيانات
+
+      // تحديث معلومات الـ Pagination
+      if (response.data.data && response.data.data.meta) {
+        setPaginationInfo({
+          last_page: response.data.data.meta.last_page,
+          per_page: response.data.data.meta.per_page,
+          total: response.data.data.meta.total,
+        });
+      }
+
+      
     } catch (error) {
       console.error("Error fetching wishlist items:", error);
       setWishlistItems([]);
@@ -56,9 +79,56 @@ export default function Wishlist() {
           },
         }
       );
-      fetchWishlistItems(); // إعادة جلب القائمة بعد الحذف
+      fetchWishlistItems();
     } catch (error) {
       console.error("Error removing item from wishlist:", error);
+    }
+  };
+
+  const clearSelectedWishlist = async () => {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+      // حذف كل العناصر المختارة
+      for (const itemId of selectedItems) {
+        await axios.post(
+          "https://spiritual.brmjatech.uk/api/wishlist/remove",
+          { product_id: itemId },
+          {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+            },
+          }
+        );
+      }
+      // إعادة جلب القائمة بعد الحذف
+      fetchWishlistItems();
+      // إعادة تعيين القائمة المختارة
+      setSelectedItems([]);
+    } catch (error) {
+      console.error("Error clearing selected wishlist items:", error);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedItems.length === wishlistItems.length) {
+      // إذا كانت كل العناصر مختارة، قم بإلغاء اختيارها
+      setSelectedItems([]);
+    } else {
+      // إذا لم تكن كل العناصر مختارة، قم باختيارها
+      const allItemIds = wishlistItems.map(item => item.product.id);
+      setSelectedItems(allItemIds);
+    }
+  };
+
+  const toggleSelectItem = (itemId) => {
+    if (selectedItems.includes(itemId)) {
+      setSelectedItems(selectedItems.filter(id => id !== itemId));
+    } else {
+      setSelectedItems([...selectedItems, itemId]);
     }
   };
 
@@ -69,7 +139,7 @@ export default function Wishlist() {
   useEffect(() => {
     fetchWishlistItems();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [currentPage]);
 
   const pageBackgroundStyle = {
     background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
@@ -120,14 +190,42 @@ export default function Wishlist() {
           </div>
         </div>
       </div>
+
       {/* محتوى صفحة Wishlist */}
       <div style={contentBackgroundStyle}>
-        <div className={`flex items-center mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <i className={`fas fa-heart text-red-500 text-3xl ${isRTL ? 'ml-3' : 'mr-3'}`}></i>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            {t("wishlist.my_wishlist")}
-          </h2>
+        <div className={`flex flex-col sm:flex-row items-center justify-between mb-8 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+          <div className="flex items-center mb-4 sm:mb-0">
+            <i className={`fas fa-heart text-red-500 text-3xl ${isRTL ? 'ml-3' : 'mr-3'}`}></i>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+              {t("wishlist.my_wishlist")}
+            </h2>
+          </div>
+          {/* أزرار Select All و Clear All */}
+          {wishlistItems.length > 0 && (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={toggleSelectAll}
+                className="bg-blue-50 text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center"
+              >
+                <i className={`fas ${selectedItems.length === wishlistItems.length ? 'fa-check-square' : 'fa-square'} mr-2`}></i>
+                {selectedItems.length === wishlistItems.length ? t("wishlist.deselect_all") : t("wishlist.select_all")}
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={clearSelectedWishlist}
+                disabled={selectedItems.length === 0}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center ${selectedItems.length === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
+              >
+                <i className="fas fa-trash-alt mr-2"></i>
+                {t("wishlist.clear_selected")}
+              </motion.button>
+            </div>
+          )}
         </div>
+
         {/* قائمة المنتجات */}
         {loading ? (
           <div className="text-center py-12">
@@ -150,10 +248,26 @@ export default function Wishlist() {
                   exit={{ opacity: 0, x: isRTL ? -300 : 300 }}
                   transition={{ type: "spring", damping: 20 }}
                   className={`bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg flex flex-col md:flex-row items-center ${isRTL ? 'md:flex-row-reverse' : ''}`}
-                  onClick={() => navigateToProductDetails(item.product.id)}
-                  style={{ cursor: 'pointer' }}
+                  style={{
+                    cursor: 'pointer',
+                    border: selectedItems.includes(item.product.id) ? '2px solid #3b82f6' : 'none'
+                  }}
                 >
-                  <div className="w-full md:w-48 h-48 p-4 flex-shrink-0">
+                  {/* مربع اختيار العنصر */}
+                  <div className="p-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(item.product.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleSelectItem(item.product.id);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-5 w-5 text-blue-500 rounded"
+                    />
+                  </div>
+                  {/* صورة المنتج */}
+                  <div className="w-full md:w-48 h-48 p-4 flex-shrink-0" onClick={() => navigateToProductDetails(item.product.id)}>
                     {item.product && item.product.image ? (
                       <img
                         src={item.product.image}
@@ -166,7 +280,8 @@ export default function Wishlist() {
                       </div>
                     )}
                   </div>
-                  <div className="p-4 w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  {/* تفاصيل المنتج */}
+                  <div className="p-4 w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4" onClick={() => navigateToProductDetails(item.product.id)}>
                     <div className="flex-1">
                       <h3 className="font-bold text-lg mb-1">
                         {item.product ? item.product.name : "Unknown Product"}
@@ -181,7 +296,7 @@ export default function Wishlist() {
                         whileTap={{ scale: 0.95 }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeFromWishlist(item.product ? item.product.id : item.id)
+                          removeFromWishlist(item.product ? item.product.id : item.id);
                         }}
                         className="bg-red-50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center"
                       >
@@ -193,6 +308,60 @@ export default function Wishlist() {
                 </motion.div>
               ))}
             </AnimatePresence>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {wishlistItems.length > 0 && (
+          <div className="mt-8 flex justify-center">
+            <div className="flex gap-2">
+              {/* زر الصفحة السابقة */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className={`px-3 py-2 rounded-lg text-sm ${
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                السابق
+              </motion.button>
+
+              {/* عرض أرقام الصفحات */}
+              {Array.from({ length: paginationInfo.last_page }, (_, i) => i + 1).map((page) => (
+                <motion.button
+                  key={page}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-2 rounded-lg text-sm ${
+                    currentPage === page
+                      ? "bg-purple-600 text-white"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {page}
+                </motion.button>
+              ))}
+
+              {/* زر الصفحة التالية */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={currentPage === paginationInfo.last_page}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                className={`px-3 py-2 rounded-lg text-sm ${
+                  currentPage === paginationInfo.last_page
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                التالي
+              </motion.button>
+            </div>
           </div>
         )}
       </div>
