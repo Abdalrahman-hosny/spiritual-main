@@ -34,18 +34,13 @@ export default function Wishlist() {
             "Authorization": `Bearer ${token}`,
           },
           params: {
-            page: currentPage, // إرسال رقم الصفحة
-
+            page: currentPage,
           },
         }
       );
-     
-
 
       const items = response.data.data && response.data.data.result ? response.data.data.result : [];
       setWishlistItems(items);
-
-      // تحديث معلومات الـ Pagination
       if (response.data.data && response.data.data.meta) {
         setPaginationInfo({
           last_page: response.data.data.meta.last_page,
@@ -54,7 +49,6 @@ export default function Wishlist() {
         });
       }
 
-      
     } catch (error) {
       console.error("Error fetching wishlist items:", error);
       setWishlistItems([]);
@@ -92,7 +86,6 @@ export default function Wishlist() {
         console.error("No token found");
         return;
       }
-      // حذف كل العناصر المختارة
       for (const itemId of selectedItems) {
         await axios.post(
           "https://spiritual.brmjatech.uk/api/wishlist/remove",
@@ -104,9 +97,7 @@ export default function Wishlist() {
           }
         );
       }
-      // إعادة جلب القائمة بعد الحذف
       fetchWishlistItems();
-      // إعادة تعيين القائمة المختارة
       setSelectedItems([]);
     } catch (error) {
       console.error("Error clearing selected wishlist items:", error);
@@ -115,10 +106,8 @@ export default function Wishlist() {
 
   const toggleSelectAll = () => {
     if (selectedItems.length === wishlistItems.length) {
-      // إذا كانت كل العناصر مختارة، قم بإلغاء اختيارها
       setSelectedItems([]);
     } else {
-      // إذا لم تكن كل العناصر مختارة، قم باختيارها
       const allItemIds = wishlistItems.map(item => item.product.id);
       setSelectedItems(allItemIds);
     }
@@ -164,7 +153,7 @@ export default function Wishlist() {
       dir={isRTL ? 'rtl' : 'ltr'}
       style={pageBackgroundStyle}
     >
-      {/* Header مع زخرفة النبات */}
+      {/* Header */}
       <div className="relative">
         <div className="image">
           <div
@@ -200,7 +189,6 @@ export default function Wishlist() {
               {t("wishlist.my_wishlist")}
             </h2>
           </div>
-          {/* أزرار Select All و Clear All */}
           {wishlistItems.length > 0 && (
             <div className="flex flex-col sm:flex-row gap-3">
               <motion.button
@@ -226,7 +214,7 @@ export default function Wishlist() {
           )}
         </div>
 
-        {/* قائمة المنتجات */}
+        {/* قائمة المنتجات في شكل Grid */}
         {loading ? (
           <div className="text-center py-12">
             <p className="text-xl text-gray-500">{t("wishlist.loading")}</p>
@@ -237,7 +225,7 @@ export default function Wishlist() {
             <p className="text-xl text-gray-500">{t("wishlist.empty")}</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             <AnimatePresence>
               {wishlistItems.map((item) => (
                 <motion.div
@@ -247,9 +235,8 @@ export default function Wishlist() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: isRTL ? -300 : 300 }}
                   transition={{ type: "spring", damping: 20 }}
-                  className={`bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg flex flex-col md:flex-row items-center ${isRTL ? 'md:flex-row-reverse' : ''}`}
+                  className={`bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg flex flex-col`}
                   style={{
-                    cursor: 'pointer',
                     border: selectedItems.includes(item.product.id) ? '2px solid #3b82f6' : 'none'
                   }}
                 >
@@ -267,7 +254,7 @@ export default function Wishlist() {
                     />
                   </div>
                   {/* صورة المنتج */}
-                  <div className="w-full md:w-48 h-48 p-4 flex-shrink-0" onClick={() => navigateToProductDetails(item.product.id)}>
+                  <div className="w-full h-48 p-4 flex-shrink-0 cursor-pointer" onClick={() => navigateToProductDetails(item.product.id)}>
                     {item.product && item.product.image ? (
                       <img
                         src={item.product.image}
@@ -281,8 +268,8 @@ export default function Wishlist() {
                     )}
                   </div>
                   {/* تفاصيل المنتج */}
-                  <div className="p-4 w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4" onClick={() => navigateToProductDetails(item.product.id)}>
-                    <div className="flex-1">
+                  <div className="p-4 flex flex-col justify-between flex-1">
+                    <div>
                       <h3 className="font-bold text-lg mb-1">
                         {item.product ? item.product.name : "Unknown Product"}
                       </h3>
@@ -290,20 +277,18 @@ export default function Wishlist() {
                         {item.product ? item.product.price : "N/A"}
                       </p>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFromWishlist(item.product ? item.product.id : item.id);
-                        }}
-                        className="bg-red-50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center"
-                      >
-                        <i className="fas fa-trash-alt mr-2"></i>
-                        {t("wishlist.remove")}
-                      </motion.button>
-                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromWishlist(item.product ? item.product.id : item.id);
+                      }}
+                      className="bg-red-50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center"
+                    >
+                      <i className="fas fa-trash-alt mr-2"></i>
+                      {t("wishlist.remove")}
+                    </motion.button>
                   </div>
                 </motion.div>
               ))}
@@ -315,7 +300,6 @@ export default function Wishlist() {
         {wishlistItems.length > 0 && (
           <div className="mt-8 flex justify-center">
             <div className="flex gap-2">
-              {/* زر الصفحة السابقة */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -329,8 +313,6 @@ export default function Wishlist() {
               >
                 السابق
               </motion.button>
-
-              {/* عرض أرقام الصفحات */}
               {Array.from({ length: paginationInfo.last_page }, (_, i) => i + 1).map((page) => (
                 <motion.button
                   key={page}
@@ -346,8 +328,6 @@ export default function Wishlist() {
                   {page}
                 </motion.button>
               ))}
-
-              {/* زر الصفحة التالية */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
