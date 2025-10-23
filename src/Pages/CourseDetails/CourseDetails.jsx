@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import preview from "../../assets/hero.png";
 import plant from "../../assets/mandala_1265367 1.png";
 import { useTranslation } from "react-i18next";
@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // CommentForm Component
-const CommentForm = ({ onReviewSubmitted }) => {
+const CommentForm = ({ courseId, onReviewSubmitted }) => {
   const [rating, setRating] = useState(5);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ const CommentForm = ({ onReviewSubmitted }) => {
     try {
       const token = sessionStorage.getItem('token');
       const response = await axios.post(
-        "https://spiritual.brmjatech.uk/api/courses/1/reviews",
+        `https://spiritual.brmjatech.uk/api/courses/${courseId}/reviews`,
         { rating, comment, name, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -125,6 +125,7 @@ const CommentForm = ({ onReviewSubmitted }) => {
 const ReviewsSection = ({ reviews }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white">
       <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px] text-right align-middle mb-6">
@@ -167,6 +168,7 @@ const ReviewsSection = ({ reviews }) => {
 
 // CourseDetails Component
 const CourseDetails = () => {
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
@@ -211,21 +213,21 @@ const CourseDetails = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses");
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/courses/${id}`);
         if (response.data.code === 200) {
-          setCourse(response.data.data.result[0]);
+          setCourse(response.data.data);
         }
       } catch (error) {
         console.error("Error fetching course data:", error);
       }
     };
     fetchCourse();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses/1/reviews");
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/courses/${id}/reviews`);
         if (response.data.success) {
           setReviews(response.data.reviews);
         }
@@ -234,12 +236,12 @@ const CourseDetails = () => {
       }
     };
     fetchReviews();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     const fetchRelatedCourses = async () => {
       try {
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses/1/related");
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/courses/${id}/related`);
         if (response.data.success) {
           setRelatedCourses(response.data.courses);
         }
@@ -248,7 +250,7 @@ const CourseDetails = () => {
       }
     };
     fetchRelatedCourses();
-  }, []);
+  }, [id]);
 
   const handleTabChange = (tabId) => {
     if (tabId === activeTab) return;
@@ -264,7 +266,7 @@ const CourseDetails = () => {
   const handleReviewSubmitted = () => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses/1/reviews");
+        const response = await axios.get(`https://spiritual.brmjatech.uk/api/courses/${id}/reviews`);
         if (response.data.success) {
           setReviews(response.data.reviews);
         }
@@ -276,42 +278,38 @@ const CourseDetails = () => {
   };
 
   const handleSubscribe = async () => {
-  setIsSubscribing(true);
-  try {
-    const token = sessionStorage.getItem('token');
-    if (!token) {
-      toast.error(t("course.noToken"), {
-        position: isRTL ? "top-left" : "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
-
-    const response = await axios.post(
-      'https://spiritual.brmjatech.uk/api/courses/1/subscribe',
-      {},
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+    setIsSubscribing(true);
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        toast.error(t("course.noToken"), {
+          position: isRTL ? "top-left" : "top-right",
+          autoClose: 3000,
+        });
+        return;
       }
-    );
- console.log(" API Response:", response.data);
-    
-    if (response.data.code === 201) {
+      const response = await axios.post(
+        `https://spiritual.brmjatech.uk/api/courses/${id}/subscribe`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("API Response:", response.data);
+      if (response.data.code === 201) {
         window.location.href = response.data.data.subscription.redirect_url;
-;
       } else {
         console.error('فشل إنشاء الطلب:', response.data.message);
       }
     } catch (error) {
       console.error('حدث خطأ أثناء إنشاء الطلب:', error);
     } finally {
-      setIsLoading(false);
+      setIsSubscribing(false);
     }
   };
-
 
   const tabs = [
     { id: "profile", label: t("course.aboutCourse"), color: "purple" },
@@ -381,7 +379,6 @@ const CourseDetails = () => {
           </div>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="pt-24 bg-white">
         <div className="w-full md:w-[80%] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
@@ -495,7 +492,6 @@ const CourseDetails = () => {
               </p>
             </motion.div>
           </motion.div>
-
           {/* Video Preview and Trainer Info */}
           <div className="col-span-3 lg:col-span-2">
             <motion.div
@@ -554,7 +550,6 @@ const CourseDetails = () => {
               </motion.div>
             </motion.div>
           </div>
-
           {/* Course Title and Tabs */}
           <div className="col-span-3 pt-3">
             <motion.h2
@@ -646,7 +641,6 @@ const CourseDetails = () => {
             )}
           </div>
         </div>
-
         {/* Related Courses */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -659,12 +653,10 @@ const CourseDetails = () => {
           </h3>
           <CourseSlider courses={relatedCourses} />
         </motion.div>
-
         {/* Reviews Section */}
         <ReviewsSection reviews={reviews} />
-
         {/* Comment Form */}
-        <CommentForm onReviewSubmitted={handleReviewSubmitted} />
+        <CommentForm courseId={id} onReviewSubmitted={handleReviewSubmitted} />
       </div>
     </div>
   );
@@ -674,6 +666,7 @@ const CourseDetails = () => {
 const TrainerFiles = ({ files }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+
   return (
     <div className="py-10 bg-white" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="space-y-6">
