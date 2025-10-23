@@ -13,15 +13,15 @@ export default function VerifyOTP() {
   const [canResend, setCanResend] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { phone } = location.state || {};
+  const { email } = location.state || {};
 
-  // التحقق من وجود `phone`
+  // التحقق من وجود `email`
   useEffect(() => {
-    if (!phone) {
-      toast.error("لا يوجد رقم هاتف لإكمال العملية، سيتم إعادة توجيهك لتسجيل الدخول.");
+    if (!email) {
+      toast.error("لا يوجد بريد إلكتروني لإكمال العملية، سيتم إعادة توجيهك لتسجيل الدخول.");
       setTimeout(() => navigate('/login'), 3000);
     }
-  }, [phone, navigate]);
+  }, [email, navigate]);
 
   // عداد الوقت لإعادة الإرسال
   useEffect(() => {
@@ -47,13 +47,21 @@ export default function VerifyOTP() {
     }
     setIsLoading(true);
     try {
-      const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
-        phone,
-        token,
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/forgot/verify-otp', {
+        email,
+         token,
       });
-     if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
-      toast.success("تم التحقق بنجاح!");
-      navigate('/ResetPassword');
+
+      if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
+        toast.success("تم التحقق بنجاح!");
+        // حفظ `token` في `sessionStorage`
+        sessionStorage.setItem('otp', token);
+        navigate('/reset-password', {
+          state: {
+            email,
+            otp: token,
+          }
+        });
       } else {
         toast.error(response.data.message || "رمز التحقق غير صحيح");
       }
@@ -70,8 +78,8 @@ export default function VerifyOTP() {
     if (!canResend) return;
     setIsResending(true);
     try {
-      const response = await axios.post('https://spiritual.brmjatech.uk/api/resend-otp', {
-        phone,
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/forgot/resend-otp', {
+        email,
       });
       if (response.data.success) {
         toast.success("تم إعادة إرسال رمز التحقق بنجاح!");
@@ -112,7 +120,7 @@ export default function VerifyOTP() {
           </div>
           <div className="text-center mb-8">
             <p className="text-gray-600">
-              تم إرسال رمز التحقق إلى رقم الهاتف: <span className="font-medium">{phone}</span>
+              تم إرسال رمز التحقق إلى بريدك الإلكتروني: <span className="font-medium">{email}</span>
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">

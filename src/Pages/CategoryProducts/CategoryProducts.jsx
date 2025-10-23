@@ -19,7 +19,7 @@ export default function CategoryProducts() {
     const fetchCategoryName = async () => {
       try {
         const response = await axios.get("https://spiritual.brmjatech.uk/api/categories");
-        const categories = response.data.data.items;
+        const categories = response.data.data.result;
         const category = categories.find((cat) => cat.id == id || cat.slug === slug);
         if (category) {
           setCategoryName(category.name);

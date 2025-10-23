@@ -752,4 +752,17 @@
     "videos": "Videos",
     "files": "Files"
   }
+,
+
+  "wishlist": {
+    "title": "My Wishlist",
+    "breadcrumb": "Home",
+    "my_wishlist": "My Wishlist",
+    "loading": "Loading...",
+    "empty": "Your wishlist is empty.",
+    "remove": "Remove",
+    "select_all": "Select All",
+    "deselect_all": "Deselect All",
+    "clear_selected": "Clear Selected"
+  }
 }

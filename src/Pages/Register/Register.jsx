@@ -104,8 +104,8 @@ export default function Register() {
         setTimeout(() => {
           navigate('/verify-otp', {
             state: {
-              phone: values.phone,
-              otpToken: otpToken || response.data.token || response.data.otp_code
+               email: values.email, // ✨ استخدم الإيميل بدل التليفون
+    otpToken: otpToken || response.data.token || response.data.otp_code
             }
           });
         }, 3000);

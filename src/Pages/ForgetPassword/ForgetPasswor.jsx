@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Phone } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import image from "../../assets/loginimg.png";
 
 export default function ForgetPassword() {
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState(''); // تغيير من phone إلى email
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  // دالة للتحقق من رقم الهاتف (بدون كود دولة)
-  const validatePhone = () => {
-    if (!phone.trim()) {
-      setError('رقم الهاتف مطلوب');
+  // دالة للتحقق من البريد الإلكتروني
+  const validateEmail = () => {
+    if (!email.trim()) {
+      setError('البريد الإلكتروني مطلوب');
       return false;
-    } else if (!/^(010|011|012|015)\d{8}$/.test(phone.trim())) {
-      setError('الرجاء إدخال رقم هاتف مصري صحيح (مثال: 01012345678)');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('الرجاء إدخال بريد إلكتروني صحيح (مثال: example@email.com)');
       return false;
     }
     setError('');
@@ -26,7 +26,7 @@ export default function ForgetPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validatePhone()) {
+    if (!validateEmail()) {
       return;
     }
     setLoading(true);
@@ -35,7 +35,7 @@ export default function ForgetPassword() {
       const response = await axios.post(
         "https://spiritual.brmjatech.uk/api/forgot/password",
         {
-          phone: phone.trim(),
+          email: email.trim(), // تغيير من phone إلى email
         },
         {
           headers: {
@@ -47,7 +47,7 @@ export default function ForgetPassword() {
         setSuccess(true);
         navigate("/verify-reset", {
           state: {
-            phone: phone.trim(),
+            email: email.trim(), // تغيير من phone إلى email
             token: response.data.token
           }
         });
@@ -102,7 +102,7 @@ export default function ForgetPassword() {
               نسيت كلمة المرور؟
             </h1>
             <p className="text-gray-600 font-montserratArabic text-xs sm:text-sm lg:text-base leading-relaxed px-2" dir="rtl">
-              أدخل رقم هاتفك وسنرسل لك رابطًا لإعادة تعيين كلمة المرور
+              أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور
             </p>
           </div>
           {/* Error Message */}
@@ -114,23 +114,23 @@ export default function ForgetPassword() {
           {/* Success Message */}
           {success && (
             <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 text-xs sm:text-sm rounded-lg text-center">
-              تم إرسال رابط إعادة تعيين كلمة المرور إلى رقم هاتفك بنجاح. سيتم تحويلك إلى صفحة التحقق.
+              تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح. سيتم تحويلك إلى صفحة التحقق.
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-6">
-            {/* Phone Field */}
+            {/* Email Field */}
             <div className="space-y-1 sm:space-y-2">
               <div className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium" dir="rtl">
-                رقم الهاتف
+                البريد الإلكتروني
               </div>
               <div className="relative">
                 <input
-                  type="tel"
-                  name="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  type="email" // تغيير من tel إلى email
+                  name="email" // تغيير من phone إلى email
+                  value={email} // تغيير من phone إلى email
+                  onChange={(e) => setEmail(e.target.value)} // تغيير من setPhone إلى setEmail
                   onKeyPress={handleKeyPress}
-                  placeholder="01012345678"
+                  placeholder="example@email.com" // تغيير من رقم الهاتف إلى البريد الإلكتروني
                   className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
                   dir="ltr"
                 />

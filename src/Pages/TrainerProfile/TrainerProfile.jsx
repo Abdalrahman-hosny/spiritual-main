@@ -44,7 +44,7 @@ export default function TrainerProfile() {
     });
   }, []);
 
-  // جلب بيانات المدرب
+  // جلب بيانات المدرب باستخدام id ديناميكي
   useEffect(() => {
     const fetchTrainerData = async () => {
       try {
@@ -58,11 +58,10 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer data:", error);
       }
     };
-
     fetchTrainerData();
-  }, []);
+  }, [id]);
 
-  // جلب بيانات الكورسات
+  // جلب بيانات الكورسات باستخدام id ديناميكي
   useEffect(() => {
     const fetchTrainerCourses = async () => {
       try {
@@ -76,11 +75,10 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer courses:", error);
       }
     };
-
     fetchTrainerCourses();
-  }, []);
+  }, [id]);
 
-  // جلب بيانات المنتجات
+  // جلب بيانات المنتجات باستخدام id ديناميكي
   useEffect(() => {
     const fetchTrainerProducts = async () => {
       try {
@@ -94,9 +92,8 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer products:", error);
       }
     };
-
     fetchTrainerProducts();
-  }, []);
+  }, [id]);
 
   // Tab configuration
   const tabs = [
@@ -125,7 +122,6 @@ export default function TrainerProfile() {
   // Simulate content loading
   const handleTabChange = (tabId) => {
     if (tabId === activeTab) return;
-
     setIsLoading(true);
     setTimeout(() => {
       setActiveTab(tabId);
@@ -199,7 +195,6 @@ export default function TrainerProfile() {
                 </motion.div>
               </motion.div>
             </div>
-
             {/* Plant Decoration */}
             <motion.div
               variants={plantVariants}
@@ -256,7 +251,6 @@ export default function TrainerProfile() {
               </div>
             </div>
           </motion.div>
-
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -274,6 +268,7 @@ export default function TrainerProfile() {
             <div className="h-[3px] bg-purple-600 my-3 md:my-8"></div>
             <div className="flex items-center gap-2">
               <span className="font-[Montserrat-Arabic] font-normal text-purple-600 text-[14px] md:text-[32px] leading-[1] tracking-[0%]">
+                {trainerData?.account_type}
                 {trainerData?.account_type}
               </span>
             </div>
@@ -353,13 +348,7 @@ export default function TrainerProfile() {
                     className="space-y-6 bg-gray-50 p-6 rounded-xl shadow-sm"
                   >
                     <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] tracking-[0%] text-right text-[#555555]">
-                      {t("trainerProfile.bio1")}
-                    </p>
-                    <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] tracking-[0%] text-right text-[#555555]">
-                      {t("trainerProfile.bio2")}
-                    </p>
-                    <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] tracking-[0%] text-right text-[#555555]">
-                      {t("trainerProfile.bio3")}
+                      {trainerData?.bio || t("trainerProfile.bio1")}
                     </p>
                   </motion.div>
                 </div>
@@ -457,7 +446,6 @@ export default function TrainerProfile() {
 
 const TrainerCourses = ({ courses }) => {
   const { t } = useTranslation();
-
   return (
     <div className="py-10 bg-white">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

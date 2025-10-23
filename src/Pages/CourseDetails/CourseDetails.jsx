@@ -125,7 +125,6 @@ const CommentForm = ({ onReviewSubmitted }) => {
 const ReviewsSection = ({ reviews }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white">
       <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px] text-right align-middle mb-6">
@@ -170,6 +169,7 @@ const ReviewsSection = ({ reviews }) => {
 const CourseDetails = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
   const [course, setCourse] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -275,6 +275,44 @@ const CourseDetails = () => {
     fetchReviews();
   };
 
+  const handleSubscribe = async () => {
+  setIsSubscribing(true);
+  try {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      toast.error(t("course.noToken"), {
+        position: isRTL ? "top-left" : "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    const response = await axios.post(
+      'https://spiritual.brmjatech.uk/api/courses/1/subscribe',
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+ console.log(" API Response:", response.data);
+    
+    if (response.data.code === 201) {
+        window.location.href = response.data.data.subscription.redirect_url;
+;
+      } else {
+        console.error('فشل إنشاء الطلب:', response.data.message);
+      }
+    } catch (error) {
+      console.error('حدث خطأ أثناء إنشاء الطلب:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   const tabs = [
     { id: "profile", label: t("course.aboutCourse"), color: "purple" },
     { id: "courses", label: t("course.files"), color: "blue", badge: course?.files_count || 0 },
@@ -343,6 +381,7 @@ const CourseDetails = () => {
           </div>
         </div>
       </div>
+
       {/* Main Content */}
       <div className="pt-24 bg-white">
         <div className="w-full md:w-[80%] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
@@ -423,9 +462,13 @@ const CourseDetails = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-[60%] bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded-full transition-colors duration-300"
+                  onClick={handleSubscribe}
+                  disabled={isSubscribing}
+                  className={`w-[60%] bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded-full transition-colors duration-300 ${
+                    isSubscribing ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
                 >
-                  {t("course.subscribe")}
+                  {isSubscribing ? t("course.subscribing") : t("course.subscribe")}
                 </motion.button>
               </div>
             </motion.div>
@@ -452,6 +495,7 @@ const CourseDetails = () => {
               </p>
             </motion.div>
           </motion.div>
+
           {/* Video Preview and Trainer Info */}
           <div className="col-span-3 lg:col-span-2">
             <motion.div
@@ -510,6 +554,7 @@ const CourseDetails = () => {
               </motion.div>
             </motion.div>
           </div>
+
           {/* Course Title and Tabs */}
           <div className="col-span-3 pt-3">
             <motion.h2
@@ -601,6 +646,7 @@ const CourseDetails = () => {
             )}
           </div>
         </div>
+
         {/* Related Courses */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -613,8 +659,10 @@ const CourseDetails = () => {
           </h3>
           <CourseSlider courses={relatedCourses} />
         </motion.div>
+
         {/* Reviews Section */}
         <ReviewsSection reviews={reviews} />
+
         {/* Comment Form */}
         <CommentForm onReviewSubmitted={handleReviewSubmitted} />
       </div>
@@ -626,7 +674,6 @@ const CourseDetails = () => {
 const TrainerFiles = ({ files }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-
   return (
     <div className="py-10 bg-white" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="space-y-6">
