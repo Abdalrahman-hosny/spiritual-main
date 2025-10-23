@@ -134,7 +134,7 @@ const CourseSlider = ({ isTrue = true }) => {
           modules={[Autoplay, Pagination]}
           spaceBetween={25}
           loop={true}
-          dir={isRTL ? "rtl" : "ltr"}
+          
           autoplay={{ delay: 3500, disableOnInteraction: false }}
           pagination={{
             clickable: true,

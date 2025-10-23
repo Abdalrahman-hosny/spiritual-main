@@ -30,7 +30,7 @@ const Footer = () => {
   return (
     <footer className="relative register text-white">
       <div className="bg-black/90 absolute inset-0"></div>
-      <div dir="rtl" className="container relative z-50 mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div  className="container relative z-50 mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* العمود 1 */}
         <div className="space-y-4">
           <img

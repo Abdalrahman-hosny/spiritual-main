@@ -50,7 +50,7 @@ export default function CheckoutSummary() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto bg-white rounded-2xl mb-8 p-6 space-y-6" dir="rtl">
+    <div className="max-w-7xl mx-auto bg-white rounded-2xl mb-8 p-6 space-y-6">
       {/* رمز القسيمة */}
       <div className="space-y-4 w-full max-w-full md:w-[500px]">
         <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-3">

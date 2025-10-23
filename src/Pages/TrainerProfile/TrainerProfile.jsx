@@ -25,6 +25,8 @@ import image3 from "../../assets/hero.png";
 import user from "../../assets/user.png";
 import { Link } from "react-router-dom";
 import { FaShoppingBag } from "react-icons/fa";
+import { useParams } from "react-router-dom";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -36,6 +38,8 @@ export default function TrainerProfile() {
   const [trainerData, setTrainerData] = useState(null);
   const [trainerCourses, setTrainerCourses] = useState([]);
   const [trainerProducts, setTrainerProducts] = useState([]);
+  const { id } = useParams();
+
 
   useEffect(() => {
     window.scrollTo({
@@ -49,7 +53,7 @@ export default function TrainerProfile() {
     const fetchTrainerData = async () => {
       try {
         const response = await axios.get(
-          "https://spiritual.brmjatech.uk/api/home/trainers/2"
+          `https://spiritual.brmjatech.uk/api/home/trainers/${id}`
         );
         if (response.data.code === 200) {
           setTrainerData(response.data.data);
@@ -226,7 +230,7 @@ export default function TrainerProfile() {
       </div>
 
       {/* Main Content */}
-      <div className="md:max-w-6xl mx-auto bg-white px-6 py-24" dir="rtl">
+      <div className="md:max-w-6xl mx-auto bg-white px-6 py-24" >
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6">
           <motion.div

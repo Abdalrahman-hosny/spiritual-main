@@ -53,7 +53,7 @@ function App() {
   }, []);
 
   return (
-    <div dir={i18n.language === "ar" ? "rtl" : "ltr"}>
+    <div >
       <BrowserRouter>
         <Routes>
           {/* ✅ الصفحات اللي فيها Navbar + Footer */}
