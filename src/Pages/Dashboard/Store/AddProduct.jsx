@@ -22,6 +22,8 @@ const AddProduct = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
   const [productData, setProductData] = useState({
     name: {
@@ -39,7 +41,7 @@ const AddProduct = () => {
     price: "",
     stock: "",
     category_id: "",
-    brand_name: "",
+    brand_id: "",
     is_active: 1,
   });
 
@@ -53,28 +55,111 @@ const AddProduct = () => {
         const headers = {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
-          "Accept-Language": i18n.language === "ar" ? "ar" : "en",
+          "Accept-Language": "ar", // Fetch in Arabic
         };
 
         // Fetch categories
-        const categoriesResponse = await axios.get(
-          "https://spiritual.brmjatech.uk/api/categories",
-          { headers }
-        );
-
-        if (categoriesResponse.data.code === 200) {
-          setCategories(
-            categoriesResponse.data.data.items || categoriesResponse.data.data
+        try {
+          const categoriesResponse = await axios.get(
+            "https://spiritual.brmjatech.uk/api/categories",
+            {
+              headers,
+            }
           );
+
+          if (categoriesResponse.data.code === 200) {
+            const responseData = categoriesResponse.data.data;
+
+            let categoriesData = [];
+
+            // Check for data in result array (as shown in the API response)
+            if (
+              responseData &&
+              responseData.result &&
+              Array.isArray(responseData.result)
+            ) {
+              categoriesData = responseData.result;
+            } else if (responseData && responseData.items) {
+              categoriesData = responseData.items;
+            } else if (responseData && Array.isArray(responseData)) {
+              categoriesData = responseData;
+            } else if (
+              responseData &&
+              responseData.data &&
+              Array.isArray(responseData.data)
+            ) {
+              categoriesData = responseData.data;
+            }
+
+            console.log("Categories data:", categoriesData);
+            setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+          } else {
+            console.error("Categories API error:", categoriesResponse.data);
+            setCategories([]);
+          }
+        } catch (error) {
+          console.error("Error fetching categories:", error);
+          setCategories([]);
+        }
+
+        // Fetch brands
+        try {
+          const brandsResponse = await axios.get(
+            "https://spiritual.brmjatech.uk/api/dashboard/brand",
+            {
+              headers: {
+                ...headers,
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (brandsResponse.data.code === 200) {
+            const responseData = brandsResponse.data;
+
+            let brandsData = [];
+
+            // Check for data in message array (as shown in Postman)
+            if (responseData.message && Array.isArray(responseData.message)) {
+              brandsData = responseData.message;
+            } else if (
+              responseData.data &&
+              responseData.data.result &&
+              Array.isArray(responseData.data.result)
+            ) {
+              brandsData = responseData.data.result;
+            } else if (responseData.data && responseData.data.items) {
+              brandsData = responseData.data.items;
+            } else if (responseData.data && Array.isArray(responseData.data)) {
+              brandsData = responseData.data;
+            } else if (
+              responseData.data &&
+              responseData.data.data &&
+              Array.isArray(responseData.data.data)
+            ) {
+              brandsData = responseData.data.data;
+            }
+
+            console.log("Brands data:", brandsData);
+            setBrands(Array.isArray(brandsData) ? brandsData : []);
+          } else {
+            console.error("Brands API error:", brandsResponse.data);
+            setBrands([]);
+          }
+        } catch (error) {
+          console.error("Error fetching brands:", error);
+          setBrands([]);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("خطأ في تحميل البيانات");
+      } finally {
+        setDataLoading(false);
       }
     };
 
     fetchData();
-  }, [i18n.language]);
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -138,7 +223,7 @@ const AddProduct = () => {
       formData.append("price", productData.price);
       formData.append("stock", productData.stock);
       formData.append("category_id", productData.category_id);
-      formData.append("brand_name", productData.brand_name);
+      formData.append("brand_id", productData.brand_id);
       formData.append("is_active", productData.is_active);
 
       // Add images
@@ -372,27 +457,55 @@ const AddProduct = () => {
                           onChange={handleInputChange}
                           className="form-select"
                           required
+                          disabled={dataLoading}
                         >
-                          <option value="">{t("store.selectCategory")}</option>
-                          {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                              {category.name}
+                          <option value="">
+                            {dataLoading
+                              ? "جاري التحميل..."
+                              : t("store.selectCategory")}
+                          </option>
+                          {categories && categories.length > 0 ? (
+                            categories.map((category) => (
+                              <option key={category.id} value={category.id}>
+                                {category.name}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="" disabled>
+                              {dataLoading ? "جاري التحميل..." : "لا توجد فئات"}
                             </option>
-                          ))}
+                          )}
                         </select>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="brand_name">{t("store.brand")}</label>
-                        <input
-                          type="text"
-                          id="brand_name"
-                          name="brand_name"
-                          value={productData.brand_name}
+                        <label htmlFor="brand_id">{t("store.brand")}</label>
+                        <select
+                          id="brand_id"
+                          name="brand_id"
+                          value={productData.brand_id}
                           onChange={handleInputChange}
-                          placeholder={t("store.enterBrand")}
-                          className="form-input"
-                          required
-                        />
+                          className="form-select"
+                          disabled={dataLoading}
+                        >
+                          <option value="">
+                            {dataLoading
+                              ? "جاري التحميل..."
+                              : t("store.selectBrand")}
+                          </option>
+                          {brands && brands.length > 0 ? (
+                            brands.map((brand) => (
+                              <option key={brand.id} value={brand.id}>
+                                {brand.name}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="" disabled>
+                              {dataLoading
+                                ? "جاري التحميل..."
+                                : "لا توجد علامات تجارية"}
+                            </option>
+                          )}
+                        </select>
                       </div>
                     </div>
                   </div>

@@ -15,7 +15,7 @@ import TrainerProfile from "./Pages/TrainerProfile/TrainerProfile";
 import CourseDetails from "./Pages/CourseDetails/CourseDetails";
 import ContactUs from "./Pages/ContactUs/ContactUs";
 import OTPPage from "./Pages/OTP/Otp";
-import ForgetPassword from "./Pages/ForgetPassword/ForgetPassword";
+import ForgetPassword from "./Pages/ForgetPassword/ForgetPasswor";
 import VerifyReset from "./Pages/verifyReset/verifyReset";
 import ResetPassword from "./Pages/ResetPassword/ResetPassword";
 import Profile from "./Pages/profile/profile";
@@ -30,11 +30,22 @@ import "./App.css";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import Courses from "./Pages/Dashboard/Courses/Courses";
 import AddCourse from "./Pages/Dashboard/Courses/AddCourse";
+import EditCourse from "./Pages/Dashboard/Courses/EditCourse";
 import Students from "./Pages/Dashboard/Students/Students";
 import StudentDetails from "./Pages/Dashboard/Students/StudentDetails";
+import Brands from "./Pages/Dashboard/Brands/Brands";
+import AddBrand from "./Pages/Dashboard/Brands/AddBrand";
+import EditBrand from "./Pages/Dashboard/Brands/EditBrand";
+import BrandDetails from "./Pages/Dashboard/Brands/BrandDetails";
 import Store from "./Pages/Dashboard/Store/Store";
 import AddProduct from "./Pages/Dashboard/Store/AddProduct";
 import Orders from "./Pages/Dashboard/Orders/Orders";
+import Coupons from "./Pages/Dashboard/Coupons/Coupons";
+import AddCoupon from "./Pages/Dashboard/Coupons/AddCoupon";
+import EditCoupon from "./Pages/Dashboard/Coupons/EditCoupon";
+import CouponDetails from "./Pages/Dashboard/Coupons/CouponDetails";
+import DashboardProfile from "./Pages/Dashboard/Profile/Profile";
+import Settings from "./Pages/Dashboard/Settings/Settings";
 
 function App() {
   useEffect(() => {
@@ -86,14 +97,25 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/courses" element={<Courses />} />
           <Route path="/dashboard/courses/add" element={<AddCourse />} />
+          <Route path="/dashboard/courses/edit/:id" element={<EditCourse />} />
           <Route path="/dashboard/students" element={<Students />} />
           <Route
             path="/dashboard/students/:studentId"
             element={<StudentDetails />}
           />
+          <Route path="/dashboard/brands" element={<Brands />} />
+          <Route path="/dashboard/brands/add" element={<AddBrand />} />
+          <Route path="/dashboard/brands/edit/:id" element={<EditBrand />} />
+          <Route path="/dashboard/brands/:id" element={<BrandDetails />} />
           <Route path="/dashboard/store" element={<Store />} />
           <Route path="/dashboard/store/add" element={<AddProduct />} />
           <Route path="/dashboard/orders" element={<Orders />} />
+          <Route path="/dashboard/coupons" element={<Coupons />} />
+          <Route path="/dashboard/coupons/add" element={<AddCoupon />} />
+          <Route path="/dashboard/coupons/edit/:id" element={<EditCoupon />} />
+          <Route path="/dashboard/coupons/:id" element={<CouponDetails />} />
+          <Route path="/dashboard/profile" element={<DashboardProfile />} />
+          <Route path="/dashboard/settings" element={<Settings />} />
 
           {/* ❌ صفحة الخطأ */}
           <Route path="*" element={<NotFound />} />

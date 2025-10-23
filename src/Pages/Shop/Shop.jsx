@@ -5,9 +5,49 @@ import plant from "../../assets/mandala_1265367 1.png";
 import { Eye, Heart, Filter, X, Search } from 'lucide-react';
 import { FaShoppingBag } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+
+// مكون فلترة السعر
+const PriceFilter = ({ priceRange, setPriceRange }) => {
+  const { t } = useTranslation();
+  return (
+    <motion.div
+      className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+    >
+      <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px] text-right align-middle text-[#000000] mb-6">
+        {t("price_range")}
+      </h3>
+      <div className="space-y-4">
+        <input
+          type="range"
+          min="0"
+          max="1000"
+          value={priceRange[0]}
+          onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+          className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
+        />
+        <input
+          type="range"
+          min="0"
+          max="1000"
+          value={priceRange[1]}
+          onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+          className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
+        />
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>{priceRange[0]}</span>
+          <span>{priceRange[1]}</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 export default function Shop() {
   const { t } = useTranslation();
@@ -16,6 +56,10 @@ export default function Shop() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [wishlist, setWishlist] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [sortOption, setSortOption] = useState('newest');
 
   // جلب قائمة الرغبات من الـ API
   const fetchWishlist = async () => {
@@ -203,7 +247,6 @@ export default function Shop() {
         });
         return;
       }
-
       const response = await axios.post(
         "https://spiritual.brmjatech.uk/api/cart/add",
         {
@@ -217,8 +260,7 @@ export default function Shop() {
           },
         }
       );
-
-      if (response.data.data.items ) {
+      if (response.data.data.items) {
         toast.success(`${product.name} ${t("product_added_to_cart")}`, {
           position: "top-right",
           autoClose: 2000,
@@ -257,30 +299,38 @@ export default function Shop() {
     }
   };
 
-  // استرجاع المنتجات من API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/products");
-        const items = response?.data?.data?.result;
-        if (Array.isArray(items)) {
-          setProducts(items);
-        } else {
-          console.error("Products not array:", items);
-          setProducts([]);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        setError("فشل في جلب المنتجات. حاول مرة أخرى لاحقًا.");
+  // استرجاع المنتجات من API باستخدام Query Params
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const params = {};
+      if (selectedCategory) params.category_id = selectedCategory;
+      if (searchQuery) params.q = searchQuery;
+      if (sortOption) params.sort = sortOption;
+      if (priceRange[0] > 0) params.min = priceRange[0];
+      if (priceRange[1] < 1000) params.max = priceRange[1];
+
+      const response = await axios.get("https://spiritual.brmjatech.uk/api/products", { params });
+      const items = response?.data?.data?.result;
+      if (Array.isArray(items)) {
+        setProducts(items);
+      } else {
+        console.error("Products not array:", items);
         setProducts([]);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setError("فشل في جلب المنتجات. حاول مرة أخرى لاحقًا.");
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProducts();
     fetchWishlist();
-  }, []);
+  }, [selectedCategory, searchQuery, sortOption, priceRange]);
 
   // فلترة المنتجات بناءً على البحث
   const filteredProducts = Array.isArray(products)
@@ -323,6 +373,16 @@ export default function Shop() {
     hidden: { opacity: 0, scale: 0.8 },
     visible: { opacity: 1, scale: 1 },
     hover: { scale: 1.1, color: "#8B5CF6" },
+  };
+
+  const sidebarVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+  };
+
+  const filterVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
 
   // إذا كانت البيانات لا تزال تُسترجع
@@ -380,7 +440,7 @@ export default function Shop() {
                 variants={plantVariants}
                 initial="hidden"
                 animate="visible"
-                className="absolute z-40 -bottom-6 sm:-bottom-8 left-0 transform -translate-x-1/4 translate-y-1/4 sm:-translate-x-1/3 sm:translate-y-1/3 md:-translate-x-1/5 md:translate-y/1/5 lg:-translate-x-1/3 lg:translate-y-1/3"
+                className="absolute z-40 -bottom-6 sm:-bottom-8 left-0 transform -translate-x-1/4 translate-y-1/4 sm:-translate-x-1/3 sm:translate-y-1/3 md:-translate-x-1/5 md:translate-y-1/5 lg:-translate-x-1/3 lg:translate-y-1/3"
               >
                 <div className="relative">
                   <div className="absolute -top-12 left-2 w-24 h-24 sm:w-32 sm:h-32 sm:-top-16 sm:left-4 md:w-48 md:h-48 md:-top-24 md:left-6 lg:w-64 lg:h-64 lg:-top-32 lg:left-8 xl:w-80 xl:h-80 xl:-top-36 rounded-full">
@@ -406,27 +466,9 @@ export default function Shop() {
         </div>
         {/* Main Content */}
         <div className="container mx-auto p-4 py-8">
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          <div className="flex flex-col lg:flex-row-reverse gap-6 lg:gap-8">
             {/* Products Grid */}
             <div className="w-full lg:flex-1">
-              {/* شريط البحث تحت العنوان */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="mt-8 w-full max-w-md mx-auto"
-              >
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder={t("search_placeholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full py-3 px-5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm"
-                  />
-                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                </div>
-              </motion.div>
               {/* Results count */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -578,8 +620,287 @@ export default function Shop() {
                 </div>
               </motion.div>
             </div>
+            {/* Desktop Sidebar */}
+            <motion.div
+              variants={sidebarVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              className="hidden lg:block w-[264px] flex-shrink-0"
+            >
+              <div className="sticky top-6 space-y-6">
+                {/* Search */}
+                <motion.div variants={filterVariants} className='p-8 rounded-[20px] bg-[#4F46E50D]'>
+                  <motion.input
+                    type="text"
+                    placeholder="بحث ..."
+                    dir='rtl'
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="font-[Montserrat-Arabic] font-light text-[16px] leading-[100%] tracking-[0] text-right align-middle w-full p-2 border-none rounded bg-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </motion.div>
+                {/* Sort Options */}
+                <motion.div variants={filterVariants} dir='rtl' className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'>
+                  <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px] text-right align-middle text-[#000000] mb-8">ترتيب حسب</h3>
+                  <div className="space-y-3">
+                    <motion.label
+                      whileHover={{ x: 5 }}
+                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0] text-right align-middle flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        className='accent-purple-500 w-4 h-4'
+                        type="radio"
+                        name="sort"
+                        checked={sortOption === 'cheapest'}
+                        onChange={() => setSortOption('cheapest')}
+                      />
+                      السعر من الأرخص إلى الأعلى
+                    </motion.label>
+                    <motion.label
+                      whileHover={{ x: 5 }}
+                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0] text-right align-middle flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        className='accent-purple-500 w-4 h-4'
+                        type="radio"
+                        name="sort"
+                        checked={sortOption === 'expensive'}
+                        onChange={() => setSortOption('expensive')}
+                      />
+                      السعر من الأعلى إلى الأرخص
+                    </motion.label>
+                    <motion.label
+                      whileHover={{ x: 5 }}
+                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0] text-right align-middle flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        className='accent-purple-500 w-4 h-4'
+                        type="radio"
+                        name="sort"
+                        checked={sortOption === 'newest'}
+                        onChange={() => setSortOption('newest')}
+                      />
+                      الأحدث
+                    </motion.label>
+                    <motion.label
+                      whileHover={{ x: 5 }}
+                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0] text-right align-middle flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        className='accent-purple-500 w-4 h-4'
+                        type="radio"
+                        name="sort"
+                        checked={sortOption === 'best_selling'}
+                        onChange={() => setSortOption('best_selling')}
+                      />
+                      الأكثر مبيعاً
+                    </motion.label>
+                  </div>
+                </motion.div>
+                <motion.div variants={filterVariants}>
+                  <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
+                </motion.div>
+                {/* Categories */}
+                <motion.div variants={filterVariants} dir='rtl' className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'>
+                  <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px] text-right align-middle mb-6">تصنيفات المنتج</h3>
+                  <ul className="space-y-3">
+                    {[
+                      { id: 1, name: 'روحانيات' },
+                      { id: 2, name: 'طاقة' },
+                      { id: 3, name: 'علاج روحاني' },
+                      { id: 4, name: 'علاج طاقي' },
+                      { id: 5, name: 'لايف كوتش' },
+                      { id: 6, name: 'تحفيظ القرآن' }
+                    ].map((category) => (
+                      <motion.li
+                        key={category.id}
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        whileHover={{ x: 5, color: "#8B5CF6" }}
+                        onClick={() => setSelectedCategory(category.id)}
+                        className={`text-[#676666] font-[Alexandria] font-light text-[14px] leading-relaxed tracking-[0px] text-right align-middle cursor-pointer ${
+                          selectedCategory === category.id ? 'text-purple-600' : ''
+                        }`}
+                      >
+                        {category.name}
+                      </motion.li>
+                    ))}
+                  </ul>
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
         </div>
+        {/* Mobile Filter Button */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 1, duration: 0.5 }}
+          className="fixed bottom-6 right-6 lg:hidden z-40"
+        >
+          <motion.button
+            onClick={() => setIsSidebarOpen(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-full shadow-2xl transition-all"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            animate={{
+              boxShadow: [
+                "0 0 0 0 rgba(147, 51, 234, 0.7)",
+                "0 0 0 10px rgba(147, 51, 234, 0)",
+                "0 0 0 0 rgba(147, 51, 234, 0)"
+              ]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <Filter className="w-5 h-5" />
+          </motion.button>
+        </motion.div>
+        {/* Mobile Sidebar Overlay */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 z-50 md:hidden"
+            >
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="fixed left-0 top-0 h-full w-4/5 max-w-sm bg-white shadow-2xl overflow-y-auto"
+              >
+                {/* Header */}
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="flex items-center justify-between p-6 border-b border-gray-200"
+                >
+                  <h2 className="text-lg font-semibold text-gray-800">تصفية المنتجات</h2>
+                  <motion.button
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    whileHover={{ rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </motion.button>
+                </motion.div>
+                {/* Content */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="p-6 space-y-6"
+                >
+                  {/* Search */}
+                  <div className='p-8 rounded-[20px] bg-[#4F46E50D]'>
+                    <input
+                      type="text"
+                      placeholder="بحث ..."
+                      dir='rtl'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full p-2 border-none rounded bg-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    />
+                  </div>
+                  {/* Sort Options */}
+                  <div dir='rtl' className='p-8 rounded-[20px] bg-[#4F46E50D]'>
+                    <h3 className="font-semibold text-[16px] mb-8">ترتيب حسب</h3>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <label className="flex items-center gap-2">
+                        <input
+                          className='accent-purple-500'
+                          type="radio"
+                          name="sort"
+                          checked={sortOption === 'cheapest'}
+                          onChange={() => setSortOption('cheapest')}
+                        />
+                        السعر من الأرخص إلى الأعلى
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          className='accent-purple-500'
+                          type="radio"
+                          name="sort"
+                          checked={sortOption === 'expensive'}
+                          onChange={() => setSortOption('expensive')}
+                        />
+                        السعر من الأعلى إلى الأرخص
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          className='accent-purple-500'
+                          type="radio"
+                          name="sort"
+                          checked={sortOption === 'newest'}
+                          onChange={() => setSortOption('newest')}
+                        />
+                        الأحدث
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          className='accent-purple-500'
+                          type="radio"
+                          name="sort"
+                          checked={sortOption === 'best_selling'}
+                          onChange={() => setSortOption('best_selling')}
+                        />
+                        الأكثر مبيعاً
+                      </label>
+                    </div>
+                  </div>
+                  <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
+                  {/* Categories */}
+                  <div dir='rtl' className='p-8 rounded-[20px] bg-[#4F46E50D]'>
+                    <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px] text-right align-middle mb-6">تصنيفات المنتج</h3>
+                    <ul className="space-y-3 text-[#676666] font-[Alexandria] font-light text-[14px] leading-relaxed tracking-[0px] text-right align-middle">
+                      {[
+                        { id: 1, name: 'روحانيات' },
+                        { id: 2, name: 'طاقة' },
+                        { id: 3, name: 'علاج روحاني' },
+                        { id: 4, name: 'علاج طاقي' },
+                        { id: 5, name: 'لايف كوتش' },
+                        { id: 6, name: 'تحفيظ القرآن' }
+                      ].map((category) => (
+                        <li
+                          key={category.id}
+                          onClick={() => {
+                            setSelectedCategory(category.id);
+                            setIsSidebarOpen(false);
+                          }}
+                          className={`cursor-pointer ${selectedCategory === category.id ? 'text-purple-600' : ''}`}
+                        >
+                          {category.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {/* Apply Button */}
+                  <motion.button
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    تطبيق الفلاتر
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

@@ -247,22 +247,24 @@ export default function Navbar({ bg }) {
                       }`}
                     >
                       <div className="py-2">
-                        {categories.map((category, index) => (
-                          <Link
-                            key={category.slug}
-                            to={`/categoryProducts/${category.id}`}
-                            className={`block px-4 py-2.5 ${
-                              isRTL ? "text-right" : "text-left"
-                            } text-sm font-montserrat-arabic text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150
+                        {categories &&
+                          categories.length > 0 &&
+                          categories.map((category, index) => (
+                            <Link
+                              key={category.slug}
+                              to={`/categoryProducts/${category.id}`}
+                              className={`block px-4 py-2.5 ${
+                                isRTL ? "text-right" : "text-left"
+                              } text-sm font-montserrat-arabic text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-150
                               ${
                                 index !== categories.length - 1
                                   ? "border-b border-gray-50"
                                   : ""
                               }`}
-                          >
-                            {category.name}
-                          </Link>
-                        ))}
+                            >
+                              {category.name}
+                            </Link>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -425,17 +427,19 @@ export default function Navbar({ bg }) {
                       }`}
                     >
                       <div className="bg-gray-50 border-t border-gray-100">
-                        {categories.map((category, index) => (
-                          <Link
-                            key={category.slug}
-                            to={`/category/${category.slug}`}
-                            onClick={toggleMobileMenu}
-                            className={`block px-8 py-3 font-montserrat-arabic text-[14px] sm:text-[16px] text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200 ${
-                              isRTL ? "text-right" : "text-left"
-                            }
+                        {categories &&
+                          categories.length > 0 &&
+                          categories.map((category, index) => (
+                            <Link
+                              key={category.slug}
+                              to={`/categoryProducts/${category.slug}`}
+                              onClick={toggleMobileMenu}
+                              className={`block px-8 py-3 font-montserrat-arabic text-[14px] sm:text-[16px] text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200 ${
+                                isRTL ? "text-right" : "text-left"
+                              }
                               ${
                                 location.pathname ===
-                                `/category/${category.slug}`
+                                `/categoryProducts/${category.slug}`
                                   ? "text-purple-600 bg-purple-100"
                                   : ""
                               }
@@ -444,10 +448,10 @@ export default function Navbar({ bg }) {
                                   ? "border-b border-gray-100"
                                   : ""
                               }`}
-                          >
-                            {category.name}
-                          </Link>
-                        ))}
+                            >
+                              {category.name}
+                            </Link>
+                          ))}
                       </div>
                     </div>
                   </div>

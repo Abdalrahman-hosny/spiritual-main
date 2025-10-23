@@ -15,16 +15,16 @@ export default function OTP() {
   const inputRefs = useRef([]);
   const navigate = useNavigate();
   const location = useLocation();
-  const { phone, autoVerify } = location.state || {};
+  const { email, autoVerify } = location.state || {}; // تغيير من phone إلى email
 
   useEffect(() => {
-    if (!phone) {
-      toast.error("لا يوجد رقم هاتف صالح. سيتم إعادة توجيهك لتسجيل الدخول.");
+    if (!email) { // تغيير من phone إلى email
+      toast.error("لا يوجد بريد إلكتروني صالح. سيتم إعادة توجيهك لتسجيل الدخول.");
       setTimeout(() => navigate('/login'), 3000);
     } else if (autoVerify) {
       handleAutoVerify(autoVerify);
     }
-  }, [phone, navigate, autoVerify]);
+  }, [email, navigate, autoVerify]); // تغيير من phone إلى email
 
   useEffect(() => {
     let timer;
@@ -39,15 +39,15 @@ export default function OTP() {
   }, [resendTimer]);
 
   const handleResendOTP = async () => {
-    if (!canResend || !phone) return;
+    if (!canResend || !email) return; // تغيير من phone إلى email
     setIsLoading(true);
     setError('');
     try {
       const response = await axios.post('https://spiritual.brmjatech.uk/api/resend-otp', {
-        phone,
+        email, // تغيير من phone إلى email
       });
       if (response.data && response.data.success) {
-        toast.success("تم إعادة إرسال رمز OTP بنجاح!");
+        toast.success("تم إعادة إرسال رمز OTP بنجاح إلى بريدك الإلكتروني!");
         setResendTimer(60);
         setCanResend(false);
       } else {
@@ -78,37 +78,36 @@ export default function OTP() {
     }
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  const enteredToken = otp.join('');
-  if (enteredToken.length !== 5) {
-    setError("يرجى إدخال رمز OTP الكامل (5 أرقام)");
-    toast.error("يرجى إدخال رمز OTP الكامل (5 أرقام)");
-    return;
-  }
-  setIsLoading(true);
-  setError('');
-  try {
-    const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
-      phone,
-      token: enteredToken,
-    });
-
-    if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
-      toast.success("تم التحقق بنجاح!");
-      navigate('/login');
-    } else {
-      throw new Error(response.data?.message || 'رمز OTP غير صحيح');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const enteredToken = otp.join('');
+    if (enteredToken.length !== 5) {
+      setError("يرجى إدخال رمز OTP الكامل (5 أرقام)");
+      toast.error("يرجى إدخال رمز OTP الكامل (5 أرقام)");
+      return;
     }
-  } catch (err) {
-    const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق';
-    setError(errorMessage);
-    toast.error(errorMessage);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+    setIsLoading(true);
+    setError('');
+    try {
+      const response = await axios.post('https://spiritual.brmjatech.uk/api/verify-otp', {
+        email, // تغيير من phone إلى email
+        token: enteredToken,
+      });
+      if (response.data && (response.data.success || response.data.message?.toLowerCase().includes('verified'))) {
+        toast.success("تم التحقق بنجاح!");
+        setSuccess(true);
+        setTimeout(() => navigate('/login'), 2000);
+      } else {
+        throw new Error(response.data?.message || 'رمز OTP غير صحيح');
+      }
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء التحقق';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -129,7 +128,7 @@ export default function OTP() {
             </div>
             <div className="text-center mb-8">
               <p className="text-gray-600">
-                تم إرسال رمز التحقق إلى رقم الهاتف: <span className="font-medium">{phone}</span>
+                تم إرسال رمز التحقق إلى بريدك الإلكتروني: <span className="font-medium">{email}</span>
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">

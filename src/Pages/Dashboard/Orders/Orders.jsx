@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import { toast } from "react-toastify";
 import {
   FaFilter,
   FaSearch,
@@ -8,6 +10,9 @@ import {
   FaChevronDown,
   FaChevronLeft,
   FaChevronRight,
+  FaTimes,
+  FaEye,
+  FaSpinner,
 } from "react-icons/fa";
 import DashboardHeader from "../DashboardHeader";
 import DashboardSidebar from "../DashboardSidebar";
@@ -19,6 +24,17 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedOrders, setSelectedOrders] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({});
+
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -28,127 +44,92 @@ const Orders = () => {
     i18n.changeLanguage(lng);
   };
 
-  const tabs = [
-    { id: "myFiles", label: t("orders.myFiles"), count: 10 },
-    { id: "underReview", label: t("orders.underReview"), count: 120 },
-    { id: "completed", label: t("orders.completed"), count: 30 },
-    { id: "inProgress", label: t("orders.inProgress"), count: 160 },
-  ];
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const orders = [
-    {
-      id: "021231",
-      itemName: "مسبحة بـ 99 خرزة",
-      itemType: "product",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "5,000.00 ج.م",
-      paymentStatus: "paid",
-      date: "2:14 Pm 04/17/23",
-      status: "delivered",
-    },
-    {
-      id: "021232",
-      itemName: "اسم الكورس",
-      itemType: "course",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "1000 ج.م",
-      paymentStatus: "unpaid",
-      date: "2:14 Pm 04/17/23",
-      status: "inDelivery",
-    },
-    {
-      id: "021233",
-      itemName: "مسبحة بـ 99 خرزة",
-      itemType: "product",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "5,000.00 ج.م",
-      paymentStatus: "paid",
-      date: "2:14 Pm 04/17/23",
-      status: "inDelivery",
-    },
-    {
-      id: "021234",
-      itemName: "اسم الكورس",
-      itemType: "course",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "1000 ج.م",
-      paymentStatus: "unpaid",
-      date: "2:14 Pm 04/17/23",
-      status: "delivered",
-    },
-    {
-      id: "021235",
-      itemName: "مسبحة بـ 99 خرزة",
-      itemType: "product",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "5,000.00 ج.م",
-      paymentStatus: "paid",
-      date: "2:14 Pm 04/17/23",
-      status: "inDelivery",
-    },
-    {
-      id: "021236",
-      itemName: "اسم الكورس",
-      itemType: "course",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "1000 ج.م",
-      paymentStatus: "unpaid",
-      date: "2:14 Pm 04/17/23",
-      status: "delivered",
-    },
-    {
-      id: "021237",
-      itemName: "مسبحة بـ 99 خرزة",
-      itemType: "product",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "5,000.00 ج.م",
-      paymentStatus: "paid",
-      date: "2:14 Pm 04/17/23",
-      status: "inDelivery",
-    },
-    {
-      id: "021238",
-      itemName: "اسم الكورس",
-      itemType: "course",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "1000 ج.م",
-      paymentStatus: "unpaid",
-      date: "2:14 Pm 04/17/23",
-      status: "delivered",
-    },
-    {
-      id: "021239",
-      itemName: "مسبحة بـ 99 خرزة",
-      itemType: "product",
-      image: "/api/placeholder/40/40",
-      customer: "مصطفي السيد",
-      price: "5,000.00 ج.م",
-      paymentStatus: "paid",
-      date: "2:14 Pm 04/17/23",
-      status: "inDelivery",
-    },
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+          setError("No authentication token found");
+          return;
+        }
+
+        const response = await axios.get(
+          "https://spiritual.brmjatech.uk/api/dashboard/orders",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+              "Accept-Language": i18n.language === "ar" ? "ar" : "en",
+            },
+            params: {
+              per_page: 10,
+              page: currentPage,
+            },
+          }
+        );
+
+        console.log("Orders API Response:", response.data);
+
+        if (response.data.code === 200) {
+          const ordersData = response.data.data.result || [];
+          const paginationData = response.data.data.meta || {};
+
+          console.log("Orders data:", ordersData);
+          console.log("Pagination data:", paginationData);
+
+          setOrders(ordersData);
+          setPagination(paginationData);
+        } else {
+          console.error("API returned error:", response.data);
+          setError(
+            `API Error: ${response.data.message || "Failed to fetch orders"}`
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        if (err.response) {
+          setError(
+            `Server Error: ${err.response.status} - ${
+              err.response.data?.message || "Unknown error"
+            }`
+          );
+        } else if (err.request) {
+          setError("Network Error: Unable to connect to server");
+        } else {
+          setError("Error loading orders");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [currentPage, i18n.language]);
+
+  const tabs = [
+    { id: "all", label: t("orders.allOrders"), count: pagination.total || 0 },
+    { id: "pending", label: t("orders.pending"), count: 0 },
+    { id: "completed", label: t("orders.completed"), count: 0 },
+    { id: "cancelled", label: t("orders.cancelled"), count: 0 },
   ];
 
   const filteredOrders = orders.filter((order) => {
-    if (activeTab === "myFiles") return true;
-    if (activeTab === "underReview") return true;
-    if (activeTab === "completed") return order.status === "delivered";
-    if (activeTab === "inProgress") return order.status === "inDelivery";
+    if (activeTab === "all") return true;
+    if (activeTab === "pending")
+      return order.status_order === null || order.status_order === "pending";
+    if (activeTab === "completed")
+      return (
+        order.status_order === "completed" || order.status_order === "delivered"
+      );
+    if (activeTab === "cancelled") return order.status_order === "cancelled";
     return true;
   });
 
-  const totalPages = Math.ceil(filteredOrders.length / 9);
-  const startIndex = (currentPage - 1) * 9;
-  const endIndex = startIndex + 9;
-  const currentOrders = filteredOrders.slice(startIndex, endIndex);
+  const currentOrders = filteredOrders;
 
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -166,12 +147,57 @@ const Orders = () => {
     }
   };
 
-  const handleEditOrder = (orderId) => {
-    console.log("Edit order:", orderId);
+  const handleDeleteOrder = (orderId) => {
+    const order = orders.find((o) => o.id === orderId);
+    setSelectedOrder(order);
+    setShowDeleteModal(true);
   };
 
-  const handleDeleteOrder = (orderId) => {
-    console.log("Delete order:", orderId);
+  const confirmDeleteOrder = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      setDeleteLoading(true);
+      const token = sessionStorage.getItem("token");
+
+      const response = await axios.delete(
+        `https://spiritual.brmjatech.uk/api/dashboard/orders/${selectedOrder.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Accept-Language": i18n.language === "ar" ? "ar" : "en",
+          },
+        }
+      );
+
+      if (response.data.code === 200) {
+        toast.success(t("orders.deleteSuccess"));
+        // Remove order from local state
+        setOrders((prev) =>
+          prev.filter((order) => order.id !== selectedOrder.id)
+        );
+        setShowDeleteModal(false);
+        setSelectedOrder(null);
+      } else {
+        toast.error(response.data.message || t("orders.deleteError"));
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast.error(t("orders.deleteError"));
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleViewImage = (imageUrl) => {
+    if (imageUrl && imageUrl !== null) {
+      setSelectedImage(imageUrl);
+      setShowImageModal(true);
+    } else {
+      // Show message for no image
+      toast.info(t("orders.noImageAvailable"));
+    }
   };
 
   return (
@@ -198,27 +224,6 @@ const Orders = () => {
 
         {/* Orders Content */}
         <div className="orders-page">
-          {/* Header Section */}
-          <div className="orders-header">
-            <div className="header-left">
-              <button className="filter-btn">
-                <FaFilter />
-                {t("orders.filter")}
-              </button>
-            </div>
-
-            <div className="header-right">
-              <div className="search-container">
-                <FaSearch className="search-icon" />
-                <input
-                  type="text"
-                  placeholder={t("orders.searchPlaceholder")}
-                  className="search-input"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Tabs Section */}
           <div className="tabs-section">
             {tabs.map((tab) => (
@@ -234,145 +239,268 @@ const Orders = () => {
 
           {/* Orders Table */}
           <div className="orders-table-container">
-            <table className="orders-table">
-              <thead>
-                <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      checked={
-                        selectedOrders.length === currentOrders.length &&
-                        currentOrders.length > 0
-                      }
-                      onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="checkbox"
-                    />
-                  </th>
-                  <th>{t("orders.orders")}</th>
-                  <th>{t("orders.customers")}</th>
-                  <th>{t("orders.price")}</th>
-                  <th>{t("orders.payment")}</th>
-                  <th>{t("orders.date")}</th>
-                  <th>{t("orders.status")}</th>
-                  <th>
-                    {t("orders.action")}
-                    <FaChevronDown className="dropdown-icon" />
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td>
+            {loading ? (
+              <div className="loading-container">
+                <FaSpinner className="spinner" />
+                <p>{t("orders.loading")}</p>
+              </div>
+            ) : error ? (
+              <div className="error-container">
+                <p className="error-message">{error}</p>
+                <button
+                  className="retry-btn"
+                  onClick={() => window.location.reload()}
+                >
+                  {t("orders.retry")}
+                </button>
+              </div>
+            ) : currentOrders.length === 0 ? (
+              <div className="empty-container">
+                <p>{t("orders.noOrders")}</p>
+              </div>
+            ) : (
+              <table className="orders-table">
+                <thead>
+                  <tr>
+                    <th>
                       <input
                         type="checkbox"
-                        checked={selectedOrders.includes(order.id)}
-                        onChange={(e) =>
-                          handleSelectOrder(order.id, e.target.checked)
+                        checked={
+                          selectedOrders.length === currentOrders.length &&
+                          currentOrders.length > 0
                         }
+                        onChange={(e) => handleSelectAll(e.target.checked)}
                         className="checkbox"
                       />
-                    </td>
-                    <td className="order-cell">
-                      <div className="order-info">
-                        <span className="order-id">{order.id}</span>
-                        <div className="item-details">
-                          <img
-                            src={order.image}
-                            alt={order.itemName}
-                            className="item-image"
-                          />
-                          <span className="item-name">{order.itemName}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="customer-cell">
-                      <span className="customer-name">{order.customer}</span>
-                    </td>
-                    <td className="price-cell">
-                      <span className="price">{order.price}</span>
-                    </td>
-                    <td className="payment-cell">
-                      <span
-                        className={`payment-status ${
-                          order.paymentStatus === "paid" ? "paid" : "unpaid"
-                        }`}
-                      >
-                        {order.paymentStatus === "paid"
-                          ? t("orders.paid")
-                          : t("orders.unpaid")}
-                      </span>
-                    </td>
-                    <td className="date-cell">
-                      <span className="date">{order.date}</span>
-                    </td>
-                    <td className="status-cell">
-                      <span
-                        className={`status ${
-                          order.status === "delivered"
-                            ? "delivered"
-                            : "inDelivery"
-                        }`}
-                      >
-                        {order.status === "delivered"
-                          ? t("orders.delivered")
-                          : t("orders.inDelivery")}
-                      </span>
-                    </td>
-                    <td className="action-cell">
-                      <div className="action-buttons">
-                        <button
-                          className="action-btn edit-btn"
-                          onClick={() => handleEditOrder(order.id)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="action-btn delete-btn"
-                          onClick={() => handleDeleteOrder(order.id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
+                    </th>
+                    <th>{t("orders.orderId")}</th>
+                    <th>{t("orders.productName")}</th>
+                    <th>{t("orders.image")}</th>
+                    <th>{t("orders.customers")}</th>
+                    <th>{t("orders.price")}</th>
+                    <th>{t("orders.payment")}</th>
+                    <th>{t("orders.date")}</th>
+                    <th>{t("orders.status")}</th>
+                    <th>{t("orders.actions")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {currentOrders.map((order) => (
+                    <tr key={order.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedOrders.includes(order.id)}
+                          onChange={(e) =>
+                            handleSelectOrder(order.id, e.target.checked)
+                          }
+                          className="checkbox"
+                        />
+                      </td>
+                      <td className="order-id-cell">
+                        <span className="order-id">#{order.id}</span>
+                      </td>
+                      <td className="product-name-cell">
+                        <span className="product-name">
+                          {order.product_name || "N/A"}
+                        </span>
+                      </td>
+                      <td className="image-cell">
+                        {order.image && order.image !== null ? (
+                          <div className="image-container">
+                            <img
+                              src={order.image}
+                              alt={order.product_name || "Order item"}
+                              className="item-image"
+                            />
+                            <button
+                              className="view-image-btn"
+                              onClick={() => handleViewImage(order.image)}
+                              title={t("orders.viewImage")}
+                            >
+                              <FaEye />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="no-image-placeholder">
+                            <button
+                              className="view-image-btn"
+                              onClick={() => handleViewImage(null)}
+                              title={t("orders.viewImage")}
+                            >
+                              <FaEye />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      <td className="customer-cell">
+                        <span className="customer-name">
+                          {order.user_id || "N/A"}
+                        </span>
+                      </td>
+                      <td className="price-cell">
+                        <span className="price">{order.price || "N/A"}</span>
+                      </td>
+                      <td className="payment-cell">
+                        <span
+                          className={`payment-status ${
+                            order.status === "Paid" ? "paid" : "unpaid"
+                          }`}
+                        >
+                          {order.status === "Paid"
+                            ? t("orders.paid")
+                            : t("orders.unpaid")}
+                        </span>
+                      </td>
+                      <td className="date-cell">
+                        <span className="date">
+                          {order.created_at || "N/A"}
+                        </span>
+                      </td>
+                      <td className="status-cell">
+                        <span
+                          className={`status ${
+                            order.status_order || "pending"
+                          }`}
+                        >
+                          {order.status_order || t("orders.pending")}
+                        </span>
+                      </td>
+                      <td className="action-cell">
+                        <div className="action-buttons">
+                          <button
+                            className="action-btn delete-btn"
+                            onClick={() => handleDeleteOrder(order.id)}
+                            title={t("orders.deleteOrder")}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           {/* Pagination */}
-          <div className="pagination">
-            <button
-              className="pagination-btn"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
-            >
-              <FaChevronLeft />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {pagination.last_page > 1 && (
+            <div className="pagination">
               <button
-                key={page}
-                className={`pagination-number ${
-                  currentPage === page ? "active" : ""
-                }`}
-                onClick={() => setCurrentPage(page)}
+                className="pagination-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
               >
-                {page.toString().padStart(2, "0")}
+                <FaChevronLeft />
               </button>
-            ))}
 
-            <button
-              className="pagination-btn"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(currentPage + 1)}
-            >
-              <FaChevronRight />
-            </button>
-          </div>
+              {Array.from(
+                { length: pagination.last_page || 1 },
+                (_, i) => i + 1
+              ).map((page) => (
+                <button
+                  key={page}
+                  className={`pagination-number ${
+                    currentPage === page ? "active" : ""
+                  }`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page.toString().padStart(2, "0")}
+                </button>
+              ))}
+
+              <button
+                className="pagination-btn"
+                disabled={currentPage === pagination.last_page}
+                onClick={() => setCurrentPage(currentPage + 1)}
+              >
+                <FaChevronRight />
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{t("orders.deleteOrder")}</h3>
+              <button
+                className="close-btn"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="modal-content">
+              <p>
+                {i18n.language === "ar"
+                  ? `هل أنت متأكد من حذف الطلب رقم #${selectedOrder?.id}؟ لا يمكن التراجع عن هذا الإجراء.`
+                  : `Are you sure you want to delete order #${selectedOrder?.id}? This action cannot be undone.`}
+              </p>
+              <div className="modal-actions">
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={deleteLoading}
+                >
+                  {t("orders.cancel")}
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={confirmDeleteOrder}
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? (
+                    <>
+                      <FaSpinner className="spinner" />
+                      {t("orders.deleting")}...
+                    </>
+                  ) : (
+                    <>
+                      <FaTrash />
+                      {t("orders.delete")}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image View Modal */}
+      {showImageModal && (
+        <div className="modal-overlay" onClick={() => setShowImageModal(false)}>
+          <div
+            className="image-modal-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="image-modal-header">
+              <h3>{t("orders.imagePreview")}</h3>
+              <button
+                className="close-btn"
+                onClick={() => setShowImageModal(false)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="image-modal-content">
+              <img
+                src={selectedImage}
+                alt="Order item"
+                className="modal-image"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

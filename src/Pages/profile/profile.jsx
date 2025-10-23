@@ -5,7 +5,6 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import plant from '../../assets/Moon.png';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -24,18 +23,34 @@ export default function Profile() {
   });
 
   useEffect(() => {
-    const storedUser = JSON.parse(sessionStorage.getItem("user"));
-    if (storedUser) {
-      setUser(storedUser);
-      setFormData({
-        name: storedUser.name || '',
-        email: storedUser.email || '',
-        phone: storedUser.phone || '',
-        currentPassword: '',
-        newPassword: '',
-        confirmNewPassword: '',
-      });
-    }
+    const fetchProfile = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+        const response = await axios.get(
+          'https://spiritual.brmjatech.uk/api/profile',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const userData = response.data.data;
+        setUser(userData);
+        setFormData({
+          name: userData.name || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+          currentPassword: '',
+          newPassword: '',
+          confirmNewPassword: '',
+        });
+      } catch (error) {
+        toast.error(error.response?.data?.message || "حدث خطأ أثناء جلب البيانات", {
+          position: "top-right",
+        });
+      }
+    };
+    fetchProfile();
   }, []);
 
   const handleImageChange = (e) => {
@@ -53,24 +68,29 @@ export default function Profile() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.put(
-        'https://app.raw7any.com/api/update-profile',
-        {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-        },
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('phone', formData.phone);
+      if (imagePreview) {
+        const blob = await fetch(imagePreview).then(r => r.blob());
+        formDataToSend.append('image', blob, 'profile.jpg');
+      }
+
+      const response = await axios.post(
+        'https://spiritual.brmjatech.uk/api/profile/update',
+        formDataToSend,
         {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
       toast.success("تم تحديث البيانات بنجاح!", {
         position: "top-right",
       });
-      sessionStorage.setItem("user", JSON.stringify(response.data.user));
-      setUser(response.data.user);
+      setUser(response.data.data);
     } catch (error) {
       toast.error(error.response?.data?.message || "حدث خطأ أثناء التحديث", {
         position: "top-right",
@@ -91,7 +111,7 @@ export default function Profile() {
     setIsLoading(true);
     try {
       await axios.put(
-        'https://app.raw7any.com/api/change-password',
+        'https://spiritual.brmjatech.uk/api/change-password',
         {
           current_password: formData.currentPassword,
           new_password: formData.newPassword,
@@ -123,7 +143,7 @@ export default function Profile() {
   const handleDeleteAccount = async () => {
     setIsLoading(true);
     try {
-      await axios.delete('https://app.raw7any.com/api/delete-account', {
+      await axios.delete('https://spiritual.brmjatech.uk/api/delete-account', {
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem("token")}`,
         },
@@ -172,46 +192,6 @@ export default function Profile() {
           ))}
         </div>
 
-        {/* Shooting stars */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={`shooting-${i}`}
-              className="absolute w-1 h-1 bg-white rounded-full opacity-70"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 50}%`,
-                animationName: 'shootingStar',
-                animationDuration: '3s',
-                animationTimingFunction: 'linear',
-                animationDelay: `${i * 2}s`,
-                animationIterationCount: 'infinite',
-              }}
-            />
-          ))}
-        </div>
-
-        
-
-        {/* Floating particles */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={`particle-${i}`}
-              className="absolute w-1 h-1 bg-purple-400/60 rounded-full animate-pulse"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationName: 'floatParticle',
-                animationDuration: `${3 + Math.random() * 4}s`,
-                animationTimingFunction: 'ease-in-out',
-                animationIterationCount: 'infinite',
-                animationDelay: `${Math.random() * 2}s`,
-              }}
-            />
-          ))}
-        </div>
-
         {/* Main content */}
         <div className="pt-[80px]"></div>
         <motion.div
@@ -236,6 +216,12 @@ export default function Profile() {
                   {imagePreview ? (
                     <img
                       src={imagePreview}
+                      alt="Profile"
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : user?.image ? (
+                    <img
+                      src={user.image}
                       alt="Profile"
                       className="w-full h-full rounded-full object-cover"
                     />
@@ -271,6 +257,12 @@ export default function Profile() {
                 <p className="text-gray-500">{user?.email || "example@example.com"}</p>
                 {user?.phone && <p className="text-gray-500">{user?.phone}</p>}
               </motion.div>
+              {/* دايرة نوع المستخدم */}
+              <div className="flex-shrink-0 w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center border-2 border-purple-300">
+                <span className="text-purple-700 font-medium text-sm">
+                  {user?.type === 'client' ? 'عميل' : user?.type === 'admin' ? 'أدمن' : user?.type}
+                </span>
+              </div>
             </motion.div>
 
             {/* تحديث البيانات الشخصية */}
@@ -299,8 +291,8 @@ export default function Profile() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors bg-gray-100"
+                      disabled
                     />
                   </div>
                   <div>
@@ -323,94 +315,6 @@ export default function Profile() {
                 </form>
               </motion.div>
 
-              {/* زر تغيير كلمة السر */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="bg-white/80 p-6 rounded-lg shadow-sm backdrop-blur-sm"
-              >
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowPasswordForm(!showPasswordForm)}
-                  className={`w-full py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-                    showPasswordForm
-                      ? "bg-purple-700 text-white border-2 border-purple-500"
-                      : "bg-white/90 text-purple-700 border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-500"
-                  }`}
-                >
-                  <Lock size={18} />
-                  تغيير كلمة السر
-                </motion.button>
-
-                {/* نموذج تغيير كلمة السر */}
-                <AnimatePresence>
-                  {showPasswordForm && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                      animate={{ opacity: 1, height: "auto", marginTop: 16 }}
-                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                      <motion.form
-                        onSubmit={handleChangePassword}
-                        className="space-y-4 pt-4"
-                      >
-                        <div>
-                          <label className="block text-gray-700 font-medium mb-1">كلمة السر الحالية</label>
-                          <input
-                            type="password"
-                            value={formData.currentPassword}
-                            onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-gray-700 font-medium mb-1">كلمة السر الجديدة</label>
-                          <input
-                            type="password"
-                            value={formData.newPassword}
-                            onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-                            required
-                          />
-                          <div className="mt-2">
-                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                              <div
-                                className={`h-2.5 rounded-full ${getPasswordStrength(formData.newPassword).color}`}
-                                style={{ width: `${(getPasswordStrength(formData.newPassword).strength / 3) * 100}%` }}
-                              ></div>
-                            </div>
-                            <p className="text-xs mt-1 text-gray-500">
-                              {getPasswordStrength(formData.newPassword).label}
-                            </p>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-gray-700 font-medium mb-1">تأكيد كلمة السر الجديدة</label>
-                          <input
-                            type="password"
-                            value={formData.confirmNewPassword}
-                            onChange={(e) => setFormData({ ...formData, confirmNewPassword: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-                            required
-                          />
-                        </div>
-                        <motion.button
-                          whileTap={{ scale: 0.98 }}
-                          type="submit"
-                          disabled={isLoading}
-                          className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
-                        >
-                          {isLoading ? "جاري التغيير..." : "تغيير كلمة السر"}
-                        </motion.button>
-                      </motion.form>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
 
               {/* زر حذف الحساب */}
               <motion.div
@@ -476,8 +380,6 @@ export default function Profile() {
             </motion.div>
           )}
         </AnimatePresence>
-
-      
       </div>
       <ToastContainer rtl />
     </div>

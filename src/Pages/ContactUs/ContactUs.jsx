@@ -6,7 +6,7 @@ import { FaMapMarkerAlt, FaEnvelope, FaClock } from "react-icons/fa";
 import map from "../../assets/location.png";
 import message1 from "../../assets/message.png";
 import { motion } from "framer-motion";
-import axios from 'axios'; // استيراد axios لإرسال الطلبات
+import axios from 'axios';
 
 const ContactUs = () => {
   const { t } = useTranslation();
@@ -19,22 +19,26 @@ const ContactUs = () => {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [settings, setSettings] = useState(null);
 
   const cards = [
     {
       id: 1,
       title: "العنوان",
       icon: map,
+      value: settings?.address || "-------------------"
     },
     {
       id: 2,
       title: "البريد الالكتروني",
       icon: message1,
+      value: settings?.email || "-------------------"
     },
     {
       id: 3,
       title: "عدد ساعات العمل",
       icon: message1,
+      value: "9 AM - 5 PM" // يمكنك استبدال هذا بقيمة من الـ API إذا كانت متاحة
     },
   ];
 
@@ -69,14 +73,26 @@ const ContactUs = () => {
       top: 0,
       behavior: "smooth",
     });
+
+    // استدعاء الـ API لاسترجاع الإعدادات
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get('https://spiritual.brmjatech.uk/api/settings');
+        if (response.data.code === 200 && response.data.data.length > 0) {
+          setSettings(response.data.data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+
+    fetchSettings();
   }, []);
 
-  // دالة لإرسال البيانات إلى الـ API
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
-
     try {
       const response = await axios.post(
         'https://spiritual.brmjatech.uk/api/contact',
@@ -93,10 +109,8 @@ const ContactUs = () => {
           },
         }
       );
-
       if (response.data.code === 201) {
         setSubmitStatus({ success: true, message: response.data.message });
-        // إعادة تعيين الحقول بعد الإرسال الناجح
         setCustomerName('');
         setEmail('');
         setPhoneNumber('');
@@ -114,9 +128,27 @@ const ContactUs = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* ... (بقية الكود كما هو) ... */}
+      <div dir='ltr' className="bg-white shadow-sm pt-24 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto">
+          {cards.map((card) => (
+            <div
+              key={card.id}
+              className="flex items-center justify-between bg-[#f9f7ff] rounded-xl p-6 shadow-sm"
+            >
+              <div className="text-right flex-1 mr-4">
+                <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-[20px] tracking-[0] text-right align-middle mb-2">
+                  {card.title}
+                </h3>
+                <p className="text-gray-400 tracking-widest">{card.value}</p>
+              </div>
+              <div className="flex items-center justify-center bg-white rounded-lg p-3 shadow">
+                <img src={card.icon} className='w-[40px] h-[40px]' alt="" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-      {/* Map Container */}
       <div className="relative">
         <div className="h-screen relative overflow-hidden">
           <div className="w-full h-full rounded-lg overflow-hidden shadow-lg">
@@ -139,13 +171,11 @@ const ContactUs = () => {
           </div>
         </div>
 
-        {/* Location Form Overlay */}
         <div className="absolute -bottom-50 left-0 w-[95%] md:w-[80%] mx-auto right-0 bg-white rounded-t-3xl shadow-lg p-6">
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-2">{t('ContactUs.customRequest')}</h2>
           </div>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
-            {/* الاسم الكامل */}
             <input
               type="text"
               placeholder={t('ContactUs.fullName')}
@@ -154,7 +184,6 @@ const ContactUs = () => {
               className="w-full p-4 font-[Montserrat-Arabic] font-light text-[16px] border border-gray-200 rounded-[20px] text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
-            {/* البريد الإلكتروني */}
             <input
               type="email"
               placeholder={t('ContactUs.emailAddress')}
@@ -163,7 +192,6 @@ const ContactUs = () => {
               className="w-full p-4 font-[Montserrat-Arabic] font-light text-[16px] border border-gray-200 rounded-[20px] text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
-            {/* رقم الهاتف */}
             <input
               type="tel"
               placeholder={t('ContactUs.phone')}
@@ -172,7 +200,6 @@ const ContactUs = () => {
               className="w-full p-4 font-[Montserrat-Arabic] font-light text-[16px] border border-gray-200 rounded-[20px] text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
-            {/* الموضوع */}
             <input
               type="text"
               placeholder={t('ContactUs.subject')}
@@ -181,7 +208,6 @@ const ContactUs = () => {
               className="w-full p-4 font-[Montserrat-Arabic] font-light text-[16px] border border-gray-200 rounded-[20px] text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
-            {/* الرسالة (تاخد عمودين) */}
             <textarea
               placeholder={t('ContactUs.message')}
               value={message}
@@ -189,7 +215,6 @@ const ContactUs = () => {
               className="md:col-span-2 w-full p-4 font-[Montserrat-Arabic] font-light text-[16px] border border-gray-200 rounded-[20px] text-right h-32 focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             ></textarea>
-            {/* زر الإرسال (ياخد عمودين برضو) */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -198,20 +223,15 @@ const ContactUs = () => {
               {isSubmitting ? 'جاري الإرسال...' : t('ContactUs.sendRequest')}
             </button>
           </form>
-
-          {/* عرض رسالة نجاح/خطأ */}
           {submitStatus && (
             <div className={`mt-4 p-3 rounded-lg text-center ${submitStatus.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
               {submitStatus.message}
             </div>
           )}
-
-          {/* Bottom indicator */}
           <div className="flex justify-center mt-4">
             <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
           </div>
         </div>
-
         <div className="absolute top-80 left-6 right-6 bg-white rounded-lg shadow-lg p-4 opacity-0 pointer-events-none">
           <div className="space-y-3">
             <div className="flex items-center space-x-3 space-x-reverse p-2 hover:bg-gray-50 rounded">
@@ -225,7 +245,6 @@ const ContactUs = () => {
           </div>
         </div>
       </div>
-
       <div className='w-full pt-84'></div>
     </div>
   );

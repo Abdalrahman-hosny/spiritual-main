@@ -24,7 +24,7 @@ import {
 } from "react-icons/fa";
 import DashboardHeader from "../DashboardHeader";
 import DashboardSidebar from "../DashboardSidebar";
-import "./store.css";
+import styles from "./store.module.css";
 
 const Store = () => {
   const { t, i18n } = useTranslation();
@@ -47,6 +47,22 @@ const Store = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [productToUpdate, setProductToUpdate] = useState(null);
+  const [updateForm, setUpdateForm] = useState({
+    name: { ar: "", en: "" },
+    small_desc: { ar: "", en: "" },
+    description: { ar: "", en: "" },
+    price: "",
+    stock: "",
+    category_id: "",
+    brand_id: "",
+    is_active: 1,
+    images: [],
+  });
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   // Fetch products from API
   useEffect(() => {
@@ -61,7 +77,7 @@ const Store = () => {
         }
 
         const response = await axios.get(
-          "https://spiritual.brmjatech.uk/api/products",
+          "https://spiritual.brmjatech.uk/api/dashboard/products",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -69,18 +85,29 @@ const Store = () => {
               "Accept-Language": i18n.language === "ar" ? "ar" : "en",
             },
             params: {
-              search: searchTerm || "Spiritual",
+              search: searchTerm || "",
               per_page: 12,
               page: currentPage,
             },
           }
         );
 
+        console.log("Products API Response:", response.data);
+
         if (response.data.code === 200) {
-          setProducts(response.data.data.result);
-          setPagination(response.data.data.meta);
+          const productsData = response.data.data.result || [];
+          const paginationData = response.data.data.meta || {};
+
+          console.log("Products data:", productsData);
+          console.log("Pagination data:", paginationData);
+
+          setProducts(productsData);
+          setPagination(paginationData);
         } else {
-          setError("Failed to fetch products");
+          console.error("API returned error:", response.data);
+          setError(
+            `API Error: ${response.data.message || "Failed to fetch products"}`
+          );
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -92,6 +119,44 @@ const Store = () => {
 
     fetchProducts();
   }, [currentPage, searchTerm, i18n.language]);
+
+  // Fetch categories and brands for update form
+  useEffect(() => {
+    const fetchCategoriesAndBrands = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+        if (!token) return;
+
+        const [categoriesRes, brandsRes] = await Promise.all([
+          axios.get("https://spiritual.brmjatech.uk/api/categories", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+              "Accept-Language": "ar", // Fetch in Arabic
+            },
+          }),
+          axios.get("https://spiritual.brmjatech.uk/api/dashboard/brand", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+              "Accept-Language": "ar", // Fetch in Arabic
+            },
+          }),
+        ]);
+
+        if (categoriesRes.data.code === 200) {
+          setCategories(categoriesRes.data.data);
+        }
+        if (brandsRes.data.code === 200) {
+          setBrands(brandsRes.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories and brands:", error);
+      }
+    };
+
+    fetchCategoriesAndBrands();
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -105,8 +170,99 @@ const Store = () => {
     navigate("/dashboard/store/add");
   };
 
-  const handleEditProduct = (productId) => {
-    navigate(`/dashboard/store/edit/${productId}`);
+  const handleEditProduct = async (productId) => {
+    try {
+      const token = sessionStorage.getItem("token");
+
+      // Fetch product data in both Arabic and English
+      const [arabicResponse, englishResponse] = await Promise.all([
+        axios.get(`https://spiritual.brmjatech.uk/api/products/${productId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Accept-Language": "ar",
+          },
+        }),
+        axios.get(`https://spiritual.brmjatech.uk/api/products/${productId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Accept-Language": "en",
+          },
+        }),
+      ]);
+
+      if (
+        arabicResponse.data.code === 200 &&
+        englishResponse.data.code === 200
+      ) {
+        const arabicProduct = arabicResponse.data.data;
+        const englishProduct = englishResponse.data.data;
+
+        console.log("Arabic Product Data:", arabicProduct);
+        console.log("English Product Data:", englishProduct);
+
+        setProductToUpdate(arabicProduct);
+
+        // Populate form with existing data from both languages
+        setUpdateForm({
+          name: {
+            ar: arabicProduct.name || arabicProduct.name_ar || "",
+            en: englishProduct.name || arabicProduct.name_en || "",
+          },
+          small_desc: {
+            ar: arabicProduct.small_desc || arabicProduct.small_desc_ar || "",
+            en: englishProduct.small_desc || arabicProduct.small_desc_en || "",
+          },
+          description: {
+            ar: arabicProduct.description || arabicProduct.description_ar || "",
+            en:
+              englishProduct.description || arabicProduct.description_en || "",
+          },
+          price: arabicProduct.price || "",
+          stock: arabicProduct.stock || "",
+          category_id: arabicProduct.category_id || "",
+          brand_id: arabicProduct.brand_id || "",
+          is_active: arabicProduct.is_active || 1,
+          images: arabicProduct.images || [],
+        });
+
+        setUpdateModalOpen(true);
+      } else {
+        // Fallback: try to get data from any successful response
+        const product =
+          arabicResponse.data.code === 200
+            ? arabicResponse.data.data
+            : englishResponse.data.data;
+        setProductToUpdate(product);
+
+        setUpdateForm({
+          name: {
+            ar: product.name_ar || product.name || "",
+            en: product.name_en || product.name || "",
+          },
+          small_desc: {
+            ar: product.small_desc_ar || product.small_desc || "",
+            en: product.small_desc_en || product.small_desc || "",
+          },
+          description: {
+            ar: product.description_ar || product.description || "",
+            en: product.description_en || product.description || "",
+          },
+          price: product.price || "",
+          stock: product.stock || "",
+          category_id: product.category_id || "",
+          brand_id: product.brand_id || "",
+          is_active: product.is_active || 1,
+          images: product.images || [],
+        });
+
+        setUpdateModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching product for update:", error);
+      toast.error("خطأ في تحميل بيانات المنتج");
+    }
   };
 
   const handleProductClick = async (productId) => {
@@ -164,7 +320,7 @@ const Store = () => {
     try {
       const token = sessionStorage.getItem("token");
       const response = await axios.delete(
-        `https://spiritual.brmjatech.uk/api/products/${productToDelete.id}`,
+        `https://spiritual.brmjatech.uk/api/dashboard/products/${productToDelete.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -196,7 +352,7 @@ const Store = () => {
       const newStatus = product.is_active === 1 ? 0 : 1;
 
       const response = await axios.put(
-        `https://spiritual.brmjatech.uk/api/products/status/${product.id}`,
+        `https://spiritual.brmjatech.uk/api/dashboard/products/status/${product.id}`,
         { is_active: newStatus },
         {
           headers: {
@@ -232,6 +388,112 @@ const Store = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  // Update form handlers
+  const handleUpdateFormChange = (field, value, lang = null) => {
+    if (lang) {
+      setUpdateForm((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          [lang]: value,
+        },
+      }));
+    } else {
+      setUpdateForm((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setUpdateForm((prev) => ({
+      ...prev,
+      images: [...prev.images, ...files],
+    }));
+  };
+
+  const removeImage = (index) => {
+    setUpdateForm((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    if (!productToUpdate) return;
+
+    try {
+      setUpdateLoading(true);
+      const token = sessionStorage.getItem("token");
+
+      const formData = new FormData();
+      formData.append("name[ar]", updateForm.name.ar);
+      formData.append("name[en]", updateForm.name.en);
+      formData.append("small_desc[ar]", updateForm.small_desc.ar);
+      formData.append("small_desc[en]", updateForm.small_desc.en);
+      formData.append("description[ar]", updateForm.description.ar);
+      formData.append("description[en]", updateForm.description.en);
+      formData.append("price", updateForm.price);
+      formData.append("stock", updateForm.stock);
+      formData.append("category_id", updateForm.category_id);
+      formData.append("brand_id", updateForm.brand_id);
+      formData.append("is_active", updateForm.is_active);
+
+      // Add new images
+      updateForm.images.forEach((image, index) => {
+        if (image instanceof File) {
+          formData.append(`images[${index}]`, image);
+        }
+      });
+
+      const response = await axios.post(
+        `https://spiritual.brmjatech.uk/api/dashboard/products/${productToUpdate.id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.code === 200) {
+        toast.success("تم تحديث المنتج بنجاح!");
+        setUpdateModalOpen(false);
+        setProductToUpdate(null);
+        // Refresh products list
+        window.location.reload();
+      } else {
+        toast.error("خطأ في تحديث المنتج");
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast.error("خطأ في تحديث المنتج. حاول مرة أخرى.");
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
+  const closeUpdateModal = () => {
+    setUpdateModalOpen(false);
+    setProductToUpdate(null);
+    setUpdateForm({
+      name: { ar: "", en: "" },
+      small_desc: { ar: "", en: "" },
+      description: { ar: "", en: "" },
+      price: "",
+      stock: "",
+      category_id: "",
+      brand_id: "",
+      is_active: 1,
+      images: [],
+    });
   };
 
   // Function to truncate description to 4-5 words
@@ -283,23 +545,26 @@ const Store = () => {
         />
 
         {/* Store Content */}
-        <div className="store-page">
+        <div className={styles.storePage}>
           {/* Header Section */}
-          <div className="store-header">
-            <div className="header-left">
-              <button className="add-product-btn" onClick={handleAddProduct}>
+          <div className={styles.storeHeader}>
+            <div className={styles.headerLeft}>
+              <button
+                className={styles.addProductBtn}
+                onClick={handleAddProduct}
+              >
                 <FaPlus />
                 {t("store.addNewProduct")}
               </button>
             </div>
 
-            <div className="header-right">
-              <div className="search-container">
-                <FaSearch className="search-icon" />
+            <div className={styles.headerRight}>
+              <div className={styles.searchContainer}>
+                <FaSearch className={styles.searchIcon} />
                 <input
                   type="text"
                   placeholder={t("store.search")}
-                  className="search-input"
+                  className={styles.searchInput}
                   value={searchTerm}
                   onChange={handleSearch}
                 />
@@ -308,11 +573,13 @@ const Store = () => {
           </div>
 
           {/* Tabs Section */}
-          <div className="tabs-section">
+          <div className={styles.tabsSection}>
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
+                className={`${styles.tabBtn} ${
+                  activeTab === tab.id ? styles.active : ""
+                }`}
                 onClick={() => setActiveTab(tab.id)}
               >
                 {tab.label} ({tab.count})
@@ -321,47 +588,51 @@ const Store = () => {
           </div>
 
           {/* Products Grid */}
-          <div className="products-grid">
+          <div className={styles.productsGrid}>
             {loading ? (
-              <div className="loading-container">
-                <FaSpinner className="spinner" />
+              <div className={styles.loadingContainer}>
+                <FaSpinner className={styles.spinner} />
                 <p>{t("store.loading")}</p>
               </div>
             ) : error ? (
-              <div className="error-container">
-                <p className="error-message">{error}</p>
+              <div className={styles.errorContainer}>
+                <p className={styles.errorMessage}>{error}</p>
                 <button
-                  className="retry-btn"
+                  className={styles.retryBtn}
                   onClick={() => window.location.reload()}
                 >
                   {t("store.retry")}
                 </button>
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="empty-container">
+              <div className={styles.emptyContainer}>
                 <p>{t("store.noProducts")}</p>
+                <p className={styles.debugInfo}>
+                  Debug: Total products: {products.length}, Filtered:{" "}
+                  {filteredProducts.length}
+                </p>
               </div>
             ) : (
               filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="product-card"
+                  className={styles.productCard}
                   onClick={() => handleProductClick(product.id)}
                 >
-                  <div className="product-image-container">
+                  <div className={styles.productImageContainer}>
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="product-image"
+                      className={styles.productImage}
                       onError={(e) => {
                         e.target.src = "/api/placeholder/200/150";
                       }}
                     />
 
                     {/* Action Buttons */}
-                    <div className="product-actions">
+                    <div className={styles.productActions}>
                       <button
-                        className="action-btn edit-btn"
+                        className={`${styles.actionBtn} ${styles.editBtn}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEditProduct(product.id);
@@ -372,8 +643,10 @@ const Store = () => {
                       </button>
 
                       <button
-                        className={`action-btn status-btn ${
-                          product.is_active === 1 ? "active" : "inactive"
+                        className={`${styles.actionBtn} ${styles.statusBtn} ${
+                          product.is_active === 1
+                            ? styles.active
+                            : styles.inactive
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -389,7 +662,7 @@ const Store = () => {
                       </button>
 
                       <button
-                        className="action-btn delete-btn"
+                        className={`${styles.actionBtn} ${styles.deleteBtn}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteProduct(product);
@@ -400,10 +673,12 @@ const Store = () => {
                       </button>
                     </div>
 
-                    <div className="status-badge">
+                    <div className={styles.statusBadge}>
                       <span
-                        className={`status ${
-                          product.stock > 0 ? "available" : "unavailable"
+                        className={`${styles.status} ${
+                          product.stock > 0
+                            ? styles.available
+                            : styles.unavailable
                         }`}
                       >
                         {product.stock > 0
@@ -412,23 +687,23 @@ const Store = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="product-info">
-                    <h3 className="product-name">{product.name}</h3>
-                    <p className="product-price">
+                  <div className={styles.productInfo}>
+                    <h3 className={styles.productName}>{product.name}</h3>
+                    <p className={styles.productPrice}>
                       {product.price} {t("store.currency")}
                     </p>
-                    <p className="product-description">
+                    <p className={styles.productDescription}>
                       {truncateDescription(product.small_desc)}
                     </p>
-                    <div className="product-stats">
-                      <div className="stat-item">
-                        <FaBoxOpen className="stat-icon" />
+                    <div className={styles.productStats}>
+                      <div className={styles.statItem}>
+                        <FaBoxOpen className={styles.statIcon} />
                         <span>
                           {product.stock} {t("store.inStock")}
                         </span>
                       </div>
-                      <div className="stat-item">
-                        <span className="brand-name">
+                      <div className={styles.statItem}>
+                        <span className={styles.brandName}>
                           {product.brand?.name || "No Brand"}
                         </span>
                       </div>
@@ -441,9 +716,9 @@ const Store = () => {
 
           {/* Pagination */}
           {!loading && !error && pagination.last_page > 1 && (
-            <div className="pagination">
+            <div className={styles.pagination}>
               <button
-                className="pagination-btn"
+                className={styles.paginationBtn}
                 disabled={pagination.current_page === 1}
                 onClick={() => handlePageChange(pagination.current_page - 1)}
               >
@@ -456,8 +731,8 @@ const Store = () => {
               ).map((page) => (
                 <button
                   key={page}
-                  className={`pagination-number ${
-                    pagination.current_page === page ? "active" : ""
+                  className={`${styles.paginationNumber} ${
+                    pagination.current_page === page ? styles.active : ""
                   }`}
                   onClick={() => handlePageChange(page)}
                 >
@@ -466,7 +741,7 @@ const Store = () => {
               ))}
 
               <button
-                className="pagination-btn"
+                className={styles.paginationBtn}
                 disabled={pagination.current_page === pagination.last_page}
                 onClick={() => handlePageChange(pagination.current_page + 1)}
               >
@@ -479,155 +754,194 @@ const Store = () => {
 
       {/* Product Details Modal */}
       {isModalOpen && selectedProduct && (
-        <div className="modal-overlay" onClick={closeModal}>
+        <div className={styles.modalOverlay} onClick={closeModal}>
           <div
-            className="modal-content"
+            className={styles.modalContent}
             onClick={(e) => e.stopPropagation()}
             dir={i18n.language === "ar" ? "rtl" : "ltr"}
           >
-            <div className="modal-header">
-              <h2 className="modal-title">{selectedProduct.name}</h2>
-              <button className="modal-close" onClick={closeModal}>
+            {/* Modal Header */}
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitleSection}>
+                <h2 className={styles.modalTitle}>{selectedProduct.name}</h2>
+                <div className={styles.productId}>#{selectedProduct.id}</div>
+              </div>
+              <button className={styles.modalClose} onClick={closeModal}>
                 <FaTimes />
               </button>
             </div>
 
-            <div className="modal-body">
-              <div className="modal-image-section">
-                <div className="main-image">
+            {/* Modal Body */}
+            <div className={styles.modalBody}>
+              {/* Image Section */}
+              <div className={styles.imageSection}>
+                <div className={styles.mainImageContainer}>
                   <img
                     src={getCurrentImage()}
                     alt={selectedProduct.name}
-                    className="product-main-image"
+                    className={styles.mainImage}
                     onError={(e) => {
-                      e.target.src = "/api/placeholder/400/300";
+                      e.target.src = "/api/placeholder/500/400";
                     }}
                   />
+                  <div className={styles.imageOverlay}>
+                    <button className={styles.zoomBtn}>
+                      <FaEye />
+                    </button>
+                  </div>
                 </div>
-                <div className="image-gallery">
-                  {/* الصورة الرئيسية */}
-                  <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.name}
-                    className={`gallery-thumb ${
-                      selectedImageIndex === 0 ? "active" : ""
+
+                {/* Image Gallery */}
+                <div className={styles.imageGallery}>
+                  <div
+                    className={`${styles.galleryThumb} ${
+                      selectedImageIndex === 0 ? styles.active : ""
                     }`}
                     onClick={() => handleImageClick(0)}
-                    onError={(e) => {
-                      e.target.src = "/api/placeholder/100/75";
-                    }}
-                  />
-                  {/* الصور الإضافية */}
-                  {selectedProduct.images?.map((img, index) => (
+                  >
                     <img
-                      key={img.id}
-                      src={img.image}
-                      alt={`${selectedProduct.name} ${index + 1}`}
-                      className={`gallery-thumb ${
-                        selectedImageIndex === index + 1 ? "active" : ""
-                      }`}
-                      onClick={() => handleImageClick(index + 1)}
+                      src={selectedProduct.image}
+                      alt={selectedProduct.name}
                       onError={(e) => {
-                        e.target.src = "/api/placeholder/100/75";
+                        e.target.src = "/api/placeholder/80/60";
                       }}
                     />
+                  </div>
+                  {selectedProduct.images?.map((img, index) => (
+                    <div
+                      key={img.id}
+                      className={`${styles.galleryThumb} ${
+                        selectedImageIndex === index + 1 ? styles.active : ""
+                      }`}
+                      onClick={() => handleImageClick(index + 1)}
+                    >
+                      <img
+                        src={img.image}
+                        alt={`${selectedProduct.name} ${index + 1}`}
+                        onError={(e) => {
+                          e.target.src = "/api/placeholder/80/60";
+                        }}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
 
-              <div className="modal-details-section">
-                {/* معلومات المنتج الأساسية */}
-                <div className="product-basic-info">
-                  <div className="price-rating-row">
-                    <div className="price-section">
-                      <span className="detail-label">{t("store.price")}</span>
-                      <span className="detail-value price-value">
-                        {selectedProduct.price} {t("store.currency")}
-                      </span>
+              {/* Product Details */}
+              <div className={styles.detailsSection}>
+                {/* Price and Rating */}
+                <div className={styles.priceRatingRow}>
+                  <div className={styles.priceSection}>
+                    <div className={styles.priceLabel}>{t("store.price")}</div>
+                    <div className={styles.priceValue}>
+                      {selectedProduct.price} {t("store.currency")}
                     </div>
+                  </div>
 
-                    <div className="rating-section">
-                      <span className="detail-label">{t("store.rating")}</span>
-                      <div className="rating-display">
-                        <div className="stars">
-                          {[...Array(5)].map((_, i) => (
-                            <FaStar
-                              key={i}
-                              className={`star ${
-                                i < Math.floor(selectedProduct.rating_avg || 0)
-                                  ? "filled"
-                                  : "empty"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="reviews-count">
-                          {selectedProduct.rating_avg || 0} (
-                          {selectedProduct.reviews_count || 0}{" "}
-                          {t("store.reviews")})
-                        </span>
+                  <div className={styles.ratingSection}>
+                    <div className={styles.ratingLabel}>
+                      {t("store.rating")}
+                    </div>
+                    <div className={styles.ratingDisplay}>
+                      <div className={styles.stars}>
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar
+                            key={i}
+                            className={`${styles.star} ${
+                              i < Math.floor(selectedProduct.rating_avg || 0)
+                                ? styles.filled
+                                : styles.empty
+                            }`}
+                          />
+                        ))}
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="stock-section">
-                    <span className="detail-label">
-                      {t("store.stockStatus")}
-                    </span>
-                    <span
-                      className={`detail-value stock-value ${
-                        selectedProduct.stock > 0 ? "available" : "unavailable"
-                      }`}
-                    >
-                      {selectedProduct.stock > 0
-                        ? `${selectedProduct.stock} ${t("store.inStock")}`
-                        : t("store.outOfStock")}
-                    </span>
-                  </div>
-                </div>
-
-                {/* الوصف */}
-                <div className="description-section">
-                  <div className="detail-item">
-                    <span className="detail-label">
-                      {t("store.shortDescription")}
-                    </span>
-                    <p className="detail-value description-text">
-                      {selectedProduct.small_desc}
-                    </p>
-                  </div>
-
-                  <div className="detail-item">
-                    <span className="detail-label">
-                      {t("store.fullDescription")}
-                    </span>
-                    <p className="detail-value description-text full-description">
-                      {selectedProduct.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* العلامة التجارية */}
-                <div className="brand-section">
-                  <div className="detail-item">
-                    <span className="detail-label">{t("store.brand")}</span>
-                    <div className="brand-info">
-                      <span className="brand-name-large">
-                        {selectedProduct.brand?.name || t("store.noBrand")}
+                      <span className={styles.reviewsCount}>
+                        {selectedProduct.rating_avg || 0} (
+                        {selectedProduct.reviews_count || 0}{" "}
+                        {t("store.reviews")})
                       </span>
-                      {selectedProduct.brand?.description && (
-                        <span className="brand-description">
-                          {selectedProduct.brand.description}
-                        </span>
-                      )}
                     </div>
                   </div>
+                </div>
+
+                {/* Stock Status */}
+                <div className={styles.stockSection}>
+                  <div className={styles.stockLabel}>
+                    {t("store.stockStatus")}
+                  </div>
+                  <div
+                    className={`${styles.stockValue} ${
+                      selectedProduct.stock > 0
+                        ? styles.available
+                        : styles.unavailable
+                    }`}
+                  >
+                    {selectedProduct.stock > 0
+                      ? `${selectedProduct.stock} ${t("store.inStock")}`
+                      : t("store.outOfStock")}
+                  </div>
+                </div>
+
+                {/* Brand */}
+                <div className={styles.brandSection}>
+                  <div className={styles.brandLabel}>{t("store.brand")}</div>
+                  <div className={styles.brandInfo}>
+                    <span className={styles.brandName}>
+                      {selectedProduct.brand?.name || t("store.noBrand")}
+                    </span>
+                    {selectedProduct.brand?.description && (
+                      <span className={styles.brandDescription}>
+                        {selectedProduct.brand.description}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Descriptions */}
+                <div className={styles.descriptionSection}>
+                  <div className={styles.descriptionItem}>
+                    <div className={styles.descriptionLabel}>
+                      {t("store.shortDescription")}
+                    </div>
+                    <div className={styles.descriptionText}>
+                      {selectedProduct.small_desc || t("store.noDescription")}
+                    </div>
+                  </div>
+
+                  <div className={styles.descriptionItem}>
+                    <div className={styles.descriptionLabel}>
+                      {t("store.fullDescription")}
+                    </div>
+                    <div className={styles.descriptionText}>
+                      {selectedProduct.description || t("store.noDescription")}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Actions */}
+                <div className={styles.productActions}>
+                  <button
+                    className={styles.actionBtn}
+                    onClick={() => handleEditProduct(selectedProduct)}
+                  >
+                    <FaEdit />
+                    {t("store.edit")}
+                  </button>
+                  <button
+                    className={styles.actionBtn}
+                    onClick={() => handleDeleteProduct(selectedProduct)}
+                  >
+                    <FaTrash />
+                    {t("store.delete")}
+                  </button>
                 </div>
               </div>
             </div>
 
-            <div className="modal-footer">
-              <button className="modal-close-btn" onClick={closeModal}>
+            {/* Modal Footer */}
+            <div className={styles.modalFooter}>
+              <button className={styles.closeBtn} onClick={closeModal}>
+                <FaTimes />
                 {t("store.close")}
               </button>
             </div>
@@ -681,6 +995,269 @@ const Store = () => {
                 {t("store.delete")}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Product Modal */}
+      {updateModalOpen && productToUpdate && (
+        <div className="modal-overlay" onClick={closeUpdateModal}>
+          <div
+            className="modal-content update-modal"
+            onClick={(e) => e.stopPropagation()}
+            dir={i18n.language === "ar" ? "rtl" : "ltr"}
+          >
+            <div className="modal-header">
+              <h2>تحديث المنتج</h2>
+              <button className="modal-close" onClick={closeUpdateModal}>
+                <FaTimes />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateProduct} className="update-form">
+              <div className="modal-body">
+                {/* Product Name */}
+                <div className="form-group">
+                  <label>اسم المنتج (عربي)</label>
+                  <input
+                    type="text"
+                    value={updateForm.name.ar}
+                    onChange={(e) =>
+                      handleUpdateFormChange("name", e.target.value, "ar")
+                    }
+                    placeholder="أدخل اسم المنتج بالعربية"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>اسم المنتج (إنجليزي)</label>
+                  <input
+                    type="text"
+                    value={updateForm.name.en}
+                    onChange={(e) =>
+                      handleUpdateFormChange("name", e.target.value, "en")
+                    }
+                    placeholder="Enter product name in English"
+                    required
+                  />
+                </div>
+
+                {/* Small Description */}
+                <div className="form-group">
+                  <label>الوصف القصير (عربي)</label>
+                  <textarea
+                    value={updateForm.small_desc.ar}
+                    onChange={(e) =>
+                      handleUpdateFormChange("small_desc", e.target.value, "ar")
+                    }
+                    placeholder="أدخل الوصف القصير بالعربية"
+                    rows="3"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>الوصف القصير (إنجليزي)</label>
+                  <textarea
+                    value={updateForm.small_desc.en}
+                    onChange={(e) =>
+                      handleUpdateFormChange("small_desc", e.target.value, "en")
+                    }
+                    placeholder="Enter short description in English"
+                    rows="3"
+                    required
+                  />
+                </div>
+
+                {/* Full Description */}
+                <div className="form-group">
+                  <label>الوصف الكامل (عربي)</label>
+                  <textarea
+                    value={updateForm.description.ar}
+                    onChange={(e) =>
+                      handleUpdateFormChange(
+                        "description",
+                        e.target.value,
+                        "ar"
+                      )
+                    }
+                    placeholder="أدخل الوصف الكامل بالعربية"
+                    rows="4"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>الوصف الكامل (إنجليزي)</label>
+                  <textarea
+                    value={updateForm.description.en}
+                    onChange={(e) =>
+                      handleUpdateFormChange(
+                        "description",
+                        e.target.value,
+                        "en"
+                      )
+                    }
+                    placeholder="Enter full description in English"
+                    rows="4"
+                    required
+                  />
+                </div>
+
+                {/* Price and Stock */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>السعر</label>
+                    <input
+                      type="number"
+                      value={updateForm.price}
+                      onChange={(e) =>
+                        handleUpdateFormChange("price", e.target.value)
+                      }
+                      placeholder="أدخل السعر"
+                      min="0"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>الكمية</label>
+                    <input
+                      type="number"
+                      value={updateForm.stock}
+                      onChange={(e) =>
+                        handleUpdateFormChange("stock", e.target.value)
+                      }
+                      placeholder="أدخل الكمية"
+                      min="0"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Category and Brand */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>الفئة</label>
+                    <select
+                      value={updateForm.category_id}
+                      onChange={(e) =>
+                        handleUpdateFormChange("category_id", e.target.value)
+                      }
+                      required
+                    >
+                      <option value="">اختر الفئة</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>العلامة التجارية</label>
+                    <select
+                      value={updateForm.brand_id}
+                      onChange={(e) =>
+                        handleUpdateFormChange("brand_id", e.target.value)
+                      }
+                    >
+                      <option value="">اختر العلامة التجارية</option>
+                      {brands.map((brand) => (
+                        <option key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="form-group">
+                  <label>الحالة</label>
+                  <select
+                    value={updateForm.is_active}
+                    onChange={(e) =>
+                      handleUpdateFormChange(
+                        "is_active",
+                        parseInt(e.target.value)
+                      )
+                    }
+                  >
+                    <option value={1}>نشط</option>
+                    <option value={0}>غير نشط</option>
+                  </select>
+                </div>
+
+                {/* Images */}
+                <div className="form-group">
+                  <label>الصور</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="file-input"
+                  />
+
+                  {updateForm.images.length > 0 && (
+                    <div className="image-preview">
+                      {updateForm.images.map((image, index) => (
+                        <div key={index} className="image-item">
+                          {image instanceof File ? (
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`Preview ${index + 1}`}
+                              className="preview-image"
+                            />
+                          ) : (
+                            <img
+                              src={image.image || image}
+                              alt={`Existing ${index + 1}`}
+                              className="preview-image"
+                            />
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="remove-image-btn"
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="modal-cancel-btn"
+                  onClick={closeUpdateModal}
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  className="modal-save-btn"
+                  disabled={updateLoading}
+                >
+                  {updateLoading ? (
+                    <>
+                      <FaSpinner className="spinner" />
+                      جاري الحفظ...
+                    </>
+                  ) : (
+                    "حفظ التغييرات"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

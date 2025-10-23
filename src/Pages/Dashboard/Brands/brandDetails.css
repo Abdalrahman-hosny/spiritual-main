@@ -1,13 +1,35 @@
-/* Student Details Modal */
+/* Brand Details Modal */
 .details-modal {
   max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
-.student-details {
+.details-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.details-modal::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.details-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.details-modal::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.brand-details {
   padding: 0;
 }
 
-.student-header {
+.brand-header {
   display: flex;
   align-items: center;
   gap: 2rem;
@@ -18,47 +40,46 @@
   border: 1px solid #e5e7eb;
 }
 
-.student-avatar-large {
+.brand-image-large {
   flex-shrink: 0;
 }
 
-.student-avatar-large img {
+.brand-image-large img {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
+  border-radius: 0.75rem;
   object-fit: cover;
   border: 4px solid white;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
-.student-avatar-large img:hover {
+.brand-image-large img:hover {
   transform: scale(1.05);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
 }
 
-.avatar-placeholder-large {
+.brand-placeholder-large {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #6a4ffc, #8b5cf6);
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 2.5rem;
-  font-weight: 700;
+  color: #9ca3af;
+  font-size: 3rem;
   border: 4px solid white;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
-.avatar-placeholder-large:hover {
+.brand-placeholder-large:hover {
   transform: scale(1.05);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
 }
 
-.student-header-info {
+.brand-header-info {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -66,7 +87,7 @@
   align-items: flex-start;
 }
 
-.student-name-large {
+.brand-name-large {
   font-size: 2.5rem;
   font-weight: 700;
   color: #1f2937;
@@ -78,9 +99,9 @@
   background-clip: text;
 }
 
-.student-id {
+.brand-slug-large {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: #6a4ffc;
   margin: 0 0 1rem 0;
   font-weight: 500;
 }
@@ -104,19 +125,8 @@
   color: white;
 }
 
-/* Status Value Styling */
-.detail-value.status-active {
-  color: #10b981;
-  font-weight: 600;
-}
-
-.detail-value.status-inactive {
-  color: #ef4444;
-  font-weight: 600;
-}
-
 /* Details Grid */
-.student-details-grid {
+.brand-details-grid {
   display: grid;
   gap: 2rem;
 }
@@ -210,6 +220,35 @@
   word-break: break-word;
 }
 
+/* Description Content */
+.description-content {
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  overflow: visible;
+}
+
+.description-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Status Value Styling */
+.detail-value.status-active {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.detail-value.status-inactive {
+  color: #ef4444;
+  font-weight: 600;
+}
+
 /* Modal Actions */
 .modal-actions {
   display: flex;
@@ -240,28 +279,28 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .student-header {
+  .brand-header {
     flex-direction: column;
     text-align: center;
     gap: 1.5rem;
   }
 
-  .student-header-info {
+  .brand-header-info {
     align-items: center;
   }
 
-  .student-name-large {
+  .brand-name-large {
     font-size: 2rem;
   }
 
-  .student-avatar-large img,
-  .avatar-placeholder-large {
+  .brand-image-large img,
+  .brand-placeholder-large {
     width: 100px;
     height: 100px;
   }
 
-  .avatar-placeholder-large {
-    font-size: 2rem;
+  .brand-placeholder-large {
+    font-size: 2.5rem;
   }
 
   .details-row {
@@ -278,7 +317,6 @@
     gap: 0.75rem;
   }
 
-  .edit-btn,
   .close-btn-secondary {
     width: 100%;
     justify-content: center;
@@ -286,18 +324,18 @@
 }
 
 @media (max-width: 480px) {
-  .student-name-large {
+  .brand-name-large {
     font-size: 1.75rem;
   }
 
-  .student-avatar-large img,
-  .avatar-placeholder-large {
+  .brand-image-large img,
+  .brand-placeholder-large {
     width: 80px;
     height: 80px;
   }
 
-  .avatar-placeholder-large {
-    font-size: 1.5rem;
+  .brand-placeholder-large {
+    font-size: 2rem;
   }
 
   .section-title {

@@ -1,6 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Star, MessageCircle, BookOpen, Package, User, Clock, Users, Award, CheckCircle, ShoppingCart, Calendar, Heart, Eye } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Star,
+  MessageCircle,
+  BookOpen,
+  Package,
+  User,
+  Clock,
+  Users,
+  Award,
+  CheckCircle,
+  ShoppingCart,
+  Calendar,
+  Heart,
+  Eye,
+} from "lucide-react";
 import plant from "../../assets/mandala_1265367 1.png";
 import { AiFillStar } from "react-icons/ai";
 import { BiVideo } from "react-icons/bi";
@@ -10,13 +24,13 @@ import image2 from "../../assets/bg-login.png";
 import image3 from "../../assets/hero.png";
 import user from "../../assets/user.png";
 import { Link } from "react-router-dom";
-import { FaShoppingBag } from 'react-icons/fa';
+import { FaShoppingBag } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 export default function TrainerProfile() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
   const [trainerData, setTrainerData] = useState(null);
@@ -34,7 +48,9 @@ export default function TrainerProfile() {
   useEffect(() => {
     const fetchTrainerData = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/2');
+        const response = await axios.get(
+          "https://spiritual.brmjatech.uk/api/home/trainers/2"
+        );
         if (response.data.code === 200) {
           setTrainerData(response.data.data);
         }
@@ -50,7 +66,9 @@ export default function TrainerProfile() {
   useEffect(() => {
     const fetchTrainerCourses = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/1/courses');
+        const response = await axios.get(
+          "https://spiritual.brmjatech.uk/api/home/trainers/1/courses"
+        );
         if (response.data.code === 200) {
           setTrainerCourses(response.data.data.result);
         }
@@ -66,7 +84,9 @@ export default function TrainerProfile() {
   useEffect(() => {
     const fetchTrainerProducts = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/home/trainers/1/products');
+        const response = await axios.get(
+          "https://spiritual.brmjatech.uk/api/home/trainers/1/products"
+        );
         if (response.data.code === 200) {
           setTrainerProducts(response.data.data.result);
         }
@@ -81,25 +101,25 @@ export default function TrainerProfile() {
   // Tab configuration
   const tabs = [
     {
-      id: 'profile',
+      id: "profile",
       label: t("trainerProfile.tabs.profile"),
       icon: User,
-      color: 'purple'
+      color: "purple",
     },
     {
-      id: 'courses',
+      id: "courses",
       label: t("trainerProfile.tabs.courses"),
       icon: BookOpen,
-      color: 'blue',
-      badge: trainerCourses.length
+      color: "blue",
+      badge: trainerCourses.length,
     },
     {
-      id: 'products',
+      id: "products",
       label: t("trainerProfile.tabs.products"),
       icon: Package,
-      color: 'green',
-      badge: trainerProducts.length
-    }
+      color: "green",
+      badge: trainerProducts.length,
+    },
   ];
 
   // Simulate content loading
@@ -109,7 +129,7 @@ export default function TrainerProfile() {
     setIsLoading(true);
     setTimeout(() => {
       setActiveTab(tabId);
-      setAnimationKey(prev => prev + 1);
+      setAnimationKey((prev) => prev + 1);
       setIsLoading(false);
     }, 300);
   };
@@ -121,9 +141,9 @@ export default function TrainerProfile() {
       scale: 1,
       transition: {
         duration: 0.8,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
   const plantVariants = {
@@ -135,16 +155,16 @@ export default function TrainerProfile() {
       transition: {
         duration: 1.2,
         ease: "easeOut",
-        delay: 0.3
-      }
-    }
+        delay: 0.3,
+      },
+    },
   };
 
   return (
     <div>
       {/* Hero Section */}
-      <div className='relative'>
-        <div className='image'>
+      <div className="relative">
+        <div className="image">
           <div className="relative bg-black/70">
             <div className="pt-[80px]"></div>
             <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
@@ -169,8 +189,12 @@ export default function TrainerProfile() {
                 >
                   <p className="font-[Montserrat-Arabic] text-white font-normal text-[18px] sm:text-[20px] md:text-[24px] text-center">
                     {t("trainerProfile.header.home")} /
-                    <span className=''> {t("trainerProfile.header.cart")}</span> /
-                    <span className='text-purple-500'> {t("trainerProfile.header.profile")}</span>
+                    <span className=""> {t("trainerProfile.header.cart")}</span>{" "}
+                    /
+                    <span className="text-purple-500">
+                      {" "}
+                      {t("trainerProfile.header.profile")}
+                    </span>
                   </p>
                 </motion.div>
               </motion.div>
@@ -218,12 +242,17 @@ export default function TrainerProfile() {
           >
             <div className="md:w-[232px] md:h-[232px] w-20 h-20 rounded-full overflow-hidden ring-4 ring-purple-100 relative group">
               <img
-                src={trainerData?.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"}
+                src={
+                  trainerData?.image ||
+                  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                }
                 alt={t("trainerProfile.trainerAlt")}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <span className="text-white font-medium text-lg">{t("trainerProfile.viewProfile")}</span>
+                <span className="text-white font-medium text-lg">
+                  {t("trainerProfile.viewProfile")}
+                </span>
               </div>
             </div>
           </motion.div>
@@ -242,10 +271,10 @@ export default function TrainerProfile() {
             <h1 className="font-[Montserrat-Arabic] font-bold text-[14px] md:text-[40px] leading-[1] tracking-[0%]">
               {trainerData?.name || t("trainerProfile.trainerName")}
             </h1>
-            <div className='h-[3px] bg-purple-600 my-3 md:my-8'></div>
+            <div className="h-[3px] bg-purple-600 my-3 md:my-8"></div>
             <div className="flex items-center gap-2">
               <span className="font-[Montserrat-Arabic] font-normal text-purple-600 text-[14px] md:text-[32px] leading-[1] tracking-[0%]">
-                 {trainerData?.account_type }
+                {trainerData?.account_type}
               </span>
             </div>
           </motion.div>
@@ -269,9 +298,17 @@ export default function TrainerProfile() {
                 whileTap={{ scale: 0.95 }}
                 className={`relative flex items-center md:px-4 py-2 font-[Montserrat-Arabic] font-light text-[14px] leading-[32.3px] tracking-[0%] text-center align-middle transition-all duration-300 flex-1 justify-center ${
                   isActive
-                    ? `bg-purple-600 text-white shadow-md transform scale-105 ${tab.id === "courses" ? "" : tab.id === "products" ? "rounded-e-2xl" : "rounded-r-2xl"}`
-                    : 'text-gray-600'
-                } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    ? `bg-purple-600 text-white shadow-md transform scale-105 ${
+                        tab.id === "courses"
+                          ? ""
+                          : tab.id === "products"
+                          ? "rounded-e-2xl"
+                          : "rounded-r-2xl"
+                      }`
+                    : "text-gray-600"
+                } ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                }`}
               >
                 {tab.label}
                 {tab.badge && (
@@ -306,7 +343,7 @@ export default function TrainerProfile() {
               transition={{ duration: 0.5 }}
               className="animate-fadeIn"
             >
-              {activeTab === 'profile' && (
+              {activeTab === "profile" && (
                 <div className="space-y-8">
                   {/* Biography */}
                   <motion.div
@@ -327,12 +364,12 @@ export default function TrainerProfile() {
                   </motion.div>
                 </div>
               )}
-              {activeTab === 'courses' && (
+              {activeTab === "courses" && (
                 <div className="space-y-6">
                   <TrainerCourses courses={trainerCourses} />
                 </div>
               )}
-              {activeTab === 'products' && (
+              {activeTab === "products" && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     {trainerProducts.map((product, idx) => (
@@ -381,8 +418,12 @@ export default function TrainerProfile() {
                             {product.description}
                           </p>
                           <div className="flex items-center justify-center font-[Montserrat-Arabic] font-medium text-[16px] leading-[100%] tracking-[0] text-center uppercase gap-1">
-                            <span className="text-purple-500">{t("trainerProfile.currency")}</span>
-                            <span className="text-purple-600">{product.price}</span>
+                            <span className="text-purple-500">
+                              {t("trainerProfile.currency")}
+                            </span>
+                            <span className="text-purple-600">
+                              {product.price}
+                            </span>
                           </div>
                         </div>
                       </motion.div>
@@ -395,10 +436,16 @@ export default function TrainerProfile() {
         )}
       </div>
 
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out forwards;
@@ -442,22 +489,32 @@ const TrainerCourses = ({ courses }) => {
                   {Array.from({ length: 5 }).map((_, i) => (
                     <AiFillStar key={i} />
                   ))}
-                  <span className="ml-2 text-gray-600 text-sm">({course.reviews})</span>
+                  <span className="ml-2 text-gray-600 text-sm">
+                    ({course.reviews})
+                  </span>
                 </div>
                 {/* Course Name */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{course.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {course.name}
+                </h3>
                 {/* Videos and Files */}
                 <div className="flex items-center text-sm text-gray-600 mb-3 space-x-3 rtl:space-x-reverse">
                   <div className="flex items-center">
-                    <BiVideo className="ml-1 text-purple-500" /> {course.videos} {t("trainerProfile.videos")}
+                    <BiVideo className="ml-1 text-purple-500" /> {course.videos}{" "}
+                    {t("trainerProfile.videos")}
                   </div>
                   <div className="flex items-center">
-                    <LuFile className="ml-1 text-purple-500" /> {course.files} {t("trainerProfile.files")}
+                    <LuFile className="ml-1 text-purple-500" /> {course.files}{" "}
+                    {t("trainerProfile.files")}
                   </div>
                 </div>
                 {/* Instructor */}
                 <div className="flex items-center text-gray-700 text-sm font-medium">
-                  <img src={user} className="w-[50px] h-[50px] rounded-full" alt={t("trainerProfile.instructorAlt")} />
+                  <img
+                    src={user}
+                    className="w-[50px] h-[50px] rounded-full"
+                    alt={t("trainerProfile.instructorAlt")}
+                  />
                   <span className="mr-2">{course.instructor}</span>
                 </div>
               </div>

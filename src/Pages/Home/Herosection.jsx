@@ -166,7 +166,7 @@ export default function Herosection() {
       </div>
 
       {/* CSS keyframes */}
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes float {
           0%,
           100% {

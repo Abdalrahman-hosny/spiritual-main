@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Lock, Phone, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import image from "../../assets/loginimg.png";
@@ -10,24 +10,23 @@ export default function Login() {
   const [loginError, setLoginError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [loginForm, setLoginForm] = useState({
-    phone: "",
+    email: "",
     password: "",
   });
   const navigate = useNavigate();
 
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   // Phone validation regex (Egyptian phone numbers without country code)
   // const phoneRegex = /^01[0-9]{9}$/;
 
   const validateForm = () => {
     const errors = {};
-    // Clean phone number from spaces or dashes
-    // const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, "");
-    // Phone validation
-    // if (!cleanPhoneNumber.trim()) {
-    //   errors.phone = "رقم الهاتف مطلوب";
-    // } else if (!phoneRegex.test(cleanPhoneNumber)) {
-    //   errors.phone = "الرجاء إدخال رقم هاتف صحيح (مثال: 01012345678)";
-    // }
+    if (!loginForm.email.trim()) {
+      errors.email = "البريد الإلكتروني مطلوب";
+    } else if (!emailRegex.test(loginForm.email)) {
+      errors.email = "الرجاء إدخال بريد إلكتروني صحيح";
+    }
     // Password validation
     if (!loginForm.password.trim()) {
       errors.password = "كلمة المرور مطلوبة";
@@ -44,14 +43,12 @@ export default function Login() {
       ...prev,
       [name]: value,
     }));
-    // Clear specific field error when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({
         ...prev,
         [name]: "",
       }));
     }
-    // Clear general login error
     if (loginError) {
       setLoginError("");
     }
@@ -59,7 +56,6 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    // Validate form before submitting
     if (!validateForm()) {
       return;
     }
@@ -67,48 +63,31 @@ export default function Login() {
     setLoginError("");
     setFieldErrors({});
     try {
-      // Clean phone number from spaces or dashes
-      const cleanPhoneNumber = loginForm.phone.replace(/[\s-]/g, "");
-      console.log("Phone sent to API:", cleanPhoneNumber);
-      console.log("Password sent to API:", loginForm.password);
-
       const response = await axios.post(
         "https://spiritual.brmjatech.uk/api/login",
         {
-          phone: cleanPhoneNumber,
+          email: loginForm.email,
           password: loginForm.password,
         },
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
-      // Check if response is successful and contains a token inside response.data.data
-      if (response.data.data && response.data.data.token) {
-        sessionStorage.setItem("token", response.data.data.token);
+      const payload = response?.data?.data;
+      if (payload?.token) {
+        sessionStorage.setItem("token", payload.token);
+      }
+      if (payload?.user) {
+        sessionStorage.setItem("user", JSON.stringify(payload.user));
+      }
 
-        // Store user data if needed
-        if (response.data.data.user) {
-          sessionStorage.setItem(
-            "user",
-            JSON.stringify(response.data.data.user)
-          );
-
-          // Check user type and redirect accordingly
-          const userType = response.data.data.user.type;
-          if (userType === "client") {
-            // Redirect to home page for clients
-            navigate("/");
-          } else {
-            // Redirect to dashboard for other user types
-            navigate("/dashboard");
-          }
-        } else {
-          // Fallback: redirect to home if no user data
-          navigate("/");
-        }
+      if (payload?.user) {
+        const userType = payload.user.type;
+        navigate(userType === "client" ? "/" : "/dashboard");
+      } else if (payload?.token) {
+        // If only token exists, safely navigate to home
+        navigate("/");
       } else {
         setLoginError(
           "لم يتم استقبال بيانات تسجيل الدخول. الرجاء المحاولة مرة أخرى."
@@ -116,30 +95,28 @@ export default function Login() {
       }
     } catch (error) {
       console.log("Login error:", error);
-      // Handle different types of errors
       if (error.response) {
         const { status, data } = error.response;
         if (status === 422) {
-          if (data.errors) {
-            // Extract all error messages from the API response
+          if (data?.errors) {
             const errorMessages = Object.values(data.errors).flat();
             setLoginError(errorMessages.join("\n"));
           } else {
             setLoginError(
-              data.message ||
-                "البيانات المدخلة غير صحيحة. الرجاء التحقق من رقم الهاتف وكلمة المرور."
+              data?.message ||
+                "البيانات المدخلة غير صحيحة. الرجاء التحقق من البريد الإلكتروني وكلمة المرور."
             );
           }
         } else {
           switch (status) {
             case 400:
               setLoginError(
-                data?.message || "رقم الهاتف أو كلمة المرور غير صحيحة"
+                data?.message || "البريد الإلكتروني أو كلمة المرور غير صحيحة"
               );
               break;
             case 401:
               setLoginError(
-                data?.message || "رقم الهاتف أو كلمة المرور غير صحيحة"
+                data?.message || "البريد الإلكتروني أو كلمة المرور غير صحيحة"
               );
               break;
             case 403:
@@ -192,27 +169,23 @@ export default function Login() {
       top: 0,
       behavior: "smooth",
     });
-    // استعادة البيانات المحفوظة من sessionStorage
-    const savedRegisterPhone = sessionStorage.getItem("registerPhone");
+    const savedRegisterEmail = sessionStorage.getItem("registerEmail");
     const savedRegisterPassword = sessionStorage.getItem("registerPassword");
-    const savedResetPhone = sessionStorage.getItem("resetPhone");
+    const savedResetEmail = sessionStorage.getItem("resetEmail");
     const savedResetPassword = sessionStorage.getItem("resetPassword");
-    // استخدام بيانات التسجيل إذا كانت موجودة
-    if (savedRegisterPhone && savedRegisterPassword) {
+    if (savedRegisterEmail && savedRegisterPassword) {
       setLoginForm({
-        phone: savedRegisterPhone,
+        email: savedRegisterEmail,
         password: savedRegisterPassword,
       });
-      sessionStorage.removeItem("registerPhone");
+      sessionStorage.removeItem("registerEmail");
       sessionStorage.removeItem("registerPassword");
-    }
-    // استخدام بيانات إعادة تعيين كلمة المرور إذا كانت موجودة
-    else if (savedResetPhone && savedResetPassword) {
+    } else if (savedResetEmail && savedResetPassword) {
       setLoginForm({
-        phone: savedResetPhone,
+        email: savedResetEmail,
         password: savedResetPassword,
       });
-      sessionStorage.removeItem("resetPhone");
+      sessionStorage.removeItem("resetEmail");
       sessionStorage.removeItem("resetPassword");
     }
   }, []);
@@ -265,30 +238,30 @@ export default function Login() {
             onSubmit={handleLogin}
             className="space-y-3 sm:space-y-4 lg:space-y-6"
           >
-            {/* Phone Field */}
+            {/* Email Field */}
             <div className="space-y-1 sm:space-y-2">
               <div
                 className="block text-right text-gray-700 text-xs sm:text-sm lg:text-base font-medium"
                 dir="rtl"
               >
-                رقم الهاتف
+                البريد الإلكتروني
               </div>
               <div className="relative">
                 <input
-                  type="text"
-                  name="phone"
-                  value={loginForm.phone}
+                  type="email"
+                  name="email"
+                  value={loginForm.email}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  placeholder="01012345678"
+                  placeholder="example@email.com"
                   className={`w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 bg-gray-50 border ${
-                    fieldErrors.phone ? "border-red-500" : "border-gray-300"
+                    fieldErrors.email ? "border-red-500" : "border-gray-300"
                   } rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-xs sm:text-sm lg:text-base`}
                   dir="ltr"
                 />
-                {fieldErrors.phone && (
+                {fieldErrors.email && (
                   <p className="text-red-500 text-xs mt-1">
-                    {fieldErrors.phone}
+                    {fieldErrors.email}
                   </p>
                 )}
               </div>

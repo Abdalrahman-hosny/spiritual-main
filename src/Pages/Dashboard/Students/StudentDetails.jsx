@@ -1,247 +1,220 @@
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { useParams, useNavigate } from "react-router-dom";
 import {
-  FaPlay,
-  FaComment,
-  FaChevronLeft,
-  FaChevronRight,
+  FaTimes,
+  FaUser,
+  FaCalendar,
+  FaGraduationCap,
+  FaEnvelope,
+  FaPhone,
+  FaGlobe,
+  FaCheckCircle,
 } from "react-icons/fa";
-import DashboardHeader from "../DashboardHeader";
-import DashboardSidebar from "../DashboardSidebar";
 import "./studentDetails.css";
 
-const StudentDetails = () => {
-  const { t, i18n } = useTranslation();
-  const { studentId } = useParams();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("courses");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+const StudentDetails = ({ student, onClose }) => {
+  const { i18n } = useTranslation();
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+  console.log("StudentDetails - student prop:", student);
+
+  // Format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ar-EG", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
+  // Get initials for avatar
+  const getInitials = (name) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
-
-  const handleBack = () => {
-    navigate("/dashboard/students");
-  };
-
-  // Mock student data
-  const student = {
-    id: studentId,
-    name: "اسم الطالب",
-    courseName: "اسم الكورس",
-    profileImage: "/api/placeholder/120/120",
-    email: "mahd012552@gmail.com",
-    phone: "+20011458752",
-    registrationDate: "22-12-2024",
-    location: "القاهرة, مصر",
-    gender: "ذكر",
-    status: "نشط",
-  };
-
-  const courses = [
-    {
-      id: 1,
-      title: "اسم الكورس",
-      price: "1000 جنيه",
-      status: "منتهي",
-      logo: "روحاني",
-      videoCount: "فيديو شرح",
-      commentsCount: "4 علقات",
-      enrollmentDate: "22-12-2024",
-    },
-    {
-      id: 2,
-      title: "اسم الكورس",
-      price: "1000 جنيه",
-      status: "نشط",
-      logo: "روحاني",
-      videoCount: "فيديو شرح",
-      commentsCount: "4 علقات",
-      enrollmentDate: "22-12-2024",
-    },
-    {
-      id: 3,
-      title: "اسم الكورس",
-      price: "1000 جنيه",
-      status: "نشط",
-      logo: "روحاني",
-      videoCount: "فيديو شرح",
-      commentsCount: "4 علقات",
-      enrollmentDate: "22-12-2024",
-    },
-    {
-      id: 4,
-      title: "اسم الكورس",
-      price: "1000 جنيه",
-      status: "نشط",
-      logo: "روحاني",
-      videoCount: "فيديو شرح",
-      commentsCount: "4 علقات",
-      enrollmentDate: "22-12-2024",
-    },
-  ];
-
-  const tabs = [
-    { id: "courses", label: t("studentDetails.courses") },
-    { id: "personal", label: t("studentDetails.personalInfo") },
-  ];
 
   return (
-    <div
-      className="dashboard-container"
-      dir={i18n.language === "ar" ? "rtl" : "ltr"}
-    >
-      {/* Sidebar */}
-      <DashboardSidebar
-        isOpen={sidebarOpen}
-        onToggle={toggleSidebar}
-        currentLanguage={i18n.language}
-        onChangeLanguage={changeLanguage}
-      />
-
-      {/* Main Content */}
-      <div className={`main-content ${!sidebarOpen ? "sidebar-closed" : ""}`}>
-        {/* Header */}
-        <DashboardHeader
-          onToggleSidebar={toggleSidebar}
-          currentLanguage={i18n.language}
-          onChangeLanguage={changeLanguage}
-        />
-
-        {/* Student Details Content */}
-        <div className="student-details-page">
-          {/* Back Button */}
-          <button className="back-btn" onClick={handleBack}>
-            <FaChevronLeft />
-            {t("studentDetails.backToStudents")}
+    <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={onClose}>
+      <div
+        className="modal-container details-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-header">
+          <h2>
+            {i18n.language === "ar" ? "تفاصيل الطالب" : "Student Details"}
+          </h2>
+          <button className="close-btn" onClick={onClose}>
+            <FaTimes />
           </button>
+        </div>
+        <div className="modal-content">
+          <div className="student-details">
+            <div className="student-header">
+              <div className="student-avatar-large">
+                {student.image &&
+                student.image !== "https://spiritual.brmjatech.uk/" ? (
+                  <img src={student.image} alt={student.name} />
+                ) : (
+                  <div className="avatar-placeholder-large">
+                    {getInitials(student.name)}
+                  </div>
+                )}
+              </div>
+              <div className="student-header-info">
+                <h3 className="student-name-large">{student.name}</h3>
+                <p className="student-id">
+                  {i18n.language === "ar" ? "رقم الطالب" : "Student ID"}: #
+                  {student.id}
+                </p>
+              </div>
+            </div>
 
-          {/* Student Header */}
-          <div className="student-header">
-            <div className="student-info">
-              <div className="profile-section">
-                <img
-                  src={student.profileImage}
-                  alt={student.name}
-                  className="profile-image"
-                />
-                <div className="profile-details">
-                  <h1 className="student-name">{student.name}</h1>
-                  <div className="purple-line"></div>
-                  <p className="course-name">{student.courseName}</p>
+            <div className="student-details-grid">
+              <div className="details-section">
+                <h5 className="section-title">
+                  {i18n.language === "ar"
+                    ? "معلومات أساسية"
+                    : "Basic Information"}
+                </h5>
+                <div className="details-row">
+                  <div className="detail-item">
+                    <FaUser className="detail-icon" />
+                    <div className="detail-content">
+                      <span className="detail-label">
+                        {i18n.language === "ar" ? "الاسم" : "Name"}
+                      </span>
+                      <span className="detail-value">{student.name}</span>
+                    </div>
+                  </div>
+                  <div className="detail-item">
+                    <FaCalendar className="detail-icon" />
+                    <div className="detail-content">
+                      <span className="detail-label">
+                        {i18n.language === "ar"
+                          ? "تاريخ التسجيل"
+                          : "Registration Date"}
+                      </span>
+                      <span className="detail-value">
+                        {formatDate(student.created_at)}
+                      </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="tabs-section">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content */}
-          <div className="tab-content">
-            {activeTab === "courses" && (
-              <div className="courses-content">
-                <div className="courses-grid">
-                  {courses.map((course) => (
-                    <div key={course.id} className="course-card">
-                      <div className="status-badge">
-                        <span
-                          className={`status ${
-                            course.status === "نشط" ? "active" : "finished"
-                          }`}
-                        >
-                          {course.status}
+              <div className="details-section">
+                <h5 className="section-title">
+                  {i18n.language === "ar"
+                    ? "معلومات الكورس"
+                    : "Course Information"}
+                </h5>
+                <div className="details-row">
+                  <div className="detail-item">
+                    <FaGraduationCap className="detail-icon" />
+                    <div className="detail-content">
+                      <span className="detail-label">
+                        {i18n.language === "ar" ? "الكورس" : "Course"}
+                      </span>
+                      <span className="detail-value">
+                        {student.course_name ||
+                          (i18n.language === "ar"
+                            ? "لا يوجد كورس"
+                            : "No Course")}
                         </span>
                       </div>
-                      <div className="course-logo">
-                        <div className="logo-text">{course.logo}</div>
-                      </div>
-                      <h3 className="course-title">{course.title}</h3>
-                      <p className="course-price">{course.price}</p>
-                      <div className="course-details">
-                        <div className="detail-item">
-                          <FaPlay className="detail-icon" />
-                          <span>{course.videoCount}</span>
                         </div>
-                        <div className="detail-item">
-                          <FaComment className="detail-icon" />
-                          <span>{course.commentsCount}</span>
                         </div>
                       </div>
-                      <p className="enrollment-date">
-                        {t("studentDetails.enrollmentDate")}{" "}
-                        {course.enrollmentDate}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {activeTab === "personal" && (
-              <div className="personal-content">
-                <div className="personal-info-list">
-                  <div className="info-item">
-                    <span className="info-label">
-                      {t("studentDetails.email")}:
-                    </span>
-                    <span className="info-value">{student.email}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">
-                      {t("studentDetails.phoneNumber")}:
-                    </span>
-                    <span className="info-value">{student.phone}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">
-                      {t("studentDetails.registrationDate")}:
-                    </span>
-                    <span className="info-value">
-                      {student.registrationDate}
-                    </span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">
-                      {t("studentDetails.location")}:
-                    </span>
-                    <span className="info-value">{student.location}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">
-                      {t("studentDetails.gender")}:
-                    </span>
-                    <span className="info-value">{student.gender}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">
-                      {t("studentDetails.status")}:
-                    </span>
-                    <span className="info-value">{student.status}</span>
-                  </div>
-                </div>
-                <div className="decorative-flower">
-                  <div className="flower-icon">🌸</div>
+              <div className="details-section">
+                <h5 className="section-title">
+                  {i18n.language === "ar"
+                    ? "معلومات الاتصال"
+                    : "Contact Information"}
+                </h5>
+                <div className="details-row">
+                  {student.email && (
+                    <div className="detail-item">
+                      <FaEnvelope className="detail-icon" />
+                      <div className="detail-content">
+                        <span className="detail-label">
+                          {i18n.language === "ar"
+                            ? "البريد الإلكتروني"
+                            : "Email"}
+                        </span>
+                        <span className="detail-value">{student.email}</span>
                 </div>
               </div>
             )}
+                  {student.phone && (
+                    <div className="detail-item">
+                      <FaPhone className="detail-icon" />
+                      <div className="detail-content">
+                        <span className="detail-label">
+                          {i18n.language === "ar" ? "رقم الهاتف" : "Phone"}
+                    </span>
+                        <span className="detail-value">{student.phone}</span>
+                  </div>
+                  </div>
+                  )}
+                  {student.country_id && (
+                    <div className="detail-item">
+                      <FaGlobe className="detail-icon" />
+                      <div className="detail-content">
+                        <span className="detail-label">
+                          {i18n.language === "ar" ? "البلد" : "Country"}
+                    </span>
+                        <span className="detail-value">
+                          {student.country_id}
+                    </span>
+                  </div>
+                    </div>
+                  )}
+                </div>
+                  </div>
+
+              <div className="details-section">
+                <h5 className="section-title">
+                  {i18n.language === "ar" ? "حالة الحساب" : "Account Status"}
+                </h5>
+                <div className="details-row">
+                  <div className="detail-item">
+                    <FaCheckCircle className="detail-icon" />
+                    <div className="detail-content">
+                      <span className="detail-label">
+                        {i18n.language === "ar" ? "الحالة" : "Status"}
+                    </span>
+                      <span
+                        className={`detail-value ${
+                          student.status === 1
+                            ? "status-active"
+                            : "status-inactive"
+                        }`}
+                      >
+                        {student.status === 1
+                          ? i18n.language === "ar"
+                            ? "نشط"
+                            : "Active"
+                          : i18n.language === "ar"
+                          ? "غير نشط"
+                          : "Inactive"}
+                    </span>
+                  </div>
+                </div>
+                </div>
+              </div>
           </div>
+          </div>
+        </div>
+        <div className="modal-actions">
+          <button className="close-btn-secondary" onClick={onClose}>
+            {i18n.language === "ar" ? "إغلاق" : "Close"}
+          </button>
         </div>
       </div>
     </div>

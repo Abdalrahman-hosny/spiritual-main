@@ -1,13 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { FaBars, FaSearch, FaBell, FaUser, FaGlobe } from "react-icons/fa";
+import { FaBars, FaBell } from "react-icons/fa";
+import userDefaultImage from "../../assets/user.png";
 
 const DashboardHeader = ({
   onToggleSidebar,
   currentLanguage,
   onChangeLanguage,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("global");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Get user data from session storage
+    const userData = sessionStorage.getItem("user");
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, []);
+
+  // Default profile image
+  const defaultProfileImage = userDefaultImage;
+
+  // Get user type in Arabic
+  const getUserType = (type) => {
+    const types = {
+      energy_coach: "مدرب طاقة",
+      admin: "مدير",
+      user: "مستخدم",
+      trainer: "مدرب",
+    };
+    return types[type] || "مستخدم";
+  };
 
   return (
     <header className="dashboard-header">
@@ -19,17 +47,6 @@ const DashboardHeader = ({
         >
           <FaBars />
         </button>
-
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder={t("dashboard.search")}
-            className="search-input"
-          />
-          <button className="search-btn">
-            <FaSearch />
-          </button>
-        </div>
       </div>
 
       <div className="header-right">
@@ -59,13 +76,16 @@ const DashboardHeader = ({
         <div className="user-profile">
           <div className="user-avatar">
             <img
-              src="https://via.placeholder.com/40x40/4F46E5/FFFFFF?text=M"
-              alt="User Avatar"
+              src={user?.image || defaultProfileImage}
+              alt={`${user?.name || "User"} Avatar`}
+              onError={(e) => {
+                e.target.src = defaultProfileImage;
+              }}
             />
           </div>
           <div className="user-info">
-            <span className="user-name">محمد أحمد</span>
-            <span className="user-role">مدير</span>
+            <span className="user-name">{user?.name || "مستخدم"}</span>
+            <span className="user-role">{getUserType(user?.type)}</span>
           </div>
         </div>
       </div>

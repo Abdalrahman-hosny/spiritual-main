@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "react-toastify";
 import {
@@ -12,7 +13,8 @@ import {
 } from "react-icons/fa";
 import "./addcourse.css";
 
-const AddCourse = ({ onClose, onSuccess }) => {
+const EditCourse = ({ course, onClose, onSuccess }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -30,6 +32,26 @@ const AddCourse = ({ onClose, onSuccess }) => {
     price: "",
     files: [],
   });
+
+  // Initialize form data with course data
+  useEffect(() => {
+    if (course) {
+      setFormData({
+        category_id: course.category_id || "",
+        "title[ar]": course.title_ar || course.title || "",
+        "title[en]": course.title_en || course.title || "",
+        "description[ar]": course.description_ar || course.description || "",
+        "description[en]": course.description_en || course.description || "",
+        image: null,
+        video: course.video || "",
+        schedule: course.schedule || "",
+        duration: course.duration || "",
+        lectures_count: course.lectures_count || "",
+        price: course.price || "",
+        files: course.files || [],
+      });
+    }
+  }, [course]);
 
   // Fetch categories
   useEffect(() => {
@@ -139,11 +161,16 @@ const AddCourse = ({ onClose, onSuccess }) => {
       }
 
       formData.files.forEach((file) => {
-        submitData.append("files[]", file);
+        if (file instanceof File) {
+          submitData.append("files[]", file);
+        } else if (file.path) {
+          // Existing file from server
+          submitData.append("files[]", file.path);
+        }
       });
 
       const response = await axios.post(
-        "https://spiritual.brmjatech.uk/api/dashboard_courses",
+        `https://spiritual.brmjatech.uk/api/dashboard_courses/${course.id}`,
         submitData,
         {
           headers: {
@@ -154,15 +181,15 @@ const AddCourse = ({ onClose, onSuccess }) => {
         }
       );
 
-      if (response.data.status) {
-        toast.success(response.data.message || "تم إنشاء الكورس بنجاح");
+      if (response.data.status || response.data.code === 200) {
+        toast.success(response.data.message || "تم تحديث الكورس بنجاح");
         onSuccess();
       } else {
-        toast.error(response.data.message || "خطأ في إنشاء الكورس");
+        toast.error(response.data.message || "خطأ في تحديث الكورس");
       }
     } catch (error) {
-      console.error("Error creating course:", error);
-      toast.error("خطأ في إنشاء الكورس");
+      console.error("Error updating course:", error);
+      toast.error("خطأ في تحديث الكورس");
     } finally {
       setLoading(false);
     }
@@ -172,7 +199,7 @@ const AddCourse = ({ onClose, onSuccess }) => {
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
-          <h2>إضافة كورس جديد</h2>
+          <h2>تعديل الكورس</h2>
           <button className="close-btn" onClick={onClose}>
             <FaTimes />
           </button>
@@ -324,8 +351,14 @@ const AddCourse = ({ onClose, onSuccess }) => {
               />
               <label htmlFor="image-upload" className="file-upload-btn">
                 <FaUpload />
-                {formData.image ? formData.image.name : "اختر صورة"}
+                {formData.image ? formData.image.name : "اختر صورة جديدة"}
               </label>
+              {course.image && !formData.image && (
+                <div className="file-preview">
+                  <FaImage />
+                  <span>الصورة الحالية: {course.image}</span>
+                </div>
+              )}
               {formData.image && (
                 <div className="file-preview">
                   <FaImage />
@@ -347,7 +380,7 @@ const AddCourse = ({ onClose, onSuccess }) => {
               />
               <label htmlFor="files-upload" className="file-upload-btn">
                 <FaPlus />
-                إضافة ملفات
+                إضافة ملفات جديدة
               </label>
             </div>
             {formData.files.length > 0 && (
@@ -355,7 +388,7 @@ const AddCourse = ({ onClose, onSuccess }) => {
                 {formData.files.map((file, index) => (
                   <div key={index} className="file-item">
                     <FaFileAlt />
-                    <span>{file.name}</span>
+                    <span>{file.name || file.path || `ملف ${index + 1}`}</span>
                     <button
                       type="button"
                       onClick={() => removeFile(index)}
@@ -374,7 +407,7 @@ const AddCourse = ({ onClose, onSuccess }) => {
               إلغاء
             </button>
             <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? "جاري الحفظ..." : "حفظ الكورس"}
+              {loading ? "جاري الحفظ..." : "حفظ التعديلات"}
             </button>
           </div>
         </form>
@@ -383,4 +416,4 @@ const AddCourse = ({ onClose, onSuccess }) => {
   );
 };
 
-export default AddCourse;
+export default EditCourse;
