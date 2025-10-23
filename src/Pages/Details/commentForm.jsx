@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { jwtDecode } from "jwt-decode"; // تأكد من تثبيت مكتبة `jwt-decode`
+import { jwtDecode } from "jwt-decode";
 
 export default function CommentForm({ onReviewSubmitted }) {
   const [rating, setRating] = useState(5);
@@ -13,11 +13,11 @@ export default function CommentForm({ onReviewSubmitted }) {
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState({ name: "", email: "", image: "" });
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar';
+  const isRTL = i18n.language === "ar";
 
   // استخراج بيانات المستخدم من token
   useEffect(() => {
-    const token = sessionStorage.getItem('token');
+    const token = sessionStorage.getItem("token");
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
@@ -38,7 +38,7 @@ export default function CommentForm({ onReviewSubmitted }) {
     setError(null);
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       const response = await axios.post(
         "https://spiritual.brmjatech.uk/api/products/1/reviews",
         {
@@ -59,7 +59,9 @@ export default function CommentForm({ onReviewSubmitted }) {
         setRating(5);
 
         toast.success(
-          isRTL ? "تم إضافة تعليقك بنجاح!" : "Your review has been added successfully!",
+          isRTL
+            ? "تم إضافة تعليقك بنجاح!"
+            : "Your review has been added successfully!",
           {
             position: isRTL ? "top-left" : "top-right",
             autoClose: 3000,
@@ -122,13 +124,13 @@ export default function CommentForm({ onReviewSubmitted }) {
             disabled={isSubmitting}
             className="px-8 py-2 font-[Montserrat-Arabic] font-medium text-[14px] leading-[19.5px] text-center bg-purple-600 text-white rounded-full hover:bg-purple-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? t("commentForm.submitting") : t("commentForm.submit")}
+            {isSubmitting
+              ? t("commentForm.submitting")
+              : t("commentForm.submit")}
           </button>
         </div>
 
-        {error && (
-          <p className="text-red-500 text-right mt-2">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-right mt-2">{error}</p>}
       </form>
     </div>
   );

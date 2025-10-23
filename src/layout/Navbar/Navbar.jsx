@@ -26,15 +26,15 @@ export default function Navbar({ bg }) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/categories');
-        
-          setCategories(response.data.data.result);
-        
         const response = await axios.get(
           "https://spiritual.brmjatech.uk/api/categories"
         );
 
-        setCategories(response.data.data.items);
+        if (response.data.data.result) {
+          setCategories(response.data.data.result);
+        } else if (response.data.data.items) {
+          setCategories(response.data.data.items);
+        }
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
