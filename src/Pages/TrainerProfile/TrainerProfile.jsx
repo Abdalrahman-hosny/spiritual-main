@@ -23,8 +23,6 @@ import image1 from "../../assets/bg.png";
 import user from "../../assets/user.png";
 import { Link, useParams } from "react-router-dom";
 import { FaShoppingBag } from "react-icons/fa";
-import { useParams } from "react-router-dom";
-
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -37,7 +35,6 @@ export default function TrainerProfile() {
   const [trainerData, setTrainerData] = useState(null);
   const [trainerCourses, setTrainerCourses] = useState([]);
   const [trainerProducts, setTrainerProducts] = useState([]);
-  const { id } = useParams();
 
 
   useEffect(() => {
@@ -277,7 +274,6 @@ export default function TrainerProfile() {
             <div className="h-[3px] bg-purple-600 my-3 md:my-8"></div>
             <div className="flex items-center gap-2">
               <span className="font-[Montserrat-Arabic] font-normal text-purple-600 text-[14px] md:text-[32px] leading-[1] tracking-[0%]">
-                {trainerData?.account_type}
                 {trainerData?.account_type}
               </span>
             </div>
