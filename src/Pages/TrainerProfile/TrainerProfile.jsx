@@ -36,7 +36,6 @@ export default function TrainerProfile() {
   const [trainerCourses, setTrainerCourses] = useState([]);
   const [trainerProducts, setTrainerProducts] = useState([]);
 
-
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -232,7 +231,7 @@ export default function TrainerProfile() {
       </div>
 
       {/* Main Content */}
-      <div className="md:max-w-6xl mx-auto bg-white px-6 py-24" >
+      <div className="md:max-w-6xl mx-auto bg-white px-6 py-24">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6">
           <motion.div
