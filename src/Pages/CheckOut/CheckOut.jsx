@@ -78,7 +78,7 @@ export default function CheckOut() {
             <h2 className="font-[Alexandria] font-semibold text-xl text-right mb-4">
               {t('checkout.orderSummary')} {/* ترجمة */}
             </h2>
-            <div dir="rtl" className="space-y-3">
+            <div  className="space-y-3">
               {[1, 2, 3].map((item, i) => (
                 <div key={i} className="flex justify-between items-center p-3 bg-white rounded-lg">
                   <div className="flex items-center">
@@ -135,7 +135,7 @@ export default function CheckOut() {
 
         {/* Shipping Address */}
         <div className="col-span-12 lg:col-span-9 order-1 lg:order-2">
-          <div className="mx-auto p-6 bg-white" dir="rtl">
+          <div className="mx-auto p-6 bg-white" >
             <h2 className="font-[Alexandria] font-bold text-2xl text-[#040404] text-right mb-8">
               {t('checkout.contactInfo')} {/* ترجمة */}
             </h2>

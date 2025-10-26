@@ -38,7 +38,6 @@ export default function Wishlist() {
           },
         }
       );
-
       const items = response.data.data && response.data.data.result ? response.data.data.result : [];
       setWishlistItems(items);
       if (response.data.data && response.data.data.meta) {
@@ -48,7 +47,6 @@ export default function Wishlist() {
           total: response.data.data.meta.total,
         });
       }
-
     } catch (error) {
       console.error("Error fetching wishlist items:", error);
       setWishlistItems([]);
@@ -108,7 +106,7 @@ export default function Wishlist() {
     if (selectedItems.length === wishlistItems.length) {
       setSelectedItems([]);
     } else {
-      const allItemIds = wishlistItems.map(item => item.product.id);
+      const allItemIds = wishlistItems.map(item => item.id);
       setSelectedItems(allItemIds);
     }
   };
@@ -227,71 +225,80 @@ export default function Wishlist() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             <AnimatePresence>
-              {wishlistItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: isRTL ? -300 : 300 }}
-                  transition={{ type: "spring", damping: 20 }}
-                  className={`bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg flex flex-col`}
-                  style={{
-                    border: selectedItems.includes(item.product.id) ? '2px solid #3b82f6' : 'none'
-                  }}
-                >
-                  {/* مربع اختيار العنصر */}
-                  <div className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(item.product.id)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        toggleSelectItem(item.product.id);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="h-5 w-5 text-blue-500 rounded"
-                    />
-                  </div>
-                  {/* صورة المنتج */}
-                  <div className="w-full h-48 p-4 flex-shrink-0 cursor-pointer" onClick={() => navigateToProductDetails(item.product.id)}>
-                    {item.product && item.product.image ? (
-                      <img
-                        src={item.product.image}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover rounded-lg"
+              {wishlistItems.map((item) => {
+                const itemId = item.id;
+                const itemName = item.name;
+                const itemPrice = item.price;
+                const itemImage = item.image || (item.images && item.images.length > 0 ? item.images[0].image : null);
+
+                return (
+                  <motion.div
+                    key={itemId}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: isRTL ? -300 : 300 }}
+                    transition={{ type: "spring", damping: 20 }}
+                    className={`bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg flex flex-col`}
+                    style={{
+                      border: selectedItems.includes(itemId) ? '2px solid #3b82f6' : 'none'
+                    }}
+                  >
+                    {/* مربع اختيار العنصر */}
+                    <div className="p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(itemId)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          toggleSelectItem(itemId);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-5 w-5 text-blue-500 rounded"
                       />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
-                        <span className="text-gray-500">No Image</span>
-                      </div>
-                    )}
-                  </div>
-                  {/* تفاصيل المنتج */}
-                  <div className="p-4 flex flex-col justify-between flex-1">
-                    <div>
-                      <h3 className="font-bold text-lg mb-1">
-                        {item.product ? item.product.name : "Unknown Product"}
-                      </h3>
-                      <p className="text-gray-600 mb-3">
-                        {item.product ? item.product.price : "N/A"}
-                      </p>
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeFromWishlist(item.product ? item.product.id : item.id);
-                      }}
-                      className="bg-red-50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center"
-                    >
-                      <i className="fas fa-trash-alt mr-2"></i>
-                      {t("wishlist.remove")}
-                    </motion.button>
-                  </div>
-                </motion.div>
-              ))}
+
+                    {/* صورة المنتج */}
+                    <div className="w-full h-48 p-4 flex-shrink-0 cursor-pointer" onClick={() => navigateToProductDetails(itemId)}>
+                      {itemImage ? (
+                        <img
+                          src={itemImage}
+                          alt={itemName}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                          <span className="text-gray-500">No Image</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* تفاصيل المنتج */}
+                    <div className="p-4 flex flex-col justify-between flex-1">
+                      <div>
+                        <h3 className="font-bold text-lg mb-1">
+                          {itemName}
+                        </h3>
+                        <p className="text-gray-600 mb-3">
+                          {itemPrice}
+                        </p>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFromWishlist(itemId);
+                        }}
+                        className="bg-red-50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center"
+                      >
+                        <i className="fas fa-trash-alt mr-2"></i>
+                        {t("wishlist.remove")}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         )}

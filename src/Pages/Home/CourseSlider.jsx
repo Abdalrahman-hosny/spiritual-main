@@ -10,6 +10,7 @@ import { LuFile } from "react-icons/lu";
 import { FaUserCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 const CourseSlider = ({ isTrue = true }) => {
   const { t } = useTranslation();
@@ -91,6 +92,7 @@ const CourseSlider = ({ isTrue = true }) => {
         setLoading(false);
       }
     };
+
     fetchCourses();
   }, []);
 
@@ -133,13 +135,11 @@ const CourseSlider = ({ isTrue = true }) => {
           </motion.h2>
         </div>
       )}
-
       <div className="relative px-4">
         <Swiper
           modules={[Autoplay, Pagination]}
           spaceBetween={25}
           loop={true}
-          dir={isRTL ? "rtl" : "ltr"}
           autoplay={{ delay: 3500, disableOnInteraction: false }}
           pagination={{
             clickable: true,
@@ -197,7 +197,6 @@ const CourseSlider = ({ isTrue = true }) => {
                       )}
                     </motion.div>
                   </div>
-
                   <div className="p-5 flex flex-col flex-grow">
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -230,7 +229,6 @@ const CourseSlider = ({ isTrue = true }) => {
                         ({course.reviews})
                       </motion.span>
                     </motion.div>
-
                     <motion.h3
                       whileHover={{ x: isRTL ? -5 : 5 }}
                       transition={{ type: "spring", stiffness: 300 }}
@@ -238,7 +236,6 @@ const CourseSlider = ({ isTrue = true }) => {
                     >
                       {course.name}
                     </motion.h3>
-
                     <motion.div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                       <motion.div
                         whileHover={{ scale: 1.1 }}
@@ -263,7 +260,6 @@ const CourseSlider = ({ isTrue = true }) => {
                         {course.files} {t("courses.files")}
                       </motion.div>
                     </motion.div>
-
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}

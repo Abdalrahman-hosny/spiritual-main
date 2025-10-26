@@ -16,6 +16,7 @@ export default function CategoryProducts() {
       top: 0,
       behavior: "smooth",
     });
+
     const fetchCategoryName = async () => {
       try {
         const response = await axios.get(
@@ -37,6 +38,7 @@ export default function CategoryProducts() {
         console.error("Failed to fetch category name:", err);
       }
     };
+
     fetchCategoryName();
   }, [id, slug, i18n.language]);
 
@@ -89,7 +91,6 @@ export default function CategoryProducts() {
                   <p className="font-[Montserrat-Arabic] text-white text-[18px] sm:text-[20px] md:text-[24px] text-center">
                     {t("categoryProducts.breadcrumbHome")} /
                     <span className="text-purple-500">
-                      {" "}
                       {categoryName || t("categoryProducts.breadcrumbCurrent")}
                     </span>
                   </p>
@@ -125,8 +126,10 @@ export default function CategoryProducts() {
           </div>
         </div>
       </div>
+
       {/* Contact List */}
       <ArabicContactList />
+
       {/* Footer */}
       <div className="pt-8"></div>
     </div>
@@ -136,9 +139,17 @@ export default function CategoryProducts() {
 export function ArabicContactList() {
   const { t, i18n } = useTranslation();
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    total: 0,
+  });
+
+  const page = searchParams.get("page") || 1;
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -154,17 +165,23 @@ export function ArabicContactList() {
         if (response.status !== 200) {
           throw new Error("Failed to fetch data");
         }
-        setContacts(response?.data?.data?.result);
+        setContacts(response.data.data.result);
+        setPagination(response.data.data.meta);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchContacts();
   }, [id, i18n.language]);
 
-  const pageNumbers = [1, 2, 3, 4, 5];
+  const handlePageChange = (newPage) => {
+    setSearchParams({ page: newPage });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const cardVariants = {
     hidden: { opacity: 0, y: 40 },
     visible: {
@@ -211,6 +228,7 @@ export function ArabicContactList() {
           {t("contactList.title")}
         </motion.h1>
       </div>
+
       {/* Search Bar */}
       <div
         className="max-w-7xl mx-auto mb-8"
@@ -230,6 +248,7 @@ export function ArabicContactList() {
           />
         </motion.div>
       </div>
+
       {/* Contact Grid */}
       <div className="max-w-7xl mx-auto">
         <motion.div
@@ -248,11 +267,12 @@ export function ArabicContactList() {
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg border border-gray-100 transition-all duration-300 hover:scale-[1.02] hover:border-purple-200"
             >
               <div className="flex flex-col items-center text-center">
-                <Link
-                  to={`/trainer/${contact.id}`}
-                  className="mb-4 relative group"
-                >
+                <Link to={`/trainer/${contact.id}`} className="mb-4 relative group">
                   <img
+                    src={
+                      contact.image ||
+                      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                    }
                     src={
                       contact.image ||
                       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
@@ -277,6 +297,7 @@ export function ArabicContactList() {
           ))}
         </motion.div>
       </div>
+
       {/* Pagination */}
       <div className="max-w-7xl mx-auto mt-12 flex justify-center">
         <motion.div
@@ -285,24 +306,50 @@ export function ArabicContactList() {
           transition={{ delay: 0.6 }}
           className="flex items-center space-x-2 space-x-reverse"
         >
-          <button className="px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+          <button
+            onClick={() =>
+              pagination.current_page < pagination.last_page &&
+              handlePageChange(pagination.current_page + 1)
+            }
+            disabled={pagination.current_page >= pagination.last_page}
+            className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+              pagination.current_page >= pagination.last_page
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:text-purple-600 hover:bg-gray-100"
+            }`}
+          >
             {t("contactList.pagination.next")}
           </button>
-          {pageNumbers.map((number, index) => (
-            <motion.button
-              key={number}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className={`w-10 h-10 rounded-full text-sm font-medium flex items-center justify-center ${
-                index === 0
-                  ? "bg-purple-600 text-white"
-                  : "text-gray-600 hover:bg-purple-100"
-              } transition-colors duration-200`}
-            >
-              {number}
-            </motion.button>
-          ))}
-          <button className="px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+
+          {Array.from({ length: pagination.last_page }, (_, i) => i + 1).map(
+            (number) => (
+              <motion.button
+                key={number}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handlePageChange(number)}
+                className={`w-10 h-10 rounded-full text-sm font-medium flex items-center justify-center ${
+                  number === pagination.current_page
+                    ? "bg-purple-600 text-white"
+                    : "text-gray-600 hover:bg-purple-100"
+                } transition-colors duration-200`}
+              >
+                {number}
+              </motion.button>
+            )
+          )}
+
+          <button
+            onClick={() =>
+              pagination.current_page > 1 && handlePageChange(pagination.current_page - 1)
+            }
+            disabled={pagination.current_page <= 1}
+            className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+              pagination.current_page <= 1
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:text-purple-600 hover:bg-gray-100"
+            }`}
+          >
             {t("contactList.pagination.prev")}
           </button>
         </motion.div>
