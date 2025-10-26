@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import plant from "../../assets/mandala_1265367 1.png";
 import { Link, useParams } from "react-router-dom";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
 
 export default function CategoryProducts() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id, slug } = useParams();
   const [categoryName, setCategoryName] = useState("");
 
@@ -18,9 +18,18 @@ export default function CategoryProducts() {
     });
     const fetchCategoryName = async () => {
       try {
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/categories");
+        const response = await axios.get(
+          "https://spiritual.brmjatech.uk/api/categories",
+          {
+            headers: {
+              "Accept-Language": i18n.language === "ar" ? "ar" : "en",
+            },
+          }
+        );
         const categories = response.data.data.result;
-        const category = categories.find((cat) => cat.id == id || cat.slug === slug);
+        const category = categories.find(
+          (cat) => cat.id == id || cat.slug === slug
+        );
         if (category) {
           setCategoryName(category.name);
         }
@@ -29,7 +38,7 @@ export default function CategoryProducts() {
       }
     };
     fetchCategoryName();
-  }, [id, slug]);
+  }, [id, slug, i18n.language]);
 
   const heroVariants = {
     hidden: { opacity: 0, scale: 0.9 },
@@ -125,7 +134,7 @@ export default function CategoryProducts() {
 }
 
 export function ArabicContactList() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -134,7 +143,14 @@ export function ArabicContactList() {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await axios.get(`https://spiritual.brmjatech.uk/api/home/categories/${id}/trainers`);
+        const response = await axios.get(
+          `https://spiritual.brmjatech.uk/api/home/categories/${id}/trainers`,
+          {
+            headers: {
+              "Accept-Language": i18n.language === "ar" ? "ar" : "en",
+            },
+          }
+        );
         if (response.status !== 200) {
           throw new Error("Failed to fetch data");
         }
@@ -146,7 +162,7 @@ export function ArabicContactList() {
       }
     };
     fetchContacts();
-  }, [id]);
+  }, [id, i18n.language]);
 
   const pageNumbers = [1, 2, 3, 4, 5];
   const cardVariants = {
@@ -160,7 +176,7 @@ export function ArabicContactList() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8" dir="rtl">
+      <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto mb-8">
           <h1 className="font-[Montserrat-Arabic] font-bold text-[24px] sm:text-[28px] md:text-[32px] text-right text-gray-800">
             {t("contactList.loading")}
@@ -172,7 +188,7 @@ export function ArabicContactList() {
 
   if (error) {
     return (
-      <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8" dir="rtl">
+      <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto mb-8">
           <h1 className="font-[Montserrat-Arabic] font-bold text-[24px] sm:text-[28px] md:text-[32px] text-right text-red-500">
             {error}
@@ -183,25 +199,28 @@ export function ArabicContactList() {
   }
 
   return (
-    <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8" dir="rtl">
+    <div className="min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="font-[Montserrat-Arabic] font-bold text-[24px] sm:text-[28px] md:text-[32px] text-right text-gray-800"
+          className="font-[Montserrat-Arabic] font-bold text-[24px] sm:text-[28px] md:text-[32px] text-center text-gray-800"
         >
           {t("contactList.title")}
         </motion.h1>
       </div>
       {/* Search Bar */}
-      <div className="max-w-7xl mx-auto mb-8">
+      <div
+        className="max-w-7xl mx-auto mb-8"
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative w-full max-w-md mx-auto md:mx-0"
+          className="relative w-full max-w-lg mx-auto md:mx-0 "
         >
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -234,7 +253,10 @@ export function ArabicContactList() {
                   className="mb-4 relative group"
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                    src={
+                      contact.image ||
+                      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                    }
                     alt={contact.name}
                     className="w-32 h-32 rounded-full object-cover border-4 border-white group-hover:border-purple-500 transition-all duration-300"
                   />

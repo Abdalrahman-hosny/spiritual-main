@@ -103,9 +103,7 @@ export default function Herosection() {
               {t("hero.description")}
             </p>
             <div
-              className={`flex ${
-                i18n.language === "ar" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex`}
             >
               <button
                 onClick={() => navigate("/about-us")}

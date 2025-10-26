@@ -20,16 +20,15 @@ import { AiFillStar } from "react-icons/ai";
 import { BiVideo } from "react-icons/bi";
 import { LuFile } from "react-icons/lu";
 import image1 from "../../assets/bg.png";
-import image2 from "../../assets/bg-login.png";
-import image3 from "../../assets/hero.png";
 import user from "../../assets/user.png";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FaShoppingBag } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 export default function TrainerProfile() {
   const { t } = useTranslation();
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
@@ -49,7 +48,7 @@ export default function TrainerProfile() {
     const fetchTrainerData = async () => {
       try {
         const response = await axios.get(
-          "https://spiritual.brmjatech.uk/api/home/trainers/2"
+          `https://spiritual.brmjatech.uk/api/home/trainers/${id || 1}`
         );
         if (response.data.code === 200) {
           setTrainerData(response.data.data);
@@ -58,7 +57,9 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer data:", error);
       }
     };
-    fetchTrainerData();
+    if (id) {
+      fetchTrainerData();
+    }
   }, [id]);
 
   // جلب بيانات الكورسات باستخدام id ديناميكي
@@ -66,7 +67,7 @@ export default function TrainerProfile() {
     const fetchTrainerCourses = async () => {
       try {
         const response = await axios.get(
-          "https://spiritual.brmjatech.uk/api/home/trainers/1/courses"
+          `https://spiritual.brmjatech.uk/api/home/trainers/${id || 1}/courses`
         );
         if (response.data.code === 200) {
           setTrainerCourses(response.data.data.result);
@@ -75,7 +76,9 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer courses:", error);
       }
     };
-    fetchTrainerCourses();
+    if (id) {
+      fetchTrainerCourses();
+    }
   }, [id]);
 
   // جلب بيانات المنتجات باستخدام id ديناميكي
@@ -83,7 +86,7 @@ export default function TrainerProfile() {
     const fetchTrainerProducts = async () => {
       try {
         const response = await axios.get(
-          "https://spiritual.brmjatech.uk/api/home/trainers/1/products"
+          `https://spiritual.brmjatech.uk/api/home/trainers/${id || 1}/products`
         );
         if (response.data.code === 200) {
           setTrainerProducts(response.data.data.result);
@@ -92,7 +95,9 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer products:", error);
       }
     };
-    fetchTrainerProducts();
+    if (id) {
+      fetchTrainerProducts();
+    }
   }, [id]);
 
   // Tab configuration

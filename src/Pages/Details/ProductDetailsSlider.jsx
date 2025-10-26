@@ -1,13 +1,23 @@
-import { useState, useEffect } from 'react';
-import { Heart, ShoppingCart, Plus, Minus, Facebook, Twitter, Linkedin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Heart,
+  ShoppingCart,
+  Plus,
+  Minus,
+  Facebook,
+  Twitter,
+  Linkedin,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
-import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ProductDetailsSlider({ productId = 5 }) {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar';
+  const isRTL = i18n.language === "ar";
   const [quantity, setQuantity] = useState(1);
   const [currentImage, setCurrentImage] = useState(0);
   const [product, setProduct] = useState(null);
@@ -20,7 +30,9 @@ export default function ProductDetailsSlider({ productId = 5 }) {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`https://spiritual.brmjatech.uk/api/products/${productId}`);
+        const response = await axios.get(
+          `https://spiritual.brmjatech.uk/api/products/${productId}`
+        );
         setProduct(response.data.data);
         checkIfInWishlist(response.data.data.id);
         checkIfInCart(response.data.data.id);
@@ -39,11 +51,11 @@ export default function ProductDetailsSlider({ productId = 5 }) {
 
   const checkIfInWishlist = async (productId) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (!token) return;
       const response = await axios.get(
         `https://spiritual.brmjatech.uk/api/wishlist/check?product_id=${productId}`,
-        { headers: { "Authorization": `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setInWishlist(response.data.is_in_wishlist);
     } catch (error) {
@@ -53,14 +65,14 @@ export default function ProductDetailsSlider({ productId = 5 }) {
 
   const checkIfInCart = async (productId) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (!token) return;
       const response = await axios.get(
         `https://spiritual.brmjatech.uk/api/cart`,
-        { headers: { "Authorization": `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       const items = response.data.data?.items || [];
-      const isInCart = items.some(item => item.product.id === productId);
+      const isInCart = items.some((item) => item.product.id === productId);
       setInCart(isInCart);
     } catch (error) {
       console.error("Error checking if product is in cart:", error);
@@ -69,10 +81,10 @@ export default function ProductDetailsSlider({ productId = 5 }) {
 
   const toggleWishlist = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (!token) {
-        toast.error(isRTL ? 'الرجاء تسجيل الدخول أولا' : 'Please login first', {
-          position: isRTL ? "top-left" : "top-right"
+        toast.error(isRTL ? "الرجاء تسجيل الدخول أولا" : "Please login first", {
+          position: isRTL ? "top-left" : "top-right",
         });
         return;
       }
@@ -80,49 +92,67 @@ export default function ProductDetailsSlider({ productId = 5 }) {
         await axios.post(
           "https://spiritual.brmjatech.uk/api/wishlist/remove",
           { product_id: product.id },
-          { headers: { "Authorization": `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        toast.success(isRTL ? 'تمت إزالة المنتج من قائمة الرغبات' : 'Product removed from wishlist', {
-          position: isRTL ? "top-left" : "top-right"
-        });
+        toast.success(
+          isRTL
+            ? "تمت إزالة المنتج من قائمة الرغبات"
+            : "Product removed from wishlist",
+          {
+            position: isRTL ? "top-left" : "top-right",
+          }
+        );
       } else {
         await axios.post(
           "https://spiritual.brmjatech.uk/api/wishlist",
           { product_id: product.id },
-          { headers: { "Authorization": `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        toast.success(isRTL ? 'تمت إضافة المنتج إلى قائمة الرغبات' : 'Product added to wishlist', {
-          position: isRTL ? "top-left" : "top-right"
-        });
+        toast.success(
+          isRTL
+            ? "تمت إضافة المنتج إلى قائمة الرغبات"
+            : "Product added to wishlist",
+          {
+            position: isRTL ? "top-left" : "top-right",
+          }
+        );
       }
       setInWishlist(!inWishlist);
     } catch (error) {
       console.error("Error toggling wishlist:", error);
-      toast.error(isRTL ? 'حدث خطأ أثناء إضافة المنتج إلى قائمة الرغبات' : 'Error adding product to wishlist', {
-        position: isRTL ? "top-left" : "top-right"
-      });
+      toast.error(
+        isRTL
+          ? "حدث خطأ أثناء إضافة المنتج إلى قائمة الرغبات"
+          : "Error adding product to wishlist",
+        {
+          position: isRTL ? "top-left" : "top-right",
+        }
+      );
     }
   };
 
-  const increaseQuantity = () => setQuantity(prev => prev + 1);
-  const decreaseQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  const decreaseQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   useEffect(() => {
     if (!product || !product.images) return;
     const interval = setInterval(() => {
-      setCurrentImage(prev => (prev + 1) % product.images.length);
+      setCurrentImage((prev) => (prev + 1) % product.images.length);
     }, 3000);
     return () => clearInterval(interval);
   }, [product]);
 
   const nextImage = () => {
     if (!product || !product.images) return;
-    setCurrentImage(prev => (prev + 1) % product.images.length);
+    setCurrentImage((prev) => (prev + 1) % product.images.length);
   };
 
   const prevImage = () => {
     if (!product || !product.images) return;
-    setCurrentImage(prev => (prev - 1 + product.images.length) % product.images.length);
+    setCurrentImage(
+      (prev) => (prev - 1 + product.images.length) % product.images.length
+    );
   };
 
   const goToImage = (index) => {
@@ -131,80 +161,119 @@ export default function ProductDetailsSlider({ productId = 5 }) {
 
   const addToCart = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (!token) {
-        toast.error(isRTL ? 'الرجاء تسجيل الدخول أولا' : 'Please login first', {
-          position: isRTL ? "top-left" : "top-right"
+        toast.error(isRTL ? "الرجاء تسجيل الدخول أولا" : "Please login first", {
+          position: isRTL ? "top-left" : "top-right",
         });
         return;
       }
 
       if (inCart) {
-        toast.warning(isRTL ? 'المنتج موجود بالفعل في السلة' : 'Product is already in cart', {
-          position: isRTL ? "top-left" : "top-right"
-        });
+        toast.warning(
+          isRTL ? "المنتج موجود بالفعل في السلة" : "Product is already in cart",
+          {
+            position: isRTL ? "top-left" : "top-right",
+          }
+        );
         return;
       }
 
       await axios.post(
         "https://spiritual.brmjatech.uk/api/cart/add",
         { product_id: product.id, quantity },
-        { headers: { "Authorization": `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success(isRTL ? 'تمت إضافة المنتج إلى السلة' : 'Product added to cart', {
-        position: isRTL ? "top-left" : "top-right"
-      });
+      toast.success(
+        isRTL ? "تمت إضافة المنتج إلى السلة" : "Product added to cart",
+        {
+          position: isRTL ? "top-left" : "top-right",
+        }
+      );
 
       setInCart(true);
     } catch (error) {
       console.error("Error adding product to cart:", error);
-      toast.error(isRTL ? 'حدث خطأ أثناء إضافة المنتج إلى السلة' : 'Error adding product to cart', {
-        position: isRTL ? "top-left" : "top-right"
-      });
+      toast.error(
+        isRTL
+          ? "حدث خطأ أثناء إضافة المنتج إلى السلة"
+          : "Error adding product to cart",
+        {
+          position: isRTL ? "top-left" : "top-right",
+        }
+      );
     }
   };
 
   if (loading) {
-    return <div className="text-center  py-12">{isRTL ? 'جاري تحميل تفاصيل المنتج...' : 'Loading product details...'}</div>;
+    return (
+      <div className="text-center  py-12">
+        {isRTL ? "جاري تحميل تفاصيل المنتج..." : "Loading product details..."}
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center py-12 text-red-500">{isRTL ? 'حدث خطأ:' : 'Error:'} {error}</div>;
+    return (
+      <div className="text-center py-12 text-red-500">
+        {isRTL ? "حدث خطأ:" : "Error:"} {error}
+      </div>
+    );
   }
 
   if (!product) {
-    return <div className="text-center py-12">{isRTL ? 'لا يوجد تفاصيل للمنتج.' : 'No product details available.'}</div>;
+    return (
+      <div className="text-center py-12">
+        {isRTL ? "لا يوجد تفاصيل للمنتج." : "No product details available."}
+      </div>
+    );
   }
 
-  const images = product.images.map(img => img.image);
+  const images = product.images.map((img) => img.image);
 
   return (
-    <div className="p-4 font-sans" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="p-4 font-sans">
       <ToastContainer />
       <div className="max-w-6xl  mx-auto bg-white rounded-lg overflow-hidden">
-        <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-col lg:flex-row'}`}>
+        <div
+          className={`flex ${
+            isRTL ? "flex-row-reverse" : "flex-col lg:flex-row"
+          }`}
+        >
           {/* Product Image Section */}
           <div className="lg:w-1/2 p-6">
             <div className="relative">
               {/* Navigation arrows */}
               <button
                 onClick={prevImage}
-                className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-shadow`}
+                className={`absolute ${
+                  isRTL ? "right-4" : "left-4"
+                } top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-shadow`}
               >
-                {isRTL ? <ChevronRight className="w-5 h-5 text-gray-600" /> : <ChevronLeft className="w-5 h-5 text-gray-600" />}
+                {isRTL ? (
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                ) : (
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                )}
               </button>
               <button
                 onClick={nextImage}
-                className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-shadow`}
+                className={`absolute ${
+                  isRTL ? "left-4" : "right-4"
+                } top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-shadow`}
               >
-                {isRTL ? <ChevronLeft className="w-5 h-5 text-gray-600" /> : <ChevronRight className="w-5 h-5 text-gray-600" />}
+                {isRTL ? (
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                )}
               </button>
               {/* Main product image */}
               <div className="bg-gray-100 rounded-lg h-[400px] flex items-center justify-center overflow-hidden">
                 <img
                   src={images[currentImage]}
-                  className='w-full h-[400px] object-cover transition-opacity duration-500'
+                  className="w-full h-[400px] object-cover transition-opacity duration-500"
                   alt={product.name}
                 />
               </div>
@@ -216,8 +285,8 @@ export default function ProductDetailsSlider({ productId = 5 }) {
                     onClick={() => goToImage(index)}
                     className={`w-3 h-3 rounded-full transition-all duration-200 ${
                       index === currentImage
-                        ? 'bg-purple-600 scale-110'
-                        : 'bg-gray-300 hover:bg-gray-400'
+                        ? "bg-purple-600 scale-110"
+                        : "bg-gray-300 hover:bg-gray-400"
                     }`}
                   />
                 ))}
@@ -229,28 +298,36 @@ export default function ProductDetailsSlider({ productId = 5 }) {
             {/* Rating */}
             <div className="flex items-center mb-4">
               <span className="font-sans font-normal text-[12px] leading-[19.5px] text-[#000000]">
-                {isRTL ? '(تقييمان من العملاء)' : '(Customer Reviews)'}
+                {isRTL ? "(تقييمان من العملاء)" : "(Customer Reviews)"}
               </span>
-              <div className={`flex text-yellow-400 ${isRTL ? 'order-first mx-2' : 'mx-2'}`}>
+              <div
+                className={`flex text-yellow-400 ${
+                  isRTL ? "order-first mx-2" : "mx-2"
+                }`}
+              >
                 {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-lg">★</span>
+                  <span key={i} className="text-lg">
+                    ★
+                  </span>
                 ))}
               </div>
             </div>
             {/* Product Name */}
-            <h1 className="font-sans font-semibold text-[24px] leading-[28px] mb-2 text-[#212529] text-right">
+            <h1 className="font-sans font-semibold text-[24px] leading-[28px] mb-2 text-[#212529] ">
               {product.name}
             </h1>
             {/* Price */}
             <div className="my-6">
               <div className="flex justify-center items-center gap-2 bg-white p-3 rounded-full w-[200px] shadow-[0px_0px_8px_3px_#0000000D]">
                 <p className="font-sans text-purple-600 font-bold text-[20px] leading-relaxed text-center uppercase">
-                  {product.price.toFixed(2)} {isRTL ? 'جنية' : 'EGP'}
+                  {product.price.toFixed(2)} {isRTL ? "جنية" : "EGP"}
                 </p>
               </div>
-              <div className='flex justify-between items-center border-b border-gray-200 py-8 my-4'>
-                <p className="text-purple-500 font-sans font-bold text-[16px] leading-[28px] text-right">
-                  {isRTL ? 'الأسعار تشمل ضريبة القيمة المضافة' : 'Prices include VAT'}
+              <div className="flex justify-between items-center border-b border-gray-200 py-8 my-4">
+                <p className="text-purple-500 font-sans font-bold text-[16px] leading-[28px] ">
+                  {isRTL
+                    ? "الأسعار تشمل ضريبة القيمة المضافة"
+                    : "Prices include VAT"}
                 </p>
                 <span className="font-sans text-red-600 font-semibold text-[24px] leading-[28.8px] align-middle">
                   {product.brand.name}
@@ -258,7 +335,11 @@ export default function ProductDetailsSlider({ productId = 5 }) {
               </div>
             </div>
             {/* Add to Cart Section */}
-            <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-col md:flex-row'} justify-between items-center gap-8 md:gap-4 border-b border-gray-200 pb-8`}>
+            <div
+              className={`flex ${
+                isRTL ? "flex-row-reverse" : "flex-col md:flex-row"
+              } justify-between items-center gap-8 md:gap-4 border-b border-gray-200 pb-8`}
+            >
               {/* Quantity Selector */}
               <div className="flex items-center gap-2 rounded-lg">
                 <button
@@ -280,7 +361,7 @@ export default function ProductDetailsSlider({ productId = 5 }) {
               {/* Add to cart button */}
               <button
                 onClick={addToCart}
-                className="bg-purple-600 text-white font-sans font-medium text-[14px] leading-[100%] text-right align-middle uppercase px-6 py-3 rounded-full hover:bg-purple-700 transition-colors flex items-center gap-2"
+                className="bg-purple-600 text-white font-sans font-medium text-[14px] leading-[100%]  align-middle uppercase px-6 py-3 rounded-full hover:bg-purple-700 transition-colors flex items-center gap-2"
               >
                 {isRTL ? (
                   <>
@@ -298,9 +379,14 @@ export default function ProductDetailsSlider({ productId = 5 }) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={toggleWishlist}
-                  className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-red-500' : 'text-gray-600'} hover:bg-gray-100`}
+                  className={`p-2 rounded-full transition-colors ${
+                    inWishlist ? "text-red-500" : "text-gray-600"
+                  } hover:bg-gray-100`}
                 >
-                  <Heart className="w-5 h-5" fill={inWishlist ? 'red' : 'none'} />
+                  <Heart
+                    className="w-5 h-5"
+                    fill={inWishlist ? "red" : "none"}
+                  />
                 </button>
                 <button className="text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors">
                   <Linkedin className="w-5 h-5" />
@@ -315,10 +401,10 @@ export default function ProductDetailsSlider({ productId = 5 }) {
             </div>
             {/* Product Description */}
             <div className="mt-6">
-              <h3 className="font-sans font-semibold text-[18px] mb-2 text-right">
-                {isRTL ? 'وصف المنتج' : 'Product Description'}
+              <h3 className="font-sans font-semibold text-[18px] mb-2 ">
+                {isRTL ? "وصف المنتج" : "Product Description"}
               </h3>
-              <p className="font-sans text-[14px] text-[#212529] text-right leading-relaxed">
+              <p className="font-sans text-[14px] text-[#212529]  leading-relaxed">
                 {product.description}
               </p>
             </div>

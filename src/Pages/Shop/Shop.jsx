@@ -1,26 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import plant from "../../assets/mandala_1265367 1.png";
-import { Eye, Heart, Filter, X, Search } from 'lucide-react';
-import { FaShoppingBag } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import image1 from "../../assets/bg.png";
+import { Eye, Heart, Filter, X, Search } from "lucide-react";
+import { FaShoppingBag } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import axios from "axios";
 
-// مكون فلترة السعر
 const PriceFilter = ({ priceRange, setPriceRange }) => {
   const { t } = useTranslation();
   return (
     <motion.div
-      className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'
+      className="p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
     >
-      <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px] text-right align-middle text-[#000000] mb-6">
+      <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px]  align-middle text-[#000000] mb-6">
         {t("price_range")}
       </h3>
       <div className="space-y-4">
@@ -29,7 +29,9 @@ const PriceFilter = ({ priceRange, setPriceRange }) => {
           min="0"
           max="1000"
           value={priceRange[0]}
-          onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+          onChange={(e) =>
+            setPriceRange([Number(e.target.value), priceRange[1]])
+          }
           className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
         />
         <input
@@ -37,7 +39,9 @@ const PriceFilter = ({ priceRange, setPriceRange }) => {
           min="0"
           max="1000"
           value={priceRange[1]}
-          onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+          onChange={(e) =>
+            setPriceRange([priceRange[0], Number(e.target.value)])
+          }
           className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
         />
         <div className="flex justify-between text-sm text-gray-600">
@@ -51,7 +55,7 @@ const PriceFilter = ({ priceRange, setPriceRange }) => {
 
 export default function Shop() {
   const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,7 +63,7 @@ export default function Shop() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [sortOption, setSortOption] = useState('newest');
+  const [sortOption, setSortOption] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationInfo, setPaginationInfo] = useState({
     last_page: 1,
@@ -70,24 +74,30 @@ export default function Shop() {
   // جلب قائمة الرغبات من الـ API
   const fetchWishlist = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (!token) {
         console.error("No token found");
         return;
       }
-      const response = await axios.get("https://spiritual.brmjatech.uk/api/wishlist", {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        "https://spiritual.brmjatech.uk/api/wishlist",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const wishlistData = Array.isArray(response.data)
         ? response.data
         : Array.isArray(response.data.data)
-          ? response.data.data
-          : [];
+        ? response.data.data
+        : [];
       setWishlist(wishlistData);
     } catch (error) {
-      console.error("Error fetching wishlist:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error fetching wishlist:",
+        error.response ? error.response.data : error.message
+      );
       setWishlist([]);
     }
   };
@@ -95,7 +105,7 @@ export default function Shop() {
   // إضافة منتج إلى قائمة الرغبات
   const addToWishlist = async (productId) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (!token) {
         toast.error(t("please_login_first"), {
           position: "top-right",
@@ -114,7 +124,7 @@ export default function Shop() {
         { product_id: productId },
         {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -132,7 +142,6 @@ export default function Shop() {
         });
         fetchWishlist();
       } else {
-        
         toast.error(t("failed_to_add_to_wishlist"), {
           position: "top-right",
           autoClose: 2000,
@@ -145,7 +154,10 @@ export default function Shop() {
         });
       }
     } catch (error) {
-      console.error("Error adding to wishlist:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error adding to wishlist:",
+        error.response ? error.response.data : error.message
+      );
       toast.error(t("failed_to_add_to_wishlist"), {
         position: "top-right",
         autoClose: 2000,
@@ -162,7 +174,7 @@ export default function Shop() {
   // إزالة منتج من قائمة الرغبات
   const removeFromWishlist = async (productId) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (!token) {
         toast.error(t("please_login_first"), {
           position: "top-right",
@@ -181,7 +193,7 @@ export default function Shop() {
         { product_id: productId },
         {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -211,7 +223,10 @@ export default function Shop() {
         });
       }
     } catch (error) {
-      console.error("Error removing from wishlist:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error removing from wishlist:",
+        error.response ? error.response.data : error.message
+      );
       toast.error(t("failed_to_remove_from_wishlist"), {
         position: "top-right",
         autoClose: 2000,
@@ -227,7 +242,8 @@ export default function Shop() {
 
   // تبديل حالة المنتج في قائمة الرغبات
   const toggleWishlist = async (productId) => {
-    const isInWishlist = Array.isArray(wishlist) && wishlist.some((item) => item.id === productId);
+    const isInWishlist =
+      Array.isArray(wishlist) && wishlist.some((item) => item.id === productId);
     if (isInWishlist) {
       await removeFromWishlist(productId);
     } else {
@@ -238,7 +254,7 @@ export default function Shop() {
   // إضافة منتج إلى السلة باستخدام API
   const addToCart = async (product) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (!token) {
         toast.error(t("please_login_first"), {
           position: "top-right",
@@ -260,7 +276,7 @@ export default function Shop() {
         },
         {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -277,7 +293,6 @@ export default function Shop() {
           rtl: true,
         });
       } else {
-        
         toast.error(t("failed_to_add_to_cart"), {
           position: "top-right",
           autoClose: 2000,
@@ -290,7 +305,10 @@ export default function Shop() {
         });
       }
     } catch (error) {
-      console.error("Error adding to cart:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error adding to cart:",
+        error.response ? error.response.data : error.message
+      );
       toast.error(t("failed_to_add_to_cart"), {
         position: "top-right",
         autoClose: 2000,
@@ -316,12 +334,14 @@ export default function Shop() {
       if (priceRange[1] < 1000) params.max = priceRange[1];
       params.page = currentPage;
 
-      const response = await axios.get("https://spiritual.brmjatech.uk/api/products", { params });
+      const response = await axios.get(
+        "https://spiritual.brmjatech.uk/api/products",
+        { params }
+      );
       const items = response?.data?.data?.result;
       if (Array.isArray(items)) {
         setProducts(items);
       } else {
-        
         setProducts([]);
       }
 
@@ -407,12 +427,16 @@ export default function Shop() {
 
   // إذا حدث خطأ
   if (error) {
-    return <div className="text-center py-12 text-red-500">حدث خطأ: {error}</div>;
+    return (
+      <div className="text-center py-12 text-red-500">حدث خطأ: {error}</div>
+    );
   }
 
   // إذا لم توجد منتجات
   if (filteredProducts.length === 0) {
-    return <div className="text-center py-12">لا توجد منتجات مطابقة للبحث.</div>;
+    return (
+      <div className="text-center py-12">لا توجد منتجات مطابقة للبحث.</div>
+    );
   }
 
   return (
@@ -420,8 +444,8 @@ export default function Shop() {
       <ToastContainer />
       <div className="min-h-screen bg-gray-50 overflow-hidden">
         {/* Hero Section */}
-        <div className='relative'>
-          <div className='image'>
+        <div className="relative">
+          <div className="image">
             <div className="relative bg-black/70">
               <div className="pt-[80px]"></div>
               <div className="relative overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
@@ -445,7 +469,8 @@ export default function Shop() {
                     transition={{ duration: 0.6, delay: 0.4 }}
                   >
                     <p className="font-[Montserrat-Arabic] text-white font-normal text-[24px] leading-[100%] tracking-[0] text-center align-middle [font-variant:small-caps]">
-                      {t("home")} / <span className='text-purple-500'>{t("shop")}</span>
+                      {t("home")} /{" "}
+                      <span className="text-purple-500">{t("shop")}</span>
                     </p>
                   </motion.div>
                 </motion.div>
@@ -465,12 +490,12 @@ export default function Shop() {
                       className="max-w-full max-h-full object-contain"
                       animate={{
                         rotate: [0, 3, -3, 0],
-                        scale: [1, 1.02, 1]
+                        scale: [1, 1.02, 1],
                       }}
                       transition={{
                         duration: 5,
                         repeat: Infinity,
-                        ease: "easeInOut"
+                        ease: "easeInOut",
                       }}
                     />
                   </div>
@@ -491,7 +516,7 @@ export default function Shop() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
                 transition={{ duration: 0.5 }}
-                className="mb-6 text-right"
+                className="mb-6 "
               >
                 <p className="text-gray-600 text-sm">
                   {t("show_products", { count: filteredProducts.length })}
@@ -507,12 +532,16 @@ export default function Shop() {
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
               >
                 {filteredProducts.map((product) => {
-                  const isInWishlist = Array.isArray(wishlist) && wishlist.some((item) => item.id === product.id);
+                  const isInWishlist =
+                    Array.isArray(wishlist) &&
+                    wishlist.some((item) => item.id === product.id);
 
                   // تحديد مصدر الصورة
                   const productImage =
                     product.image ||
-                    (product.images && product.images.length > 0 ? product.images[0].image : "https://via.placeholder.com/300");
+                    (product.images && product.images.length > 0
+                      ? product.images[0].image
+                      : image1);
 
                   return (
                     <motion.div
@@ -543,9 +572,9 @@ export default function Shop() {
                               hidden: {},
                               visible: {
                                 transition: {
-                                  staggerChildren: 0.1
-                                }
-                              }
+                                  staggerChildren: 0.1,
+                                },
+                              },
                             }}
                           >
                             <motion.button
@@ -575,7 +604,11 @@ export default function Shop() {
                                   : "bg-purple-500/90 hover:bg-white text-white hover:text-purple-700"
                               }`}
                             >
-                              <Heart className={`w-4 h-4 ${isInWishlist ? "fill-current" : ""}`} />
+                              <Heart
+                                className={`w-4 h-4 ${
+                                  isInWishlist ? "fill-current" : ""
+                                }`}
+                              />
                             </motion.button>
                           </motion.div>
                         </motion.div>
@@ -602,8 +635,12 @@ export default function Shop() {
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="text-purple-500">{t("currency")}</span>
-                          <span className="text-purple-600">{product.price?.toFixed(2)}</span>
+                          <span className="text-purple-500">
+                            {t("currency")}
+                          </span>
+                          <span className="text-purple-600">
+                            {product.price?.toFixed(2)}
+                          </span>
                         </motion.div>
                       </motion.div>
                     </motion.div>
@@ -632,11 +669,14 @@ export default function Shop() {
                         : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    السابق
+                    {t("previous")}
                   </motion.button>
 
                   {/* عرض أرقام الصفحات */}
-                  {Array.from({ length: paginationInfo.last_page }, (_, i) => i + 1).map((page) => (
+                  {Array.from(
+                    { length: paginationInfo.last_page },
+                    (_, i) => i + 1
+                  ).map((page) => (
                     <motion.button
                       key={page}
                       whileHover={{ scale: 1.1 }}
@@ -664,7 +704,7 @@ export default function Shop() {
                         : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    التالي
+                    {t("next")}
                   </motion.button>
                 </div>
               </motion.div>
@@ -680,97 +720,101 @@ export default function Shop() {
             >
               <div className="sticky top-6 space-y-6">
                 {/* Search */}
-                <motion.div variants={filterVariants} className='p-8 rounded-[20px] bg-[#4F46E50D]'>
+                <motion.div
+                  variants={filterVariants}
+                  className="p-8 rounded-[20px] bg-[#4F46E50D]"
+                >
                   <motion.input
                     type="text"
-                    placeholder="بحث ..."
-                    dir='rtl'
+                    placeholder={t("search")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="font-[Montserrat-Arabic] font-light text-[16px] leading-[100%] tracking-[0] text-right align-middle w-full p-2 border-none rounded bg-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    className="font-[Montserrat-Arabic] font-light text-[16px] leading-[100%] tracking-[0]  align-middle w-full p-2 border-none rounded bg-white focus:outline-none focus:ring-2 focus:ring-purple-400"
                     whileFocus={{ scale: 1.02 }}
                     transition={{ duration: 0.2 }}
                   />
                 </motion.div>
 
                 {/* Sort Options */}
-                <motion.div variants={filterVariants} dir='rtl' className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'>
-                  <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px] text-right align-middle text-[#000000] mb-8">
-                    ترتيب حسب
+                <motion.div
+                  variants={filterVariants}
+                  className="p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100"
+                >
+                  <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px]  align-middle text-[#000000] mb-8">
+                    {t("sort_by_heading")}
                   </h3>
                   <div className="space-y-3">
                     <motion.label
                       whileHover={{ x: 5 }}
-                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0] text-right align-middle flex items-center gap-2 cursor-pointer"
+                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0]  align-middle flex items-center gap-2 cursor-pointer"
                     >
                       <input
-                        className='accent-purple-500 w-4 h-4'
+                        className="accent-purple-500 w-4 h-4"
                         type="radio"
                         name="sort"
-                        checked={sortOption === 'cheapest'}
-                        onChange={() => setSortOption('cheapest')}
+                        checked={sortOption === "cheapest"}
+                        onChange={() => setSortOption("cheapest")}
                       />
-                      السعر من الأرخص إلى الأعلى
+                      {t("sort_by_price_low_to_high")}
                     </motion.label>
                     <motion.label
                       whileHover={{ x: 5 }}
-                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0] text-right align-middle flex items-center gap-2 cursor-pointer"
+                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0]  align-middle flex items-center gap-2 cursor-pointer"
                     >
                       <input
-                        className='accent-purple-500 w-4 h-4'
+                        className="accent-purple-500 w-4 h-4"
                         type="radio"
                         name="sort"
-                        checked={sortOption === 'expensive'}
-                        onChange={() => setSortOption('expensive')}
+                        checked={sortOption === "expensive"}
+                        onChange={() => setSortOption("expensive")}
                       />
-                      السعر من الأعلى إلى الأرخص
+                      {t("sort_by_price_high_to_low")}
                     </motion.label>
                     <motion.label
                       whileHover={{ x: 5 }}
-                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0] text-right align-middle flex items-center gap-2 cursor-pointer"
+                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0]  align-middle flex items-center gap-2 cursor-pointer"
                     >
                       <input
-                        className='accent-purple-500 w-4 h-4'
+                        className="accent-purple-500 w-4 h-4"
                         type="radio"
                         name="sort"
-                        checked={sortOption === 'newest'}
-                        onChange={() => setSortOption('newest')}
+                        checked={sortOption === "newest"}
+                        onChange={() => setSortOption("newest")}
                       />
-                      الأحدث
+                      {t("sort_by_newest")}
                     </motion.label>
                     <motion.label
                       whileHover={{ x: 5 }}
-                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0] text-right align-middle flex items-center gap-2 cursor-pointer"
+                      className="font-[Montserrat-Arabic] text-[#676666] font-light text-[14px] leading-[100%] tracking-[0]  align-middle flex items-center gap-2 cursor-pointer"
                     >
                       <input
-                        className='accent-purple-500 w-4 h-4'
+                        className="accent-purple-500 w-4 h-4"
                         type="radio"
                         name="sort"
-                        checked={sortOption === 'best_selling'}
-                        onChange={() => setSortOption('best_selling')}
+                        checked={sortOption === "best_selling"}
+                        onChange={() => setSortOption("best_selling")}
                       />
-                      الأكثر مبيعاً
+                      {t("sort_by_most_popular")}
                     </motion.label>
                   </div>
                 </motion.div>
 
-                <motion.div variants={filterVariants}>
-                  <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
-                </motion.div>
-
                 {/* Categories */}
-                <motion.div variants={filterVariants} dir='rtl' className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'>
-                  <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px] text-right align-middle mb-6">
-                    تصنيفات المنتج
+                <motion.div
+                  variants={filterVariants}
+                  className="p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100"
+                >
+                  <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px]  align-middle mb-6">
+                    {t("product_categories_heading")}
                   </h3>
                   <ul className="space-y-3">
                     {[
-                      { id: 1, name: 'روحانيات' },
-                      { id: 2, name: 'طاقة' },
-                      { id: 3, name: 'علاج روحاني' },
-                      { id: 4, name: 'علاج طاقي' },
-                      { id: 5, name: 'لايف كوتش' },
-                      { id: 6, name: 'تحفيظ القرآن' }
+                      { id: 1, nameKey: "category_1", name: t("category_1") },
+                      { id: 2, nameKey: "category_2", name: t("category_2") },
+                      { id: 3, nameKey: "category_3", name: t("category_3") },
+                      { id: 4, nameKey: "category_4", name: t("category_4") },
+                      { id: 5, nameKey: "category_5", name: t("category_5") },
+                      { id: 6, nameKey: "category_6", name: t("category_6") },
                     ].map((category) => (
                       <motion.li
                         key={category.id}
@@ -780,8 +824,10 @@ export default function Shop() {
                         transition={{ delay: 0.1 }}
                         whileHover={{ x: 5, color: "#8B5CF6" }}
                         onClick={() => setSelectedCategory(category.id)}
-                        className={`text-[#676666] font-[Alexandria] font-light text-[14px] leading-relaxed tracking-[0px] text-right align-middle cursor-pointer ${
-                          selectedCategory === category.id ? 'text-purple-600' : ''
+                        className={`text-[#676666] font-[Alexandria] font-light text-[14px] leading-relaxed tracking-[0px]  align-middle cursor-pointer ${
+                          selectedCategory === category.id
+                            ? "text-purple-600"
+                            : ""
                         }`}
                       >
                         {category.name}
@@ -810,13 +856,13 @@ export default function Shop() {
               boxShadow: [
                 "0 0 0 0 rgba(147, 51, 234, 0.7)",
                 "0 0 0 10px rgba(147, 51, 234, 0)",
-                "0 0 0 0 rgba(147, 51, 234, 0)"
-              ]
+                "0 0 0 0 rgba(147, 51, 234, 0)",
+              ],
             }}
             transition={{
               duration: 2,
               repeat: Infinity,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
           >
             <Filter className="w-5 h-5" />
@@ -846,7 +892,9 @@ export default function Shop() {
                   transition={{ delay: 0.1 }}
                   className="flex items-center justify-between p-6 border-b border-gray-200"
                 >
-                  <h2 className="text-lg font-semibold text-gray-800">تصفية المنتجات</h2>
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {t("filter_products")}
+                  </h2>
                   <motion.button
                     onClick={() => setIsSidebarOpen(false)}
                     className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -865,11 +913,10 @@ export default function Shop() {
                   className="p-6 space-y-6"
                 >
                   {/* Search */}
-                  <div className='p-8 rounded-[20px] bg-[#4F46E50D]'>
+                  <div className="p-8 rounded-[20px] bg-[#4F46E50D]">
                     <input
                       type="text"
-                      placeholder="بحث ..."
-                      dir='rtl'
+                      placeholder={t("search")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full p-2 border-none rounded bg-white focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -877,67 +924,72 @@ export default function Shop() {
                   </div>
 
                   {/* Sort Options */}
-                  <div dir='rtl' className='p-8 rounded-[20px] bg-[#4F46E50D]'>
-                    <h3 className="font-semibold text-[16px] mb-8">ترتيب حسب</h3>
+                  <div dir="rtl" className="p-8 rounded-[20px] bg-[#4F46E50D]">
+                    <h3 className="font-semibold text-[16px] mb-8">
+                      {t("sort_by_heading")}
+                    </h3>
                     <div className="space-y-2 text-sm text-gray-600">
                       <label className="flex items-center gap-2">
                         <input
-                          className='accent-purple-500'
+                          className="accent-purple-500"
                           type="radio"
                           name="sort"
-                          checked={sortOption === 'cheapest'}
-                          onChange={() => setSortOption('cheapest')}
+                          checked={sortOption === "cheapest"}
+                          onChange={() => setSortOption("cheapest")}
                         />
-                        السعر من الأرخص إلى الأعلى
+                        {t("sort_by_price_low_to_high")}
                       </label>
                       <label className="flex items-center gap-2">
                         <input
-                          className='accent-purple-500'
+                          className="accent-purple-500"
                           type="radio"
                           name="sort"
-                          checked={sortOption === 'expensive'}
-                          onChange={() => setSortOption('expensive')}
+                          checked={sortOption === "expensive"}
+                          onChange={() => setSortOption("expensive")}
                         />
-                        السعر من الأعلى إلى الأرخص
+                        {t("sort_by_price_high_to_low")}
                       </label>
                       <label className="flex items-center gap-2">
                         <input
-                          className='accent-purple-500'
+                          className="accent-purple-500"
                           type="radio"
                           name="sort"
-                          checked={sortOption === 'newest'}
-                          onChange={() => setSortOption('newest')}
+                          checked={sortOption === "newest"}
+                          onChange={() => setSortOption("newest")}
                         />
-                        الأحدث
+                        {t("sort_by_newest")}
                       </label>
                       <label className="flex items-center gap-2">
                         <input
-                          className='accent-purple-500'
+                          className="accent-purple-500"
                           type="radio"
                           name="sort"
-                          checked={sortOption === 'best_selling'}
-                          onChange={() => setSortOption('best_selling')}
+                          checked={sortOption === "best_selling"}
+                          onChange={() => setSortOption("best_selling")}
                         />
-                        الأكثر مبيعاً
+                        {t("sort_by_most_popular")}
                       </label>
                     </div>
                   </div>
 
-                  <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
+                  <PriceFilter
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                  />
 
                   {/* Categories */}
-                  <div dir='rtl' className='p-8 rounded-[20px] bg-[#4F46E50D]'>
-                    <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px] text-right align-middle mb-6">
-                      تصنيفات المنتج
+                  <div dir="rtl" className="p-8 rounded-[20px] bg-[#4F46E50D]">
+                    <h3 className="font-[Alexandria] text-[#000000] font-semibold text-[16px] leading-[27.2px] tracking-[-0.68px]  align-middle mb-6">
+                      {t("product_categories_heading")}
                     </h3>
-                    <ul className="space-y-3 text-[#676666] font-[Alexandria] font-light text-[14px] leading-relaxed tracking-[0px] text-right align-middle">
+                    <ul className="space-y-3 text-[#676666] font-[Alexandria] font-light text-[14px] leading-relaxed tracking-[0px]  align-middle">
                       {[
-                        { id: 1, name: 'روحانيات' },
-                        { id: 2, name: 'طاقة' },
-                        { id: 3, name: 'علاج روحاني' },
-                        { id: 4, name: 'علاج طاقي' },
-                        { id: 5, name: 'لايف كوتش' },
-                        { id: 6, name: 'تحفيظ القرآن' }
+                        { id: 1, name: t("category_1") },
+                        { id: 2, name: t("category_2") },
+                        { id: 3, name: t("category_3") },
+                        { id: 4, name: t("category_4") },
+                        { id: 5, name: t("category_5") },
+                        { id: 6, name: t("category_6") },
                       ].map((category) => (
                         <li
                           key={category.id}
@@ -945,7 +997,11 @@ export default function Shop() {
                             setSelectedCategory(category.id);
                             setIsSidebarOpen(false);
                           }}
-                          className={`cursor-pointer ${selectedCategory === category.id ? 'text-purple-600' : ''}`}
+                          className={`cursor-pointer ${
+                            selectedCategory === category.id
+                              ? "text-purple-600"
+                              : ""
+                          }`}
                         >
                           {category.name}
                         </li>
@@ -960,7 +1016,7 @@ export default function Shop() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    تطبيق الفلاتر
+                    {t("apply_filters")}
                   </motion.button>
                 </motion.div>
               </motion.div>

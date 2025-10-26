@@ -88,7 +88,7 @@ export default function CommentForm({ onReviewSubmitted }) {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white">
-      <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px] text-right align-middle mb-6">
+      <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px]  align-middle mb-6">
         {t("commentForm.title")}
       </h2>
 
@@ -98,7 +98,7 @@ export default function CommentForm({ onReviewSubmitted }) {
           onChange={(e) => setComment(e.target.value)}
           placeholder={t("commentForm.comment")}
           rows="4"
-          className="w-full border font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full border font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-purple-500"
           required
         ></textarea>
 
@@ -130,7 +130,7 @@ export default function CommentForm({ onReviewSubmitted }) {
           </button>
         </div>
 
-        {error && <p className="text-red-500 text-right mt-2">{error}</p>}
+        {error && <p className="text-red-500  mt-2">{error}</p>}
       </form>
     </div>
   );

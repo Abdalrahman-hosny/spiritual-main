@@ -159,15 +159,14 @@ function ArabicTestimonials({ reviewsUpdated }) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6" dir="rtl">
+    <div className="max-w-6xl mx-auto p-6">
       <div className="grid grid-cols-1 gap-8">
         {/* Right Column - Details */}
         <div className='border-b pb-6'>
           <div className='flex justify-between items-center'>
-            <h3 className="font-semibold text-[24px] mb-4 text-right">{t("details.about_brand")}</h3>
-            <p className="text-red-600 font-semibold text-[24px]">فيزدل</p>
+            <h3 className="font-semibold text-[24px] mb-4 ">{t("details.about_brand")}</h3>
           </div>
-          <p className="text-[14px] text-[#212529] text-right leading-relaxed">
+          <p className="text-[14px] text-[#212529]  leading-relaxed">
             {t("details.brand_description")}
           </p>
         </div>
@@ -175,7 +174,7 @@ function ArabicTestimonials({ reviewsUpdated }) {
 
       {/* Left Column - Reviews */}
       <div>
-        <h2 className="font-semibold text-[24px] mb-6 text-right">{t("details.reviews")}</h2>
+        <h2 className="font-semibold text-[24px] mb-6 ">{t("details.reviews")}</h2>
         <div className="space-y-6">
           {testimonials.length > 0 ? (
             testimonials.map((testimonial) => (
@@ -190,8 +189,8 @@ function ArabicTestimonials({ reviewsUpdated }) {
                       />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-[20px] mb-2 text-right">{testimonial.user.name}</h4>
-                      <p className="text-[#212529] text-[14px] text-right">
+                      <h4 className="font-semibold text-[20px] mb-2 ">{testimonial.user.name}</h4>
+                      <p className="text-[#212529] text-[14px] ">
                         {testimonial.created_human}
                       </p>
                     </div>
@@ -202,7 +201,7 @@ function ArabicTestimonials({ reviewsUpdated }) {
                     ))}
                   </div>
                 </div>
-                <p className="text-[14px] text-[#212529] text-right leading-relaxed mb-4">
+                <p className="text-[14px] text-[#212529]  leading-relaxed mb-4">
                   {testimonial.comment}
                 </p>
               </div>
