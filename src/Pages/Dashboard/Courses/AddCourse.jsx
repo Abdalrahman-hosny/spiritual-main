@@ -156,6 +156,21 @@ const AddCourse = ({ onClose, onSuccess }) => {
 
       if (response.data.status) {
         toast.success(response.data.message || "تم إنشاء الكورس بنجاح");
+        // إعادة تعيين النموذج
+        setFormData({
+          category_id: "",
+          "title[ar]": "",
+          "title[en]": "",
+          "description[ar]": "",
+          "description[en]": "",
+          image: null,
+          video: "",
+          schedule: "",
+          duration: "",
+          lectures_count: "",
+          price: "",
+          files: [],
+        });
         onSuccess();
       } else {
         toast.error(response.data.message || "خطأ في إنشاء الكورس");
@@ -179,7 +194,7 @@ const AddCourse = ({ onClose, onSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="course-form">
-          <div className="form-row">
+          <div className="form-row-single">
             <div className="form-group">
               <label>التصنيف *</label>
               <select
@@ -251,7 +266,7 @@ const AddCourse = ({ onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="form-row-triple">
             <div className="form-group">
               <label>سعر الكورس *</label>
               <input
@@ -275,9 +290,6 @@ const AddCourse = ({ onClose, onSuccess }) => {
                 placeholder="مثال: 3 ساعات"
               />
             </div>
-          </div>
-
-          <div className="form-row">
             <div className="form-group">
               <label>عدد المحاضرات</label>
               <input
@@ -289,6 +301,9 @@ const AddCourse = ({ onClose, onSuccess }) => {
                 min="0"
               />
             </div>
+          </div>
+
+          <div className="form-row">
             <div className="form-group">
               <label>جدول الكورس</label>
               <input
@@ -299,17 +314,16 @@ const AddCourse = ({ onClose, onSuccess }) => {
                 placeholder="مثال: كل يوم سبت الساعة 7 مساءً"
               />
             </div>
-          </div>
-
-          <div className="form-group">
-            <label>رابط الفيديو</label>
-            <input
-              type="url"
-              name="video"
-              value={formData.video}
-              onChange={handleInputChange}
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
+            <div className="form-group">
+              <label>رابط الفيديو</label>
+              <input
+                type="url"
+                name="video"
+                value={formData.video}
+                onChange={handleInputChange}
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+            </div>
           </div>
 
           <div className="form-group">

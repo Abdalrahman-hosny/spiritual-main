@@ -397,7 +397,6 @@ const Coupons = () => {
                   <div className={styles.couponContent}>
                     <div className={styles.discountInfo}>
                       <div className={styles.discountValue}>
-                        <FaPercentage className={styles.discountIcon} />
                         <span className={styles.discountText}>
                           {coupon.discount_precentage}%
                         </span>

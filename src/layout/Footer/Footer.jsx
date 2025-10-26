@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Facebook, Linkedin, Twitter, Youtube } from "lucide-react";
 import { FaBehance, FaFacebook } from "react-icons/fa6";
 import logo from "../../assets/loginimg.png";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import phone from "../../assets/telephone-call2.svg fill.png";
 import chat from "../../assets/bubble-chat2.svg fill.png";
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { Link } from "react-router-dom";
+import axios from "axios";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -15,7 +15,9 @@ const Footer = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/settings');
+        const response = await axios.get(
+          "https://spiritual.brmjatech.uk/api/settings"
+        );
         if (response.data.code === 200 && response.data.data.length > 0) {
           setSettings(response.data.data[0]);
         }
@@ -30,14 +32,13 @@ const Footer = () => {
   return (
     <footer className="relative register text-white">
       <div className="bg-black/90 absolute inset-0"></div>
-      <div dir="rtl" className="container relative z-50 mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div
+        dir="rtl"
+        className="container relative z-50 mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8"
+      >
         {/* العمود 1 */}
         <div className="space-y-4">
-          <img
-            src={settings?.logo || logo}
-            alt="Logo"
-            className="w-32"
-          />
+          <img src={settings?.logo || logo} alt="Logo" className="w-32" />
           <p className="text-sm leading-6">
             {settings?.desc || t("footer.description")}
           </p>
@@ -55,17 +56,26 @@ const Footer = () => {
               </Link>
             </li>
             <li>
-              <Link to="/about-us" className="hover:text-purple-500 transition-colors">
+              <Link
+                to="/about-us"
+                className="hover:text-purple-500 transition-colors"
+              >
                 {t("footer.legal.aboutus")}
               </Link>
             </li>
             <li>
-              <Link to="/contact-us" className="hover:text-purple-500 transition-colors">
+              <Link
+                to="/contact-us"
+                className="hover:text-purple-500 transition-colors"
+              >
                 {t("footer.legal.ContactUs")}
               </Link>
             </li>
             <li>
-              <Link to="/shop" className="hover:text-purple-500 transition-colors">
+              <Link
+                to="/shop"
+                className="hover:text-purple-500 transition-colors"
+              >
                 {t("footer.legal.shop")}
               </Link>
             </li>
@@ -79,22 +89,34 @@ const Footer = () => {
           </h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link to="/about-us" className="hover:text-purple-500 transition-colors">
+              <Link
+                to="/about-us"
+                className="hover:text-purple-500 transition-colors"
+              >
                 {t("footer.legal.aboutus")}
               </Link>
             </li>
             <li>
-              <Link to="/terms-and-conditions" className="hover:text-purple-500 transition-colors">
+              <Link
+                to="/terms-and-conditions"
+                className="hover:text-purple-500 transition-colors"
+              >
                 {t("footer.legal.terms")}
               </Link>
             </li>
             <li>
-              <Link to="/privacy-policy" className="hover:text-purple-500 transition-colors">
+              <Link
+                to="/privacy-policy"
+                className="hover:text-purple-500 transition-colors"
+              >
                 {t("footer.legal.privacy")}
               </Link>
             </li>
             <li>
-              <Link to="/faqs" className="hover:text-purple-500 transition-colors">
+              <Link
+                to="/faqs"
+                className="hover:text-purple-500 transition-colors"
+              >
                 {t("footer.legal.faqs")}
               </Link>
             </li>
@@ -142,10 +164,7 @@ const Footer = () => {
             </li>
             <li className="flex items-center gap-2">
               <FaBehance className="w-3 h-3 text-purple-500" />
-              <a
-                href="#"
-                className="hover:text-purple-500 transition-colors"
-              >
+              <a href="#" className="hover:text-purple-500 transition-colors">
                 {t("footer.socialMedia.platforms.3")}
               </a>
             </li>
@@ -168,7 +187,10 @@ const Footer = () => {
       <div className="border-t relative z-50 border-white/20 mt-8 py-4 text-center text-sm flex flex-col md:flex-row items-center justify-between px-6">
         <p className="font-montserratArabic font-normal text-[15px] leading-[25px] tracking-[0] text-center align-middle">
           {settings?.copyright || t("footer.copyright")}
-          <span className="text-orange-500 font-semibold"> {t("footer.poweredBy")}</span>
+          <span className="text-orange-500 font-semibold">
+            {" "}
+            {t("footer.poweredBy")}
+          </span>
         </p>
         <div className="flex items-center gap-6 mt-2 md:mt-0">
           <div className="flex items-center gap-2">
@@ -177,7 +199,9 @@ const Footer = () => {
                 {t("footer.support.title")}
               </p>
               <a
-                href={`mailto:${settings?.support || t("footer.support.email")}`}
+                href={`mailto:${
+                  settings?.support || t("footer.support.email")
+                }`}
                 className="text-purple-500 font-montserratArabic font-normal text-[14px] leading-[20px] tracking-[0] text-right align-middle"
               >
                 {settings?.support || t("footer.support.email")}

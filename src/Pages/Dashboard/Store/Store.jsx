@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -63,12 +63,15 @@ const Store = () => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [dataLoading, setDataLoading] = useState(true);
 
   // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
+        setError(null);
         const token = sessionStorage.getItem("token");
 
         if (!token) {
@@ -108,10 +111,12 @@ const Store = () => {
           setError(
             `API Error: ${response.data.message || "Failed to fetch products"}`
           );
+          setProducts([]);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
         setError("Error loading products. Please try again.");
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -120,41 +125,195 @@ const Store = () => {
     fetchProducts();
   }, [currentPage, searchTerm, i18n.language]);
 
+  // Function to refresh products list
+  const refreshProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = sessionStorage.getItem("token");
+
+      if (!token) {
+        console.error("No token found for refresh");
+        return;
+      }
+
+      const response = await axios.get(
+        "https://spiritual.brmjatech.uk/api/dashboard/products",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Accept-Language": i18n.language === "ar" ? "ar" : "en",
+          },
+          params: {
+            search: searchTerm || "",
+            per_page: 12,
+            page: currentPage,
+          },
+        }
+      );
+
+      if (response.data.code === 200) {
+        const productsData = response.data.data.result || [];
+        const paginationData = response.data.data.meta || {};
+        setProducts(productsData);
+        setPagination(paginationData);
+        console.log("Products refreshed successfully");
+      }
+    } catch (error) {
+      console.error("Error refreshing products:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm, currentPage, i18n.language]);
+
+  // Listen for focus events to refresh products when returning from add product page
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log("Window focused, refreshing products...");
+      refreshProducts();
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("Page became visible, refreshing products...");
+        refreshProducts();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [searchTerm, currentPage, i18n.language, refreshProducts]);
+
   // Fetch categories and brands for update form
   useEffect(() => {
     const fetchCategoriesAndBrands = async () => {
       try {
         const token = sessionStorage.getItem("token");
-        if (!token) return;
-
-        const [categoriesRes, brandsRes] = await Promise.all([
-          axios.get("https://spiritual.brmjatech.uk/api/categories", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-              "Accept-Language": "ar", // Fetch in Arabic
-            },
-          }),
-          axios.get("https://spiritual.brmjatech.uk/api/dashboard/brand", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-              "Accept-Language": "ar", // Fetch in Arabic
-            },
-          }),
-        ]);
-
-        if (categoriesRes.data.code === 200) {
-          setCategories(categoriesRes.data.data);
+        if (!token) {
+          console.log("No token found");
+          return;
         }
-        if (brandsRes.data.code === 200) {
-          setBrands(brandsRes.data.data);
+
+        console.log("Starting to fetch categories and brands...");
+
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Accept-Language": "ar", // Fetch in Arabic
+        };
+
+        // Fetch categories
+        try {
+          console.log("Fetching categories...");
+          const categoriesResponse = await axios.get(
+            "https://spiritual.brmjatech.uk/api/categories",
+            {
+              headers,
+            }
+          );
+
+          if (categoriesResponse.data.code === 200) {
+            const responseData = categoriesResponse.data.data;
+
+            let categoriesData = [];
+
+            // Check for data in result array (as shown in the API response)
+            if (
+              responseData &&
+              responseData.result &&
+              Array.isArray(responseData.result)
+            ) {
+              categoriesData = responseData.result;
+            } else if (responseData && responseData.items) {
+              categoriesData = responseData.items;
+            } else if (responseData && Array.isArray(responseData)) {
+              categoriesData = responseData;
+            } else if (
+              responseData &&
+              responseData.data &&
+              Array.isArray(responseData.data)
+            ) {
+              categoriesData = responseData.data;
+            }
+
+            console.log("Categories data:", categoriesData);
+            setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+          } else {
+            console.error("Categories API error:", categoriesResponse.data);
+            setCategories([]);
+          }
+        } catch (error) {
+          console.error("Error fetching categories:", error);
+          setCategories([]);
+        }
+
+        // Fetch brands
+        try {
+          console.log("Fetching brands...");
+          const brandsResponse = await axios.get(
+            "https://spiritual.brmjatech.uk/api/dashboard/brand",
+            {
+              headers: {
+                ...headers,
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (brandsResponse.data.code === 200) {
+            const responseData = brandsResponse.data;
+
+            let brandsData = [];
+
+            // Check for data in message array (as shown in Postman)
+            if (responseData.message && Array.isArray(responseData.message)) {
+              brandsData = responseData.message;
+            } else if (
+              responseData.data &&
+              responseData.data.result &&
+              Array.isArray(responseData.data.result)
+            ) {
+              brandsData = responseData.data.result;
+            } else if (responseData.data && responseData.data.items) {
+              brandsData = responseData.data.items;
+            } else if (responseData.data && Array.isArray(responseData.data)) {
+              brandsData = responseData.data;
+            } else if (
+              responseData.data &&
+              responseData.data.data &&
+              Array.isArray(responseData.data.data)
+            ) {
+              brandsData = responseData.data.data;
+            }
+
+            console.log("Brands data:", brandsData);
+            setBrands(Array.isArray(brandsData) ? brandsData : []);
+          } else {
+            console.error("Brands API error:", brandsResponse.data);
+            setBrands([]);
+          }
+        } catch (error) {
+          console.error("Error fetching brands:", error);
+          setBrands([]);
         }
       } catch (error) {
-        console.error("Error fetching categories and brands:", error);
+        console.error("Error fetching data:", error);
+        toast.error("خطأ في تحميل البيانات");
+        // Set empty arrays as fallback
+        setCategories([]);
+        setBrands([]);
+      } finally {
+        console.log("Finished fetching categories and brands");
+        setDataLoading(false);
       }
     };
 
+    console.log("useEffect for categories and brands triggered");
     fetchCategoriesAndBrands();
   }, []);
 
@@ -166,13 +325,117 @@ const Store = () => {
     i18n.changeLanguage(lng);
   };
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
+    // Refresh categories and brands before navigating to add product page
+    console.log("Refreshing data before adding new product...");
+    setDataLoading(true);
+    await refreshCategoriesAndBrands();
+    setDataLoading(false);
     navigate("/dashboard/store/add");
+  };
+
+  // Function to refresh categories and brands
+  const refreshCategoriesAndBrands = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        console.log("No token found for refresh");
+        return;
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Accept-Language": "ar",
+      };
+
+      // Fetch categories
+      try {
+        console.log("Refreshing categories...");
+        const categoriesResponse = await axios.get(
+          "https://spiritual.brmjatech.uk/api/categories",
+          { headers }
+        );
+
+        if (categoriesResponse.data.code === 200) {
+          const responseData = categoriesResponse.data.data;
+          let categoriesData = [];
+
+          if (
+            responseData &&
+            responseData.result &&
+            Array.isArray(responseData.result)
+          ) {
+            categoriesData = responseData.result;
+          } else if (responseData && responseData.items) {
+            categoriesData = responseData.items;
+          } else if (responseData && Array.isArray(responseData)) {
+            categoriesData = responseData;
+          } else if (
+            responseData &&
+            responseData.data &&
+            Array.isArray(responseData.data)
+          ) {
+            categoriesData = responseData.data;
+          }
+
+          console.log("Refreshed categories data:", categoriesData);
+          setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+        }
+      } catch (error) {
+        console.error("Error refreshing categories:", error);
+      }
+
+      // Fetch brands
+      try {
+        console.log("Refreshing brands...");
+        const brandsResponse = await axios.get(
+          "https://spiritual.brmjatech.uk/api/dashboard/brand",
+          { headers }
+        );
+
+        if (brandsResponse.data.code === 200) {
+          const responseData = brandsResponse.data;
+          let brandsData = [];
+
+          if (responseData.message && Array.isArray(responseData.message)) {
+            brandsData = responseData.message;
+          } else if (
+            responseData.data &&
+            responseData.data.result &&
+            Array.isArray(responseData.data.result)
+          ) {
+            brandsData = responseData.data.result;
+          } else if (responseData.data && responseData.data.items) {
+            brandsData = responseData.data.items;
+          } else if (responseData.data && Array.isArray(responseData.data)) {
+            brandsData = responseData.data;
+          } else if (
+            responseData.data &&
+            responseData.data.data &&
+            Array.isArray(responseData.data.data)
+          ) {
+            brandsData = responseData.data.data;
+          }
+
+          console.log("Refreshed brands data:", brandsData);
+          setBrands(Array.isArray(brandsData) ? brandsData : []);
+        }
+      } catch (error) {
+        console.error("Error refreshing brands:", error);
+      }
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    }
   };
 
   const handleEditProduct = async (productId) => {
     try {
       const token = sessionStorage.getItem("token");
+
+      // Refresh categories and brands data when opening edit modal
+      console.log("Refreshing categories and brands for edit modal...");
+      setDataLoading(true);
 
       // Fetch product data in both Arabic and English
       const [arabicResponse, englishResponse] = await Promise.all([
@@ -257,11 +520,16 @@ const Store = () => {
           images: product.images || [],
         });
 
+        // Refresh categories and brands before opening modal
+        await refreshCategoriesAndBrands();
+
         setUpdateModalOpen(true);
       }
     } catch (error) {
       console.error("Error fetching product for update:", error);
       toast.error("خطأ في تحميل بيانات المنتج");
+    } finally {
+      setDataLoading(false);
     }
   };
 
@@ -332,8 +600,10 @@ const Store = () => {
 
       if (response.status === 200 || response.status === 204) {
         toast.success("تم حذف المنتج بنجاح!");
-        // Refresh products list
-        window.location.reload();
+        // Remove product from state
+        setProducts((prevProducts) =>
+          prevProducts.filter((p) => p.id !== productToDelete.id)
+        );
       } else {
         toast.error("خطأ في حذف المنتج");
       }
@@ -351,6 +621,15 @@ const Store = () => {
       const token = sessionStorage.getItem("token");
       const newStatus = product.is_active === 1 ? 0 : 1;
 
+      console.log(
+        "Toggling status for product:",
+        product.id,
+        "from",
+        product.is_active,
+        "to",
+        newStatus
+      );
+
       const response = await axios.put(
         `https://spiritual.brmjatech.uk/api/dashboard/products/status/${product.id}`,
         { is_active: newStatus },
@@ -364,20 +643,64 @@ const Store = () => {
         }
       );
 
-      if (response.data.code === 200) {
+      console.log("Status update response:", response.data);
+
+      // Check for success in different possible response formats
+      if (
+        response.data.code === 200 ||
+        response.data.status === true ||
+        response.status === 200
+      ) {
         toast.success(
           newStatus === 1
             ? "تم تفعيل المنتج بنجاح!"
             : "تم إلغاء تفعيل المنتج بنجاح!"
         );
-        // Refresh products list
-        window.location.reload();
+
+        // Get the actual status from API response if available
+        const actualStatus = response.data.data?.is_active ?? newStatus;
+
+        // Update product status in state immediately
+        setProducts((prevProducts) =>
+          prevProducts.map((p) =>
+            p.id === product.id ? { ...p, is_active: actualStatus } : p
+          )
+        );
+
+        // Update selected product if it's the same product
+        if (selectedProduct && selectedProduct.id === product.id) {
+          setSelectedProduct((prev) => ({ ...prev, is_active: actualStatus }));
+        }
+
+        // Force re-render by updating refresh key
+        setRefreshKey((prev) => prev + 1);
+
+        // Refresh the entire products list to ensure consistency
+        setTimeout(() => {
+          refreshProducts();
+        }, 100);
       } else {
-        toast.error("خطأ في تغيير حالة المنتج");
+        console.error("API returned error:", response.data);
+        toast.error(response.data.message || "خطأ في تغيير حالة المنتج");
       }
     } catch (error) {
       console.error("Error toggling product status:", error);
-      toast.error("خطأ في تغيير حالة المنتج. حاول مرة أخرى.");
+
+      // Handle different types of errors
+      if (error.response) {
+        const errorMessage =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          "خطأ في الخادم";
+        toast.error(`خطأ في تغيير حالة المنتج: ${errorMessage}`);
+        console.error("Server Error:", error.response.data);
+      } else if (error.request) {
+        toast.error("خطأ في الاتصال بالخادم. تحقق من اتصال الإنترنت.");
+        console.error("Network Error:", error.request);
+      } else {
+        toast.error("خطأ غير متوقع في تغيير حالة المنتج. حاول مرة أخرى.");
+        console.error("Unexpected Error:", error.message);
+      }
     }
   };
 
@@ -467,8 +790,8 @@ const Store = () => {
         toast.success("تم تحديث المنتج بنجاح!");
         setUpdateModalOpen(false);
         setProductToUpdate(null);
-        // Refresh products list
-        window.location.reload();
+        // Refresh products list by refetching
+        window.location.reload(); // Keep reload for update as it might have complex changes
       } else {
         toast.error("خطأ في تحديث المنتج");
       }
@@ -615,7 +938,7 @@ const Store = () => {
             ) : (
               filteredProducts.map((product) => (
                 <div
-                  key={product.id}
+                  key={`${product.id}-${product.is_active}-${refreshKey}`}
                   className={styles.productCard}
                   onClick={() => handleProductClick(product.id)}
                 >
@@ -952,45 +1275,45 @@ const Store = () => {
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && productToDelete && (
         <div
-          className="modal-overlay"
+          className={`${styles.modalOverlay} ${styles.deleteModalOverlay}`}
           onClick={() => setDeleteModalOpen(false)}
         >
           <div
-            className="modal-content delete-modal"
+            className={`${styles.modalContent} ${styles.deleteModalContent}`}
             onClick={(e) => e.stopPropagation()}
             dir={i18n.language === "ar" ? "rtl" : "ltr"}
           >
-            <div className="modal-header">
+            <div className={styles.modalHeader}>
               <h2>{t("store.deleteProduct")}</h2>
               <button
-                className="modal-close"
+                className={styles.modalClose}
                 onClick={() => setDeleteModalOpen(false)}
               >
                 <FaTimes />
               </button>
             </div>
 
-            <div className="modal-body">
-              <div className="delete-confirmation">
-                <div className="warning-icon">
+            <div className={styles.modalBody}>
+              <div className={styles.deleteConfirmation}>
+                <div className={styles.warningIcon}>
                   <FaTrash />
                 </div>
-                <p className="confirmation-text">
+                <p className={styles.confirmationText}>
                   {t("store.deleteConfirmation")} "
                   <strong>{productToDelete.name}</strong>"؟
                 </p>
-                <p className="warning-text">{t("store.deleteWarning")}</p>
+                <p className={styles.warningText}>{t("store.deleteWarning")}</p>
               </div>
             </div>
 
-            <div className="modal-footer">
+            <div className={styles.modalFooter}>
               <button
-                className="modal-cancel-btn"
+                className={styles.modalCancelBtn}
                 onClick={() => setDeleteModalOpen(false)}
               >
                 {t("store.cancel")}
               </button>
-              <button className="modal-delete-btn" onClick={confirmDelete}>
+              <button className={styles.modalDeleteBtn} onClick={confirmDelete}>
                 <FaTrash />
                 {t("store.delete")}
               </button>
@@ -1001,23 +1324,23 @@ const Store = () => {
 
       {/* Update Product Modal */}
       {updateModalOpen && productToUpdate && (
-        <div className="modal-overlay" onClick={closeUpdateModal}>
+        <div className={styles.modalOverlay} onClick={closeUpdateModal}>
           <div
-            className="modal-content update-modal"
+            className={styles.modalContent}
             onClick={(e) => e.stopPropagation()}
             dir={i18n.language === "ar" ? "rtl" : "ltr"}
           >
-            <div className="modal-header">
+            <div className={styles.modalHeader}>
               <h2>تحديث المنتج</h2>
-              <button className="modal-close" onClick={closeUpdateModal}>
+              <button className={styles.modalClose} onClick={closeUpdateModal}>
                 <FaTimes />
               </button>
             </div>
 
-            <form onSubmit={handleUpdateProduct} className="update-form">
-              <div className="modal-body">
+            <form onSubmit={handleUpdateProduct} className={styles.updateForm}>
+              <div className={styles.modalBody}>
                 {/* Product Name */}
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>اسم المنتج (عربي)</label>
                   <input
                     type="text"
@@ -1030,7 +1353,7 @@ const Store = () => {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>اسم المنتج (إنجليزي)</label>
                   <input
                     type="text"
@@ -1044,7 +1367,7 @@ const Store = () => {
                 </div>
 
                 {/* Small Description */}
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>الوصف القصير (عربي)</label>
                   <textarea
                     value={updateForm.small_desc.ar}
@@ -1057,7 +1380,7 @@ const Store = () => {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>الوصف القصير (إنجليزي)</label>
                   <textarea
                     value={updateForm.small_desc.en}
@@ -1071,7 +1394,7 @@ const Store = () => {
                 </div>
 
                 {/* Full Description */}
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>الوصف الكامل (عربي)</label>
                   <textarea
                     value={updateForm.description.ar}
@@ -1088,7 +1411,7 @@ const Store = () => {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>الوصف الكامل (إنجليزي)</label>
                   <textarea
                     value={updateForm.description.en}
@@ -1106,8 +1429,8 @@ const Store = () => {
                 </div>
 
                 {/* Price and Stock */}
-                <div className="form-row">
-                  <div className="form-group">
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
                     <label>السعر</label>
                     <input
                       type="number"
@@ -1122,7 +1445,7 @@ const Store = () => {
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className={styles.formGroup}>
                     <label>الكمية</label>
                     <input
                       type="number"
@@ -1138,8 +1461,8 @@ const Store = () => {
                 </div>
 
                 {/* Category and Brand */}
-                <div className="form-row">
-                  <div className="form-group">
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
                     <label>الفئة</label>
                     <select
                       value={updateForm.category_id}
@@ -1147,36 +1470,60 @@ const Store = () => {
                         handleUpdateFormChange("category_id", e.target.value)
                       }
                       required
+                      disabled={dataLoading}
                     >
-                      <option value="">اختر الفئة</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
+                      <option value="">
+                        {dataLoading ? "جاري التحميل..." : "اختر الفئة"}
+                      </option>
+                      {categories &&
+                      Array.isArray(categories) &&
+                      categories.length > 0 ? (
+                        categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>
+                          {dataLoading ? "جاري التحميل..." : "لا توجد فئات"}
                         </option>
-                      ))}
+                      )}
                     </select>
                   </div>
 
-                  <div className="form-group">
+                  <div className={styles.formGroup}>
                     <label>العلامة التجارية</label>
                     <select
                       value={updateForm.brand_id}
                       onChange={(e) =>
                         handleUpdateFormChange("brand_id", e.target.value)
                       }
+                      disabled={dataLoading}
                     >
-                      <option value="">اختر العلامة التجارية</option>
-                      {brands.map((brand) => (
-                        <option key={brand.id} value={brand.id}>
-                          {brand.name}
+                      <option value="">
+                        {dataLoading
+                          ? "جاري التحميل..."
+                          : "اختر العلامة التجارية"}
+                      </option>
+                      {brands && Array.isArray(brands) && brands.length > 0 ? (
+                        brands.map((brand) => (
+                          <option key={brand.id} value={brand.id}>
+                            {brand.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>
+                          {dataLoading
+                            ? "جاري التحميل..."
+                            : "لا توجد علامات تجارية"}
                         </option>
-                      ))}
+                      )}
                     </select>
                   </div>
                 </div>
 
                 {/* Status */}
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>الحالة</label>
                   <select
                     value={updateForm.is_active}
@@ -1193,37 +1540,37 @@ const Store = () => {
                 </div>
 
                 {/* Images */}
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>الصور</label>
                   <input
                     type="file"
                     multiple
                     accept="image/*"
                     onChange={handleImageChange}
-                    className="file-input"
+                    className={styles.fileInput}
                   />
 
                   {updateForm.images.length > 0 && (
-                    <div className="image-preview">
+                    <div className={styles.imagePreview}>
                       {updateForm.images.map((image, index) => (
-                        <div key={index} className="image-item">
+                        <div key={index} className={styles.imageItem}>
                           {image instanceof File ? (
                             <img
                               src={URL.createObjectURL(image)}
                               alt={`Preview ${index + 1}`}
-                              className="preview-image"
+                              className={styles.previewImage}
                             />
                           ) : (
                             <img
                               src={image.image || image}
                               alt={`Existing ${index + 1}`}
-                              className="preview-image"
+                              className={styles.previewImage}
                             />
                           )}
                           <button
                             type="button"
                             onClick={() => removeImage(index)}
-                            className="remove-image-btn"
+                            className={styles.removeImageBtn}
                           >
                             <FaTimes />
                           </button>
@@ -1234,22 +1581,22 @@ const Store = () => {
                 </div>
               </div>
 
-              <div className="modal-footer">
+              <div className={styles.modalFooter}>
                 <button
                   type="button"
-                  className="modal-cancel-btn"
+                  className={styles.modalCancelBtn}
                   onClick={closeUpdateModal}
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  className="modal-save-btn"
+                  className={styles.modalSaveBtn}
                   disabled={updateLoading}
                 >
                   {updateLoading ? (
                     <>
-                      <FaSpinner className="spinner" />
+                      <FaSpinner className={styles.spinner} />
                       جاري الحفظ...
                     </>
                   ) : (
