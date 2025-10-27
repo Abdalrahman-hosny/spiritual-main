@@ -47,6 +47,8 @@ import CouponDetails from "./Pages/Dashboard/Coupons/CouponDetails";
 import DashboardProfile from "./Pages/Dashboard/Profile/Profile";
 import Settings from "./Pages/Dashboard/Settings/Settings";
 
+import ProtectedRoute from './components/ProtectedRoute';
+
 function App() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -57,7 +59,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* ✅ الصفحات اللي فيها Navbar + Footer */}
-          <Route element={<MainLayout />}>
+          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/" element={<HomePage />} />
             <Route path="/about-us" element={<AboutUs />} />
             <Route path="/shop" element={<Shop />} />
@@ -94,28 +96,28 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Dashboard Pages */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/courses" element={<Courses />} />
-          <Route path="/dashboard/courses/add" element={<AddCourse />} />
-          <Route path="/dashboard/courses/edit/:id" element={<EditCourse />} />
-          <Route path="/dashboard/students" element={<Students />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
+          <Route path="/dashboard/courses/add" element={<ProtectedRoute><AddCourse /></ProtectedRoute>} />
+          <Route path="/dashboard/courses/edit/:id" element={<ProtectedRoute><EditCourse /></ProtectedRoute>} />
+          <Route path="/dashboard/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
           <Route
             path="/dashboard/students/:studentId"
-            element={<StudentDetails />}
+            element={<ProtectedRoute><StudentDetails /></ProtectedRoute>}
           />
-          <Route path="/dashboard/brands" element={<Brands />} />
-          <Route path="/dashboard/brands/add" element={<AddBrand />} />
-          <Route path="/dashboard/brands/edit/:id" element={<EditBrand />} />
-          <Route path="/dashboard/brands/:id" element={<BrandDetails />} />
-          <Route path="/dashboard/store" element={<Store />} />
-          <Route path="/dashboard/store/add" element={<AddProduct />} />
-          <Route path="/dashboard/orders" element={<Orders />} />
-          <Route path="/dashboard/coupons" element={<Coupons />} />
-          <Route path="/dashboard/coupons/add" element={<AddCoupon />} />
-          <Route path="/dashboard/coupons/edit/:id" element={<EditCoupon />} />
-          <Route path="/dashboard/coupons/:id" element={<CouponDetails />} />
-          <Route path="/dashboard/profile" element={<DashboardProfile />} />
-          <Route path="/dashboard/settings" element={<Settings />} />
+          <Route path="/dashboard/brands" element={<ProtectedRoute><Brands /></ProtectedRoute>} />
+          <Route path="/dashboard/brands/add" element={<ProtectedRoute><AddBrand /></ProtectedRoute>} />
+          <Route path="/dashboard/brands/edit/:id" element={<ProtectedRoute><EditBrand /></ProtectedRoute>} />
+          <Route path="/dashboard/brands/:id" element={<ProtectedRoute><BrandDetails /></ProtectedRoute>} />
+          <Route path="/dashboard/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
+          <Route path="/dashboard/store/add" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
+          <Route path="/dashboard/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/dashboard/coupons" element={<ProtectedRoute><Coupons /></ProtectedRoute>} />
+          <Route path="/dashboard/coupons/add" element={<ProtectedRoute><AddCoupon /></ProtectedRoute>} />
+          <Route path="/dashboard/coupons/edit/:id" element={<ProtectedRoute><EditCoupon /></ProtectedRoute>} />
+          <Route path="/dashboard/coupons/:id" element={<ProtectedRoute><CouponDetails /></ProtectedRoute>} />
+          <Route path="/dashboard/profile" element={<ProtectedRoute><DashboardProfile /></ProtectedRoute>} />
+          <Route path="/dashboard/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
           {/* ❌ صفحة الخطأ */}
           <Route path="*" element={<NotFound />} />

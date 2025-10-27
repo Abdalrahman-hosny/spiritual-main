@@ -50,7 +50,7 @@ export default function Register() {
     const fetchCountries = async () => {
       try {
         const response = await axios.get('https://spiritual.brmjatech.uk/api/countries');
-        if (response.data && response.data.data) {
+        if (response.data && response.data.data.result) {
           const formattedCountries = response.data.data.map(country => ({
             value: country.id,
             label: country.name, // استخدام `country.name` بدلاً من `country.name.ar`

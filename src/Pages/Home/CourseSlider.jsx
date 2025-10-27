@@ -13,10 +13,20 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 
 const CourseSlider = ({ isTrue = true }) => {
-  const { t } = useTranslation();
-  const isRTL = true;
+  const { t, i18n } = useTranslation();
+  // derive direction from i18n language instead of hardcoding
+  const isRTL = i18n?.language === "ar";
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // helper to get first two letters for placeholder
+  const getInitials = (name) => {
+    if (!name) return "";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    const initials = (parts[0][0] || "") + (parts[1][0] || "");
+    return initials.toUpperCase();
+  };
 
   // تأثيرات حركية للكارت
   const cardVariants = {
@@ -54,7 +64,9 @@ const CourseSlider = ({ isTrue = true }) => {
       color: "#8B5CF6",
       transition: {
         duration: 0.2,
-        yoyo: Infinity,
+        // use repeat for framer-motion vX compatibility
+        repeat: Infinity,
+        repeatType: "reverse",
       },
     },
   };
@@ -67,14 +79,15 @@ const CourseSlider = ({ isTrue = true }) => {
           const formattedCourses = response.data.data.result.map((course) => ({
             id: course.id,
             name: course.title,
-            instructor: course.trainer.name,
+            // guard trainer access (API may return null/missing trainer)
+            instructor: course.trainer?.name || "",
             logo: course.image,
             rating: course.rating_avg,
             reviews: course.reviews_count,
             price: course.price,
             files: course.files_count,
             videos: course.lectures_count,
-            trainerImage: course.trainer.image,
+            trainerImage: course.trainer?.image || null,
           }));
           setCourses(formattedCourses);
         }
@@ -171,11 +184,17 @@ const CourseSlider = ({ isTrue = true }) => {
                       transition={{ duration: 0.5 }}
                       className="flex justify-center items-center bg-gray-100 overflow-hidden h-48"
                     >
-                      <img
-                        src={course.logo}
-                        alt={course.name}
-                        className="object-cover w-full h-full"
-                      />
+                      {course.logo ? (
+                        <img
+                          src={course.logo}
+                          alt={course.name}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500 text-white">
+                          <span className="text-4xl font-extrabold">{getInitials(course.name)}</span>
+                        </div>
+                      )}
                     </motion.div>
                   </div>
                   <div className="p-5 flex flex-col flex-grow">
@@ -239,7 +258,9 @@ const CourseSlider = ({ isTrue = true }) => {
                           alt={course.instructor}
                         />
                       ) : (
-                        <FaUserCircle className="w-10 h-10 text-gray-400" />
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500 text-white font-medium">
+                          <span className="text-sm">{getInitials(course.instructor)}</span>
+                        </div>
                       )}
                       <motion.span
                         whileHover={{ color: "#8B5CF6" }}

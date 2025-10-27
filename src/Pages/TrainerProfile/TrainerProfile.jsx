@@ -70,7 +70,7 @@ export default function TrainerProfile() {
     const fetchTrainerCourses = async () => {
       try {
         const response = await axios.get(
-          "https://spiritual.brmjatech.uk/api/home/trainers/1/courses"
+          `https://spiritual.brmjatech.uk/api/home/trainers/${id}/courses`
         );
         if (response.data.code === 200) {
           setTrainerCourses(response.data.data.result);
@@ -87,7 +87,7 @@ export default function TrainerProfile() {
     const fetchTrainerProducts = async () => {
       try {
         const response = await axios.get(
-          "https://spiritual.brmjatech.uk/api/home/trainers/1/products"
+          `https://spiritual.brmjatech.uk/api/home/trainers/${id}/products`
         );
         if (response.data.code === 200) {
           setTrainerProducts(response.data.data.result);

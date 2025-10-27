@@ -82,12 +82,19 @@ export default function Login() {
         sessionStorage.setItem("user", JSON.stringify(payload.user));
       }
 
-      if (payload?.user) {
+      // Redirect based on user type
+      // client => home (/)
+      // any other role => dashboard (/dashboard)
+      if (payload?.user && payload.user.type) {
         const userType = payload.user.type;
-        navigate(userType === "client" ? "/" : "/dashboard");
+        if (userType === "client") {
+          navigate("/");
+        } else {
+          navigate("/dashboard");
+        }
       } else if (payload?.token) {
-        // If only token exists, safely navigate to home
-        navigate("/");
+        // No user object returned — fallback to dashboard for safety
+        navigate("/dashboard");
       } else {
         setLoginError(
           "لم يتم استقبال بيانات تسجيل الدخول. الرجاء المحاولة مرة أخرى."

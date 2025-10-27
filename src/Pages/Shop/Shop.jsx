@@ -9,45 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 
-// مكون فلترة السعر
-const PriceFilter = ({ priceRange, setPriceRange }) => {
-  const { t } = useTranslation();
-  return (
-    <motion.div
-      className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-    >
-      <h3 className="font-[Montserrat-Arabic] font-semibold text-[16px] leading-relaxed tracking-[-0.68px] text-right align-middle text-[#000000] mb-6">
-        {t("price_range")}
-      </h3>
-      <div className="space-y-4">
-        <input
-          type="range"
-          min="0"
-          max="1000"
-          value={priceRange[0]}
-          onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-          className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
-        />
-        <input
-          type="range"
-          min="0"
-          max="1000"
-          value={priceRange[1]}
-          onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-          className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer"
-        />
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>{priceRange[0]}</span>
-          <span>{priceRange[1]}</span>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+
 
 export default function Shop() {
   const { t } = useTranslation();
@@ -57,7 +19,7 @@ export default function Shop() {
   const [error, setError] = useState(null);
   const [wishlist, setWishlist] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [sortOption, setSortOption] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
@@ -312,8 +274,6 @@ export default function Shop() {
       if (selectedCategory) params.category_id = selectedCategory;
       if (searchQuery) params.q = searchQuery;
       if (sortOption) params.sort = sortOption;
-      if (priceRange[0] > 0) params.min = priceRange[0];
-      if (priceRange[1] < 1000) params.max = priceRange[1];
       params.page = currentPage;
 
       const response = await axios.get("https://spiritual.brmjatech.uk/api/products", { params });
@@ -345,7 +305,7 @@ export default function Shop() {
   useEffect(() => {
     fetchProducts();
     fetchWishlist();
-  }, [currentPage, selectedCategory, searchQuery, sortOption, priceRange]);
+  }, [currentPage, selectedCategory, searchQuery, sortOption]);
 
   // فلترة المنتجات بناءً على البحث
   const filteredProducts = Array.isArray(products)
@@ -504,15 +464,17 @@ export default function Shop() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8"
               >
                 {filteredProducts.map((product) => {
                   const isInWishlist = Array.isArray(wishlist) && wishlist.some((item) => item.id === product.id);
 
-                  // تحديد مصدر الصورة
-                  const productImage =
-                    product.image ||
-                    (product.images && product.images.length > 0 ? product.images[0].image : "https://via.placeholder.com/300");
+                  // تحديد مصدر الصورة والحروف الأولى من اسم المنتج
+                  const productInitials = product.name ? product.name.slice(0, 2).toUpperCase() : "";
+                  const hasValidImage = product.image || (product.images && product.images.length > 0 && product.images[0].image);
+                  const productImage = hasValidImage ? 
+                    (product.image || product.images[0].image) : 
+                    null;
 
                   return (
                     <motion.div
@@ -522,13 +484,25 @@ export default function Shop() {
                       className="rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group border border-gray-100 hover:border-purple-200 overflow-hidden bg-white"
                     >
                       <div className="relative overflow-hidden">
-                        <motion.img
-                          src={productImage}
-                          alt={product.name}
-                          className="w-full h-48 sm:h-56 md:h-64 object-cover"
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.3 }}
-                        />
+                        {productImage ? (
+                          <motion.img
+                            src={productImage}
+                            alt={product.name}
+                            className="w-full h-48 sm:h-56 md:h-64 object-cover"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        ) : (
+                          <motion.div
+                            className="w-full h-48 sm:h-56 md:h-64 flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-50"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <span className="text-3xl sm:text-4xl font-bold text-purple-400">
+                              {productInitials}
+                            </span>
+                          </motion.div>
+                        )}
                         <motion.div
                           className="absolute inset-0 bg-black/40 flex items-end justify-center"
                           initial={{ opacity: 0 }}
@@ -594,7 +568,7 @@ export default function Shop() {
                         >
                           {product.name}
                         </motion.h2>
-                        <p className="font-[Montserrat-Arabic] my-4 font-normal text-[12px] leading-relaxed text-[#0000004D] tracking-[0] text-center align-middle">
+                        <p className="font-[Montserrat-Arabic] my-4 font-normal text-[12px] leading-relaxed text-[#0000004D] tracking-[0] text-center align-middle line-clamp-2">
                           {product.small_desc}
                         </p>
                         <motion.div
@@ -754,9 +728,7 @@ export default function Shop() {
                   </div>
                 </motion.div>
 
-                <motion.div variants={filterVariants}>
-                  <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
-                </motion.div>
+
 
                 {/* Categories */}
                 <motion.div variants={filterVariants} dir='rtl' className='p-6 rounded-2xl bg-[#4F46E50D] border border-purple-100'>
@@ -923,7 +895,7 @@ export default function Shop() {
                     </div>
                   </div>
 
-                  <PriceFilter priceRange={priceRange} setPriceRange={setPriceRange} />
+
 
                   {/* Categories */}
                   <div dir='rtl' className='p-8 rounded-[20px] bg-[#4F46E50D]'>
