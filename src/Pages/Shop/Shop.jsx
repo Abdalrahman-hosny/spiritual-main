@@ -501,12 +501,12 @@ export default function Shop() {
                     null;
 
                   return (
-                    <motion.div
-                      key={product.id}
-                      variants={cardVariants}
-                      whileHover="hover"
-                      className="rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group border border-gray-100 hover:border-purple-200 overflow-hidden bg-white"
-                    >
+                    <Link to={`/product-details/${product.id}`} key={product.id} className="block">
+                      <motion.div
+                        variants={cardVariants}
+                        whileHover="hover"
+                        className="rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group border border-gray-100 hover:border-purple-200 overflow-hidden bg-white"
+                      >
                       <div className="relative overflow-hidden">
                         {productImage ? (
                           <motion.img
@@ -549,24 +549,36 @@ export default function Shop() {
                             <motion.button
                               variants={buttonVariants}
                               whileHover="hover"
-                              onClick={() => addToCart(product)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                addToCart(product);
+                              }}
                               className="bg-purple-500/90 backdrop-blur-sm hover:bg-white p-2.5 rounded-full text-white hover:text-purple-700 transition-all shadow-lg"
                             >
                               <FaShoppingBag className="w-4 h-4" />
                             </motion.button>
-                            <Link to={`/product-details/${product.id}`}>
-                              <motion.div
-                                variants={buttonVariants}
-                                whileHover="hover"
-                                className="bg-purple-500/90 backdrop-blur-sm hover:bg-white p-2.5 rounded-full text-white hover:text-purple-700 transition-all shadow-lg"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </motion.div>
-                            </Link>
+                            <motion.div
+                              variants={buttonVariants}
+                              whileHover="hover"
+                              onClick={(e) => {
+                                // prevent overlay click from triggering the outer Link twice
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // navigation will be handled by outer Link when clicking elsewhere
+                              }}
+                              className="bg-purple-500/90 backdrop-blur-sm hover:bg-white p-2.5 rounded-full text-white hover:text-purple-700 transition-all shadow-lg"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </motion.div>
                             <motion.button
                               variants={buttonVariants}
                               whileHover="hover"
-                              onClick={() => toggleWishlist(product.id)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleWishlist(product.id);
+                              }}
                               className={`backdrop-blur-sm p-2.5 rounded-full transition-all shadow-lg ${
                                 isInWishlist
                                   ? "bg-red-500/90 hover:bg-white text-white hover:text-red-500"
@@ -612,7 +624,8 @@ export default function Shop() {
                           </span>
                         </motion.div>
                       </motion.div>
-                    </motion.div>
+                      </motion.div>
+                    </Link>
                   );
                 })}
               </motion.div>

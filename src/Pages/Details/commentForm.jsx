@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 
-export default function CommentForm({ onReviewSubmitted }) {
+export default function CommentForm({ productId = 1, onReviewSubmitted }) {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,8 +39,17 @@ export default function CommentForm({ onReviewSubmitted }) {
 
     try {
       const token = sessionStorage.getItem("token");
+      if (!token) {
+        toast.error(isRTL ? "الرجاء تسجيل الدخول أولاً" : "Please login first", {
+          position: isRTL ? "top-left" : "top-right",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const url = `https://spiritual.brmjatech.uk/api/products/${productId}/reviews`;
       const response = await axios.post(
-        "https://spiritual.brmjatech.uk/api/products/1/reviews",
+        url,
         {
           rating,
           comment,
@@ -54,7 +63,9 @@ export default function CommentForm({ onReviewSubmitted }) {
         }
       );
 
-      if (response.data.code === 201) {
+      // API may return status 201 or code 201 in body
+      const wasCreated = response.status === 201 || response.data?.code === 201 || response.data?.success;
+      if (wasCreated) {
         setComment("");
         setRating(5);
 
@@ -68,7 +79,9 @@ export default function CommentForm({ onReviewSubmitted }) {
           }
         );
 
-        onReviewSubmitted();
+        // Try to pass the created review object to the parent for optimistic update.
+        const created = response.data && (response.data.data ? response.data.data : response.data);
+        onReviewSubmitted(created);
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message;

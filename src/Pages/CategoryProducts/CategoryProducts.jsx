@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import plant from "../../assets/mandala_1265367 1.png";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -269,10 +269,6 @@ export function ArabicContactList() {
               <div className="flex flex-col items-center text-center">
                 <Link to={`/trainer/${contact.id}`} className="mb-4 relative group">
                   <img
-                    src={
-                      contact.image ||
-                      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-                    }
                     src={
                       contact.image ||
                       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"

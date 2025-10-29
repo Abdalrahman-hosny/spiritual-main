@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import plant from "../../assets/mandala_1265367 1.png";
 import { Star } from 'lucide-react';
 import ProductDetailsSlider from './ProductDetailsSlider';
@@ -11,6 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function Details() {
   const { t } = useTranslation();
+  const { id } = useParams();
 
   useEffect(() => {
     window.scrollTo({
@@ -40,99 +42,64 @@ export default function Details() {
 
   const [reviewsUpdated, setReviewsUpdated] = useState(false);
 
-  const handleReviewSubmitted = useCallback(() => {
-    setReviewsUpdated(prev => !prev);
+  const [testimonials, setTestimonials] = useState([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+  const [testimonialsError, setTestimonialsError] = useState(null);
+
+  const handleReviewSubmitted = useCallback((newReview) => {
+    // If caller provided the created review object, prepend it to the list for instant feedback.
+    if (newReview) {
+      setTestimonials(prev => [newReview, ...prev]);
+    } else {
+      setReviewsUpdated(prev => !prev);
+    }
   }, []);
 
+  // Fetch testimonials for this product
+  useEffect(() => {
+    let cancelled = false;
+    if (!id) return;
+    setTestimonialsLoading(true);
+    setTestimonialsError(null);
+
+    axios.get(`/api/products/${id}/reviews`)
+      .then((res) => {
+        if (cancelled) return;
+        // API may return array or { data: [...] }
+        const payload = res.data && (Array.isArray(res.data) ? res.data : res.data.data ? res.data.data : res.data);
+        setTestimonials(Array.isArray(payload) ? payload : []);
+        setTestimonialsLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setTestimonialsError(err?.message || 'Error loading reviews');
+        setTestimonialsLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [id, reviewsUpdated]);
+
   return (
-    <div className="min-h-screen">
-      <ToastContainer />
-      {/* Hero Section */}
-      <div className='relative'>
-        <div className='image'>
-          <div className="relative bg-black/70">
-            <div className="relative mt-5 overflow-hidden min-h-[35vh] sm:min-h-[40vh] md:min-h-[45vh] z-10 flex justify-center items-center px-4">
-              <motion.div
-                variants={heroVariants}
-                initial="hidden"
-                animate="visible"
-                className="text-center p-4 md:p-8 max-w-4xl"
-              >
-                <motion.h1
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 md:mb-6 leading-tight"
-                >
-                  {t("details.store")}
-                </motion.h1>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                >
-                  <p className="font-[Montserrat-Arabic] text-white font-normal text-[24px] text-center">
-                    {t("details.breadcrumb_home")} / <span>{t("details.store")}</span> / <span className='text-purple-500'>{t("details.product_details")}</span>
-                  </p>
-                </motion.div>
-              </motion.div>
-            </div>
-            {/* Plant decoration */}
-            <motion.div
-              variants={plantVariants}
-              initial="hidden"
-              animate="visible"
-              className="absolute z-40 -bottom-6 sm:-bottom-8 left-0 transform -translate-x-1/4 translate-y-1/4"
-            >
-              <div className="relative">
-                <div className="absolute -top-30 left-2 w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 xl:w-80 xl:h-80 rounded-full">
-                  <motion.img
-                    src={plant}
-                    alt="Plant Decoration"
-                    className="max-w-full max-h-full object-contain"
-                    animate={{ rotate: [0, 3, -3, 0], scale: [1, 1.02, 1] }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-6xl mx-auto p-6">
       <div className='pt-24'>
-        <ProductDetailsSlider />
+        <ProductDetailsSlider productId={id ? id : undefined} />
       </div>
+
       <div className='pt-4'>
-        <ArabicTestimonials reviewsUpdated={reviewsUpdated} />
+        <ArabicTestimonials testimonials={testimonials} loading={testimonialsLoading} error={testimonialsError} />
       </div>
+
       <div className='pt-4 pb-8'>
-        <CommentForm onReviewSubmitted={handleReviewSubmitted} />
+        <CommentForm productId={id} onReviewSubmitted={handleReviewSubmitted} />
       </div>
+      <ToastContainer />
     </div>
   );
 }
 
 // ---------------------- Testimonials Section ----------------------
-function ArabicTestimonials({ reviewsUpdated }) {
+function ArabicTestimonials({ testimonials = [], loading = true, error = null }) {
   const { t } = useTranslation();
-  const [testimonials, setTestimonials] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchTestimonials = async () => {
-      try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/products/1/reviews');
-        setTestimonials(response.data.data.result);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTestimonials();
-  }, [reviewsUpdated]);
 
   const details = [
     t("details.point1"),
@@ -162,14 +129,7 @@ function ArabicTestimonials({ reviewsUpdated }) {
     <div className="max-w-6xl mx-auto p-6">
       <div className="grid grid-cols-1 gap-8">
         {/* Right Column - Details */}
-        <div className='border-b pb-6'>
-          <div className='flex justify-between items-center'>
-            <h3 className="font-semibold text-[24px] mb-4 ">{t("details.about_brand")}</h3>
-          </div>
-          <p className="text-[14px] text-[#212529]  leading-relaxed">
-            {t("details.brand_description")}
-          </p>
-        </div>
+      
       </div>
 
       {/* Left Column - Reviews */}
