@@ -27,7 +27,12 @@ export default function Navbar({ bg }) {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(
-          "https://spiritual.brmjatech.uk/api/categories"
+          "https://spiritual.brmjatech.uk/api/categories",
+          {
+            headers: {
+              "Accept-Language": i18n.language === "ar" ? "ar" : "en",
+            },
+          }
         );
 
         if (response.data.data.result) {
@@ -41,7 +46,7 @@ export default function Navbar({ bg }) {
     };
 
     fetchCategories();
-  }, []);
+  }, [i18n.language]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -187,30 +192,23 @@ export default function Navbar({ bg }) {
       }`}
     >
       <nav className="w-[95%] lg:w-[90%] xl:w-[85%] 2xl:w-[80%] mx-auto flex items-center justify-between px-2 sm:px-4 py-3 sm:py-4 h-full">
+        <div className="flex items-center">
+          <Link to="/">
+            <img
+              src={logo}
+              alt="Logo"
+              className="h-6 sm:h-8 md:h-10 lg:h-11 xl:h-12 2xl:h-14 w-auto"
+            />
+          </Link>
+        </div>
         {/* قائمة سطح المكتب */}
         <div
           className={`hidden lg:flex items-center ${
             isRTL ? "space-x-reverse gap-3" : "gap-6"
           }`}
         >
-          <LanguageDropdown />
-          <Link
-            to="/wishlist"
-            className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 relative"
-          >
-            <FaHeart className="text-[15px] xl:text-[18px] text-purple-500" />
-          </Link>
-          <Link
-            to="/cart"
-            className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 relative"
-          >
-            <FaShoppingBag className="text-[15px] xl:text-[18px] text-purple-500" />
-          </Link>
-          <AuthDropdown />
           <div
-            className={`flex mx-3 xl:mx-6 gap-2 lg:gap-3 xl:gap-5 bg-white rounded-full py-2 lg:py-3 px-3 lg:px-6 xl:px-8 text-black shadow-lg ${
-              isRTL ? "flex-row-reverse" : ""
-            }`}
+            className={`flex mx-3 xl:mx-6 gap-2 lg:gap-3 xl:gap-5 bg-white rounded-full py-2 lg:py-3 px-3 lg:px-6 xl:px-8 text-black shadow-lg`}
           >
             {t("navLinks", { returnObjects: true }).map((link) =>
               link.hasDropdown ? (
@@ -289,6 +287,20 @@ export default function Navbar({ bg }) {
               )
             )}
           </div>
+          <LanguageDropdown />
+          <Link
+            to="/wishlist"
+            className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 relative"
+          >
+            <FaHeart className="text-[15px] xl:text-[18px] text-purple-500" />
+          </Link>
+          <Link
+            to="/cart"
+            className="w-9 cursor-pointer xl:w-10 h-9 xl:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 relative"
+          >
+            <FaShoppingBag className="text-[15px] xl:text-[18px] text-purple-500" />
+          </Link>
+          <AuthDropdown />
         </div>
 
         {/* قائمة الهواتف المتوسطة */}
@@ -366,15 +378,6 @@ export default function Navbar({ bg }) {
         </div>
 
         {/* الشعار */}
-        <div className="flex items-center">
-          <Link to="/">
-            <img
-              src={logo}
-              alt="Logo"
-              className="h-6 sm:h-8 md:h-10 lg:h-11 xl:h-12 2xl:h-14 w-auto"
-            />
-          </Link>
-        </div>
       </nav>
 
       {/* القائمة المنسدلة للهواتف */}

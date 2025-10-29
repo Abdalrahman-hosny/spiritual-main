@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Herosection from './Herosection';
-import Features from './Features';
-import CourseSlider from './CourseSlider';
-import HowWork from './HowWork';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import Herosection from "./Herosection";
+import Features from "./Features";
+import CourseSlider from "./CourseSlider";
+import HowWork from "./HowWork";
+import axios from "axios";
 
 const VideoSection = ({ videoUrl }) => {
+  const { t } = useTranslation();
   const [isPlaying, setIsPlaying] = useState(false);
   const [showOverlay, setShowOverlay] = useState(true);
 
@@ -38,7 +40,7 @@ const VideoSection = ({ videoUrl }) => {
               transition={{ delay: 0.2 }}
               className="text-3xl md:text-4xl font-bold text-center mb-4"
             >
-              شاهد فيديوهاتنا الترويجية
+              {t("video.title")}
             </motion.h2>
             <motion.p
               initial={{ y: 20, opacity: 0 }}
@@ -46,7 +48,7 @@ const VideoSection = ({ videoUrl }) => {
               transition={{ delay: 0.4 }}
               className="text-center text-lg md:text-xl mb-8 max-w-lg"
             >
-              اكتشف كيف يمكن لمنتجاتنا وخدماتنا أن تغير حياتك نحو الأفضل
+              {t("video.description")}
             </motion.p>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -74,7 +76,7 @@ const VideoSection = ({ videoUrl }) => {
                   d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              تشغيل الفيديو
+              {t("video.playButton")}
             </motion.button>
           </motion.div>
         )}
@@ -82,12 +84,15 @@ const VideoSection = ({ videoUrl }) => {
         {/* الفيديو نفسه */}
         <iframe
           className="w-full h-full"
-          src={videoUrl || "https://www.youtube.com/embed/jK75iRv33mI?si=2TR3A2QE7CL4WBCB&autoplay=1&mute=1"}
+          src={
+            videoUrl ||
+            "https://www.youtube.com/embed/jK75iRv33mI?si=2TR3A2QE7CL4WBCB&autoplay=1&mute=1"
+          }
           title="YouTube video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
-          style={{ display: isPlaying ? 'block' : 'none' }}
+          style={{ display: isPlaying ? "block" : "none" }}
         ></iframe>
 
         {/* زر تشغيل في المنتصف إذا كان الفيديو متوقف */}
@@ -144,17 +149,24 @@ export default function HomePage() {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   };
 
   useEffect(() => {
-    window.addEventListener('scroll', toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility);
 
     // استدعاء الـ API لاسترجاع رابط الفيديو
     const fetchSettings = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/settings');
+        const response = await axios.get(
+          "https://spiritual.brmjatech.uk/api/settings",
+          {
+            headers: {
+              "Accept-Language": "ar",
+            },
+          }
+        );
         if (response.data.code === 200 && response.data.data.length > 0) {
           const promotionUrl = response.data.data[0].promotion;
 
@@ -163,10 +175,16 @@ export default function HomePage() {
           if (promotionUrl && promotionUrl.includes("youtu.be")) {
             const videoId = promotionUrl.split("youtu.be/")[1];
             embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
-          } else if (promotionUrl && promotionUrl.includes("youtube.com/watch")) {
+          } else if (
+            promotionUrl &&
+            promotionUrl.includes("youtube.com/watch")
+          ) {
             const videoId = promotionUrl.split("v=")[1].split("&")[0];
             embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
-          } else if (promotionUrl && promotionUrl.includes("youtube.com/embed")) {
+          } else if (
+            promotionUrl &&
+            promotionUrl.includes("youtube.com/embed")
+          ) {
             embedUrl = `${promotionUrl}?autoplay=1&mute=1`;
           }
 
@@ -180,7 +198,7 @@ export default function HomePage() {
     fetchSettings();
 
     return () => {
-      window.removeEventListener('scroll', toggleVisibility);
+      window.removeEventListener("scroll", toggleVisibility);
     };
   }, []);
 

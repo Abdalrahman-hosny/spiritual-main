@@ -71,11 +71,17 @@
   "currency": "EGP",
   "search": "Search...",
   "sort_by": "Sort by",
+  "sort_by_heading": "Sort by",
+  "sort_by_price_low_to_high": "Price: Low to High",
+  "sort_by_price_high_to_low": "Price: High to Low",
+  "sort_by_newest": "Newest",
+  "sort_by_most_popular": "Most Popular",
   "sort_low_high": "Price: Low to High",
   "sort_high_low": "Price: High to Low",
   "sort_latest": "Latest",
   "sort_best": "Best Seller",
   "categories": "Product Categories",
+  "product_categories_heading": "Product Categories",
   "category_1": "Spirituality",
   "category_2": "Energy",
   "category_3": "Spiritual Healing",
@@ -84,6 +90,8 @@
   "category_6": "Quran Memorization",
   "filter_products": "Filter Products",
   "apply_filters": "Apply Filters",
+  "previous": "Previous",
+  "next": "Next",
   "howwork": {
     "subtitle": "How to use Rawhany",
     "title": "How does it work?",
@@ -378,6 +386,11 @@
     "failed_to_add_to_cart": "Failed to add product to cart",
     "please_login_first": "Please login first"
   },
+  "price_range": "Price Range",
+  "product_added_to_wishlist": "Product added to wishlist",
+  "failed_to_add_to_wishlist": "Failed to add product to wishlist",
+  "product_removed_from_wishlist": "Product removed from wishlist",
+  "failed_to_remove_from_wishlist": "Failed to remove product from wishlist",
 
   "termsAndConditions": {
     "title": "Terms and Conditions",
@@ -751,9 +764,7 @@
     "currency": "EGP",
     "videos": "Videos",
     "files": "Files"
-  }
-,
-
+  },
   "wishlist": {
     "title": "My Wishlist",
     "breadcrumb": "Home",
@@ -764,5 +775,10 @@
     "select_all": "Select All",
     "deselect_all": "Deselect All",
     "clear_selected": "Clear Selected"
+  },
+  "video": {
+    "title": "Watch Our Promotional Videos",
+    "description": "Discover how our products and services can transform your life for the better",
+    "playButton": "Play Video"
   }
 }

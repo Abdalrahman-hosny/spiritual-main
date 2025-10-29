@@ -23,10 +23,8 @@ import Wishlist from "./Pages/wishlist/wishlist";
 import TermsAndConditions from "./Pages/TermsAndConditions/terms-and-conditions";
 import PrivacyPolicy from "./Pages/PrivacyPolicy/privacy-policy";
 import FAQs from "./Pages/FAQS/faqs";
-import i18n from "./locales/i18n";
 import MainLayout from "./layout/MainLayout";
 import "./App.css";
-
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import Courses from "./Pages/Dashboard/Courses/Courses";
 import AddCourse from "./Pages/Dashboard/Courses/AddCourse";
@@ -55,7 +53,7 @@ function App() {
   }, []);
 
   return (
-    <div >
+    <div>
       <BrowserRouter>
         <Routes>
           {/* ✅ الصفحات اللي فيها Navbar + Footer */}

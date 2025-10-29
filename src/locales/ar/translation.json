@@ -71,11 +71,17 @@
   "currency": "ج.م",
   "search": "بحث ...",
   "sort_by": "ترتيب حسب",
+  "sort_by_heading": "ترتيب حسب",
+  "sort_by_price_low_to_high": "السعر من الأرخص إلى الأعلى",
+  "sort_by_price_high_to_low": "السعر من الأعلى إلى الأرخص",
+  "sort_by_newest": "الأحدث",
+  "sort_by_most_popular": "الأكثر مبيعاً",
   "sort_low_high": "السعر من الأرخص إلى الأعلى",
   "sort_high_low": "السعر من الأعلى إلى الأرخص",
   "sort_latest": "الأحدث",
   "sort_best": "الأكثر مبيعاً",
   "categories": "تصنيفات المنتج",
+  "product_categories_heading": "تصنيفات المنتج",
   "category_1": "روحانيات",
   "category_2": "طاقة",
   "category_3": "علاج روحاني",
@@ -84,6 +90,8 @@
   "category_6": "تحفيظ القرآن",
   "filter_products": "تصفية المنتجات",
   "apply_filters": "تطبيق الفلاتر",
+  "previous": "السابق",
+  "next": "التالي",
   "howwork": {
     "subtitle": "طريقة استخدام روحاني",
     "title": "كيف يعمل؟",
@@ -173,8 +181,16 @@
     "remove": "إزالة",
     "empty": "السلة فارغة",
     "currency": "جنية",
-    "breadcrumb": "الرئيسية"
+    "breadcrumb": "الرئيسية",
+    "product_added_to_cart": "تم إضافة المنتج إلى السلة",
+    "failed_to_add_to_cart": "فشل في إضافة المنتج إلى السلة",
+    "please_login_first": "يرجى تسجيل الدخول أولاً"
   },
+  "price_range": "نطاق السعر",
+  "product_added_to_wishlist": "تم إضافة المنتج إلى قائمة الرغبات",
+  "failed_to_add_to_wishlist": "فشل في إضافة المنتج إلى قائمة الرغبات",
+  "product_removed_from_wishlist": "تم إزالة المنتج من قائمة الرغبات",
+  "failed_to_remove_from_wishlist": "فشل في إزالة المنتج من قائمة الرغبات",
   "product": {
     "name": "فيزدل",
     "description": "مسبحة + 99 خرزة تصميم منقوش بأسماء الله الحسنى وسبندا محمد ص إسلامية",
@@ -707,9 +723,7 @@
       "linkedin": "لينكد إن",
       "whatsapp": "واتساب"
     }
-  }
-,
-
+  },
   "wishlist": {
     "title": "قائمة الرغبات",
     "breadcrumb": "الرئيسية",
@@ -720,5 +734,10 @@
     "select_all": "اختيار الكل",
     "deselect_all": "إلغاء اختيار الكل",
     "clear_selected": "مسح المختار"
+  },
+  "video": {
+    "title": "شاهد فيديوهاتنا الترويجية",
+    "description": "اكتشف كيف يمكن لمنتجاتنا وخدماتنا أن تغير حياتك نحو الأفضل",
+    "playButton": "تشغيل الفيديو"
   }
 }

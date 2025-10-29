@@ -244,15 +244,51 @@ const AddProduct = () => {
         }
       );
 
-      if (response.data.code === 200) {
-        toast.success("تم إضافة المنتج بنجاح!");
+      console.log("Add Product Response:", response.data);
+
+      if (
+        response.data.code === 200 ||
+        response.data.status === true ||
+        response.status === 200
+      ) {
+        toast.success(response.data.message || "تم إضافة المنتج بنجاح!");
+        // إعادة تعيين النموذج
+        setProductData({
+          name: { ar: "", en: "" },
+          small_desc: { ar: "", en: "" },
+          description: { ar: "", en: "" },
+          price: "",
+          stock: "",
+          category_id: "",
+          brand_id: "",
+          is_active: 1,
+        });
+        setImages([]);
         navigate("/dashboard/store");
       } else {
-        toast.error("خطأ في إضافة المنتج");
+        toast.error(response.data.message || "خطأ في إضافة المنتج");
       }
     } catch (error) {
       console.error("Error adding product:", error);
-      toast.error("خطأ في إضافة المنتج. حاول مرة أخرى.");
+
+      // معالجة أخطاء مختلفة
+      if (error.response) {
+        // خطأ من الخادم
+        const errorMessage =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          "خطأ في الخادم";
+        toast.error(`خطأ في الخادم: ${errorMessage}`);
+        console.error("Server Error:", error.response.data);
+      } else if (error.request) {
+        // خطأ في الشبكة
+        toast.error("خطأ في الاتصال بالخادم. تحقق من اتصال الإنترنت.");
+        console.error("Network Error:", error.request);
+      } else {
+        // خطأ آخر
+        toast.error("خطأ غير متوقع. حاول مرة أخرى.");
+        console.error("Unexpected Error:", error.message);
+      }
     } finally {
       setLoading(false);
     }

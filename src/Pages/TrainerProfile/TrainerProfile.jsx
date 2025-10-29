@@ -20,26 +20,21 @@ import { AiFillStar } from "react-icons/ai";
 import { BiVideo } from "react-icons/bi";
 import { LuFile } from "react-icons/lu";
 import image1 from "../../assets/bg.png";
-import image2 from "../../assets/bg-login.png";
-import image3 from "../../assets/hero.png";
 import user from "../../assets/user.png";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FaShoppingBag } from "react-icons/fa";
-import { useParams } from "react-router-dom";
-
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 export default function TrainerProfile() {
   const { t } = useTranslation();
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
   const [trainerData, setTrainerData] = useState(null);
   const [trainerCourses, setTrainerCourses] = useState([]);
   const [trainerProducts, setTrainerProducts] = useState([]);
-  const { id } = useParams();
-
 
   useEffect(() => {
     window.scrollTo({
@@ -62,7 +57,9 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer data:", error);
       }
     };
-    fetchTrainerData();
+    if (id) {
+      fetchTrainerData();
+    }
   }, [id]);
 
   // جلب بيانات الكورسات باستخدام id ديناميكي
@@ -79,7 +76,9 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer courses:", error);
       }
     };
-    fetchTrainerCourses();
+    if (id) {
+      fetchTrainerCourses();
+    }
   }, [id]);
 
   // جلب بيانات المنتجات باستخدام id ديناميكي
@@ -96,7 +95,9 @@ export default function TrainerProfile() {
         console.error("Error fetching trainer products:", error);
       }
     };
-    fetchTrainerProducts();
+    if (id) {
+      fetchTrainerProducts();
+    }
   }, [id]);
 
   // Tab configuration
@@ -230,7 +231,7 @@ export default function TrainerProfile() {
       </div>
 
       {/* Main Content */}
-      <div className="md:max-w-6xl mx-auto bg-white px-6 py-24" >
+      <div className="md:max-w-6xl mx-auto bg-white px-6 py-24">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6">
           <motion.div
@@ -272,7 +273,6 @@ export default function TrainerProfile() {
             <div className="h-[3px] bg-purple-600 my-3 md:my-8"></div>
             <div className="flex items-center gap-2">
               <span className="font-[Montserrat-Arabic] font-normal text-purple-600 text-[14px] md:text-[32px] leading-[1] tracking-[0%]">
-                {trainerData?.account_type}
                 {trainerData?.account_type}
               </span>
             </div>

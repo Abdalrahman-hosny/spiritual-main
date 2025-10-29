@@ -5,7 +5,7 @@ import axios from "axios";
 
 export default function AboutUs() {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar';
+  const isRTL = i18n.language === "ar";
   const [aboutData, setAboutData] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -13,7 +13,9 @@ export default function AboutUs() {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const response = await axios.get('https://spiritual.brmjatech.uk/api/pages/about');
+        const response = await axios.get(
+          "https://spiritual.brmjatech.uk/api/pages/about"
+        );
         setAboutData(response.data.data);
         setIsLoaded(true);
       } catch (error) {
@@ -103,15 +105,15 @@ export default function AboutUs() {
               </h1>
               <div className="w-24 h-1 bg-purple-500 mx-auto mb-6"></div>
               <p className="text-lg md:text-xl text-purple-100 max-w-3xl mx-auto">
-                {isRTL ? "منصة روحي تهدف إلى نشر الوعي وتقديم دورات وخدمات روحية ومنتجات دينية." : aboutData.content}
+                {isRTL
+                  ? "منصة روحي تهدف إلى نشر الوعي وتقديم دورات وخدمات روحية ومنتجات دينية."
+                  : aboutData.content}
               </p>
             </motion.div>
 
             {/* بطاقة معلومات إضافية */}
-        
 
             {/* قسم "لماذا نحن؟" */}
-           
           </div>
         </motion.div>
       )}

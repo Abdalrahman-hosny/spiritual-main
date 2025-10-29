@@ -76,11 +76,22 @@ const Courses = () => {
         );
 
         if (response.data.code === 200) {
-          setCourses(response.data.data.result);
-          setPagination(response.data.data.meta);
+          setCourses(response.data.data.result || []);
+          setPagination(
+            response.data.data.meta || {
+              current_page: 1,
+              last_page: 1,
+              per_page: 10,
+              total: 0,
+            }
+          );
+        } else {
+          setCourses([]);
+          toast.error("خطأ في جلب الكورسات");
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
+        setCourses([]);
         toast.error("خطأ في جلب الكورسات");
       } finally {
         setLoading(false);
@@ -517,7 +528,9 @@ const Courses = () => {
               onClose={() => setShowAddModal(false)}
               onSuccess={() => {
                 setShowAddModal(false);
-                fetchCourses(pagination.current_page, searchTerm);
+                // إعادة تحميل الكورسات من الصفحة الأولى
+                fetchCourses(1, "");
+                setSearchTerm("");
               }}
             />
           )}
@@ -532,6 +545,7 @@ const Courses = () => {
               onSuccess={() => {
                 setShowEditModal(false);
                 setSelectedCourse(null);
+                // إعادة تحميل الكورسات من الصفحة الحالية
                 fetchCourses(pagination.current_page, searchTerm);
               }}
             />

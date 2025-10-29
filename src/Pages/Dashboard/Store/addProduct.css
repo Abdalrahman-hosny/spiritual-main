@@ -318,9 +318,6 @@
 }
 
 /* RTL Support */
-[dir="rtl"] .page-header {
-  flex-direction: row-reverse;
-}
 
 [dir="rtl"] .multilingual-inputs {
   direction: rtl;

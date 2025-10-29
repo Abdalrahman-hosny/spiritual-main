@@ -74,16 +74,24 @@ const CourseSlider = ({ isTrue = true }) => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get("https://spiritual.brmjatech.uk/api/courses");
-        if (response.data.code === 200) {
-          const formattedCourses = response.data.data.result.map((course) => ({
+        const response = await fetch(
+          "https://spiritual.brmjatech.uk/api/courses",
+          {
+            headers: {
+              "Accept-Language": "ar",
+            },
+          }
+        );
+        const data = await response.json();
+        if (data.code === 200 && data.data && data.data.result) {
+          const formattedCourses = data.data.result.map((course) => ({
             id: course.id,
             name: course.title,
             // guard trainer access (API may return null/missing trainer)
             instructor: course.trainer?.name || "",
             logo: course.image,
-            rating: course.rating_avg,
-            reviews: course.reviews_count,
+            rating: course.rating_avg || 0,
+            reviews: course.reviews_count || 0,
             price: course.price,
             files: course.files_count,
             videos: course.lectures_count,
@@ -169,7 +177,10 @@ const CourseSlider = ({ isTrue = true }) => {
                 whileTap="tap"
                 className="bg-white rounded-xl overflow-hidden border border-gray-100 h-full flex flex-col shadow-sm hover:shadow-lg transition-all duration-300"
               >
-                <Link to={`/courseDetails/${course.id}`} className="block h-full">
+                <Link
+                  to={`/courseDetails/${course.id}`}
+                  className="block h-full"
+                >
                   <div className="relative">
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
@@ -211,11 +222,19 @@ const CourseSlider = ({ isTrue = true }) => {
                           initial="initial"
                           whileHover="hover"
                         >
-                          <AiFillStar className="mx-px" />
+                          <AiFillStar
+                            className={`mx-px ${
+                              i < Math.floor(course.rating)
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
                         </motion.span>
                       ))}
                       <motion.span
-                        className={`text-gray-600 text-sm ${isRTL ? "mr-2" : "ml-2"}`}
+                        className={`text-gray-600 text-sm ${
+                          isRTL ? "mr-2" : "ml-2"
+                        }`}
                         whileHover={{ color: "#8B5CF6" }}
                       >
                         ({course.reviews})
@@ -233,14 +252,22 @@ const CourseSlider = ({ isTrue = true }) => {
                         whileHover={{ scale: 1.1 }}
                         className="flex items-center"
                       >
-                        <BiVideo className={`text-purple-600 ${isRTL ? "mr-1" : "ml-1"}`} />
+                        <BiVideo
+                          className={`text-purple-600 ${
+                            isRTL ? "mr-1" : "ml-1"
+                          }`}
+                        />
                         {course.videos} {t("courses.videos")}
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.1 }}
                         className="flex items-center"
                       >
-                        <LuFile className={`text-purple-600 ${isRTL ? "mr-1" : "ml-1"}`} />
+                        <LuFile
+                          className={`text-purple-600 ${
+                            isRTL ? "mr-1" : "ml-1"
+                          }`}
+                        />
                         {course.files} {t("courses.files")}
                       </motion.div>
                     </motion.div>
@@ -264,7 +291,9 @@ const CourseSlider = ({ isTrue = true }) => {
                       )}
                       <motion.span
                         whileHover={{ color: "#8B5CF6" }}
-                        className={`text-gray-700 text-sm font-medium ${isRTL ? "mr-2" : "ml-2"}`}
+                        className={`text-gray-700 text-sm font-medium ${
+                          isRTL ? "mr-2" : "ml-2"
+                        }`}
                       >
                         {course.instructor}
                       </motion.span>

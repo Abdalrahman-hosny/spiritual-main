@@ -103,7 +103,7 @@ export default function Herosection() {
               {t("hero.description")}
             </p>
             <div
-             
+              className={`flex`}
             >
               <button
                 onClick={() => navigate("/about-us")}

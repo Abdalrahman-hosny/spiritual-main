@@ -3,6 +3,14 @@
   box-sizing: border-box;
 }
 
+/* React Icons fix */
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
 /* Store Page */
 .storePage {
   padding: 2rem;
@@ -71,6 +79,13 @@
   right: 1rem;
   color: #6b7280;
   font-size: 0.875rem;
+  z-index: 1;
+}
+
+.searchIcon svg {
+  width: 1em;
+  height: 1em;
+  display: block;
 }
 
 [dir="rtl"] .searchIcon {
@@ -211,9 +226,15 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   transition: all 0.2s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.actionBtn svg {
+  width: 1em;
+  height: 1em;
+  display: block;
 }
 
 .actionBtn:hover {
@@ -345,13 +366,14 @@
 .statIcon {
   font-size: 0.8rem;
   color: #9ca3af;
-  background: transparent !important;
-  padding: 0;
-  border: none;
-  box-shadow: none;
-  width: auto;
-  height: auto;
-  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.statIcon svg {
+  width: 1em;
+  height: 1em;
+  display: block;
 }
 
 /* Product Description */
@@ -412,6 +434,12 @@
   transition: all 0.2s;
 }
 
+.paginationBtn svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
 .paginationBtn:hover:not(:disabled) {
   background: #f3f4f6;
   color: #374151;
@@ -464,10 +492,6 @@
 
 [dir="rtl"] .pagination {
   flex-direction: row-reverse;
-}
-
-[dir="rtl"] .productStats {
-  align-items: flex-end;
 }
 
 /* Responsive Design */
@@ -733,6 +757,12 @@
   margin-bottom: 1rem;
 }
 
+.spinner svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -788,8 +818,9 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: 2rem;
   backdrop-filter: blur(4px);
+  overflow-y: auto;
 }
 
 .modalContent {
@@ -798,11 +829,32 @@
   max-width: 1000px;
   width: 100%;
   max-height: 90vh;
-  overflow: hidden;
+  overflow-y: auto;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   flex-direction: column;
+  margin: auto;
+  position: relative;
+}
+
+/* Custom scrollbar for modal */
+.modalContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 @keyframes modalSlideIn {
@@ -869,6 +921,12 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
+.modalClose svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
 .modalClose:hover {
   background: #dc2626;
   transform: scale(1.1);
@@ -877,7 +935,6 @@
 
 .modalBody {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   padding: 2rem;
   flex: 1;
@@ -1170,16 +1227,11 @@
   overflow-y: auto;
 }
 
-.productActions {
+.modalActions {
   display: flex;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: #f8fafc;
-  border-radius: 1rem;
-  border: 1px solid #e5e7eb;
 }
 
-.actionBtn {
+.modalActionBtn {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1194,22 +1246,22 @@
   justify-content: center;
 }
 
-.actionBtn:first-child {
+.modalActionBtn:first-child {
   background: linear-gradient(135deg, #6a4ffc 0%, #8b5cf6 100%);
   color: white;
 }
 
-.actionBtn:first-child:hover {
+.modalActionBtn:first-child:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(106, 79, 252, 0.3);
 }
 
-.actionBtn:last-child {
+.modalActionBtn:last-child {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
 }
 
-.actionBtn:last-child:hover {
+.modalActionBtn:last-child:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
@@ -1240,6 +1292,12 @@
   box-shadow: 0 4px 15px rgba(237, 200, 14, 0.3);
 }
 
+.closeBtn svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
 .closeBtn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(237, 200, 14, 0.4);
@@ -1258,18 +1316,225 @@
   direction: rtl;
 }
 
-[dir="rtl"] .productActions {
-  flex-direction: row-reverse;
+/* Delete Modal Styles */
+.deleteConfirmation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Specific styles for delete modal */
+.deleteModalOverlay {
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteModalContent {
+  max-width: 500px;
+  width: 90%;
+  margin: auto;
+}
+
+.warningIcon {
+  width: 60px;
+  height: 60px;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: #ef4444;
+  font-size: 1.5rem;
+}
+
+.confirmationText {
+  font-size: 1.1rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.warningText {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.modalCancelBtn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+.modalCancelBtn:hover {
+  background: #4b5563;
+}
+
+.modalDeleteBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modalDeleteBtn:hover {
+  background: #dc2626;
+}
+
+/* Update Form Styles */
+.updateForm {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #6a4ffc;
+  box-shadow: 0 0 0 3px rgba(106, 79, 252, 0.1);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.fileInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fileInput:hover {
+  border-color: #6a4ffc;
+  background: #f3f4f6;
+}
+
+.imagePreview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.imageItem {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 24px;
+  height: 24px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.removeImageBtn:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.modalSaveBtn {
+  background: #6a4ffc;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modalSaveBtn:hover:not(:disabled) {
+  background: #5a3edb;
+  transform: translateY(-2px);
+}
+
+.modalSaveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Responsive Modal */
 @media (max-width: 768px) {
   .modalOverlay {
-    padding: 0.5rem;
+    padding: 1rem;
+    align-items: flex-start;
+    padding-top: 2rem;
   }
 
   .modalContent {
     max-height: 95vh;
+    overflow-y: auto;
+    margin: 0;
+    width: 100%;
   }
 
   .modalHeader {
@@ -1291,14 +1556,23 @@
     gap: 1rem;
   }
 
-  .productActions {
+  .modalActions {
     flex-direction: column;
   }
 }
 
 @media (max-width: 480px) {
   .modalOverlay {
-    padding: 0.25rem;
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 1rem;
+  }
+
+  .modalContent {
+    max-height: 98vh;
+    overflow-y: auto;
+    margin: 0;
+    width: 100%;
   }
 
   .modalHeader {

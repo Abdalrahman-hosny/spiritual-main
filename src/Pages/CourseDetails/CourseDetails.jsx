@@ -23,14 +23,14 @@ const CommentForm = ({ courseId, onReviewSubmitted }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar';
+  const isRTL = i18n.language === "ar";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
     try {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       const response = await axios.post(
         `https://spiritual.brmjatech.uk/api/courses/${courseId}/reviews`,
         { rating, comment, name, email },
@@ -42,7 +42,9 @@ const CommentForm = ({ courseId, onReviewSubmitted }) => {
         setComment("");
         setRating(5);
         toast.success(
-          isRTL ? "تم إضافة تعليقك بنجاح!" : "Your review has been added successfully!",
+          isRTL
+            ? "تم إضافة تعليقك بنجاح!"
+            : "Your review has been added successfully!",
           { position: isRTL ? "top-left" : "top-right", autoClose: 3000 }
         );
         onReviewSubmitted();
@@ -61,7 +63,7 @@ const CommentForm = ({ courseId, onReviewSubmitted }) => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white">
-      <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px] text-right align-middle mb-6">
+      <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px]  align-middle mb-6">
         {t("commentForm.title")}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -71,7 +73,7 @@ const CommentForm = ({ courseId, onReviewSubmitted }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t("commentForm.email")}
-            className="w-full border font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full border font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-purple-500"
             required
           />
           <input
@@ -79,7 +81,7 @@ const CommentForm = ({ courseId, onReviewSubmitted }) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t("commentForm.name")}
-            className="w-full font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-purple-500"
             required
           />
         </div>
@@ -88,7 +90,7 @@ const CommentForm = ({ courseId, onReviewSubmitted }) => {
           onChange={(e) => setComment(e.target.value)}
           placeholder={t("commentForm.comment")}
           rows="4"
-          className="w-full border font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full border font-[Montserrat-Arabic] font-light text-[16px] p-3 leading-[100%] align-middle text-[#757575] border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-purple-500"
           required
         ></textarea>
         <div className="flex justify-between items-center">
@@ -112,10 +114,12 @@ const CommentForm = ({ courseId, onReviewSubmitted }) => {
             disabled={isSubmitting}
             className="px-8 py-2 font-[Montserrat-Arabic] font-medium text-[14px] leading-[19.5px] text-center bg-purple-600 text-white rounded-full hover:bg-purple-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? t("commentForm.submitting") : t("commentForm.submit")}
+            {isSubmitting
+              ? t("commentForm.submitting")
+              : t("commentForm.submit")}
           </button>
         </div>
-        {error && <p className="text-red-500 text-right mt-2">{error}</p>}
+        {error && <p className="text-red-500  mt-2">{error}</p>}
       </form>
     </div>
   );
@@ -128,7 +132,7 @@ const ReviewsSection = ({ reviews }) => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white">
-      <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px] text-right align-middle mb-6">
+      <h2 className="font-[Montserrat-Arabic] font-semibold text-[24px] leading-[28.8px]  align-middle mb-6">
         {t("reviews.title")}
       </h2>
       <div className="space-y-6">
@@ -147,7 +151,9 @@ const ReviewsSection = ({ reviews }) => {
                     <FaStar
                       key={i}
                       size={16}
-                      className={i < review.rating ? "text-orange-400" : "text-gray-300"}
+                      className={
+                        i < review.rating ? "text-orange-400" : "text-gray-300"
+                      }
                     />
                   ))}
                 </div>
@@ -156,7 +162,7 @@ const ReviewsSection = ({ reviews }) => {
                 {review.name}
               </p>
             </div>
-            <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] text-right text-[#555555]">
+            <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px]  text-[#555555]">
               {review.comment}
             </p>
           </motion.div>
@@ -177,7 +183,7 @@ const CourseDetails = () => {
   const [reviews, setReviews] = useState([]);
   const [relatedCourses, setRelatedCourses] = useState([]);
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar';
+  const isRTL = i18n.language === "ar";
 
   const heroVariants = {
     hidden: { opacity: 0, scale: 0.9 },
@@ -206,7 +212,7 @@ const CourseDetails = () => {
   };
 
   useEffect(() => {
-    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
     document.documentElement.lang = i18n.language;
   }, [isRTL, i18n.language]);
 
@@ -302,10 +308,10 @@ const CourseDetails = () => {
       if (response.data.code === 201) {
         window.location.href = response.data.data.subscription.redirect_url;
       } else {
-        console.error('فشل إنشاء الطلب:', response.data.message);
+        console.error("فشل إنشاء الطلب:", response.data.message);
       }
     } catch (error) {
-      console.error('حدث خطأ أثناء إنشاء الطلب:', error);
+      console.error("حدث خطأ أثناء إنشاء الطلب:", error);
     } finally {
       setIsSubscribing(false);
     }
@@ -313,13 +319,18 @@ const CourseDetails = () => {
 
   const tabs = [
     { id: "profile", label: t("course.aboutCourse"), color: "purple" },
-    { id: "courses", label: t("course.files"), color: "blue", badge: course?.files_count || 0 },
+    {
+      id: "courses",
+      label: t("course.files"),
+      color: "blue",
+      badge: course?.files_count || 0,
+    },
   ];
 
   if (!course) return <div>Loading...</div>;
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'}>
+    <div>
       {/* Hero Section */}
       <div className="relative">
         <div className="image">
@@ -355,7 +366,11 @@ const CourseDetails = () => {
               variants={plantVariants}
               initial="hidden"
               animate="visible"
-              className={`absolute z-40 -bottom-6 sm:-bottom-8 ${isRTL ? 'right-0 transform translate-x-1/4 translate-y-1/4' : 'left-0 transform -translate-x-1/4 translate-y-1/4'} sm:-translate-x-1/3 sm:translate-y-1/3 md:-translate-x-1/5 md:translate-y-1/5 lg:-translate-x-1/3 lg:translate-y-1/3`}
+              className={`absolute z-40 -bottom-6 sm:-bottom-8 ${
+                isRTL
+                  ? "right-0 transform translate-x-1/4 translate-y-1/4"
+                  : "left-0 transform -translate-x-1/4 translate-y-1/4"
+              } sm:-translate-x-1/3 sm:translate-y-1/3 md:-translate-x-1/5 md:translate-y-1/5 lg:-translate-x-1/3 lg:translate-y-1/3`}
             >
               <div className="relative">
                 <div className="absolute -top-12 left-2 w-24 h-24 sm:w-32 sm:h-32 sm:-top-16 sm:left-4 md:w-48 md:h-48 md:-top-24 md:left-6 lg:w-64 lg:h-64 lg:-top-32 lg:left-8 xl:w-80 xl:h-80 xl:-top-36 rounded-full">
@@ -390,52 +405,108 @@ const CourseDetails = () => {
             className="hidden bg-white shadow-md rounded-md p-6 border border-gray-100 md:flex flex-col justify-between"
           >
             <div>
-              <h3 className="font-[Montserrat-Arabic] text-right font-semibold text-[18px] text-gray-800 mb-4">
+              <h3 className="font-[Montserrat-Arabic]  font-semibold text-[18px] text-gray-800 mb-4">
                 {t("course.includes")}
               </h3>
               {/* Course Schedule */}
-              <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
+              <div
+                className={`flex items-center justify-between border-b border-gray-200 py-4 text-gray-600 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
                   {course.schedule}
                 </span>
-                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
+                <span
+                  className={`flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px] ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
                   {t("course.time")}
-                  {isRTL ? <IoMdTime className="mr-1 text-purple-500 font-bold text-md" /> : <IoMdTime className="ml-1 text-purple-500 font-bold text-md" />}
+                  {isRTL ? (
+                    <IoMdTime className="mr-1 text-purple-500 font-bold text-md" />
+                  ) : (
+                    <IoMdTime className="ml-1 text-purple-500 font-bold text-md" />
+                  )}
                 </span>
               </div>
               {/* Files */}
-              <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
+              <div
+                className={`flex items-center justify-between border-b border-gray-200 py-4 text-gray-600 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
                   {course.files_count}
                 </span>
-                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
+                <span
+                  className={`flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px] ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
                   {t("course.files")}
-                  {isRTL ? <CiFileOn className="mr-1 text-purple-500 font-bold text-md" /> : <CiFileOn className="ml-1 text-purple-500 font-bold text-md" />}
+                  {isRTL ? (
+                    <CiFileOn className="mr-1 text-purple-500 font-bold text-md" />
+                  ) : (
+                    <CiFileOn className="ml-1 text-purple-500 font-bold text-md" />
+                  )}
                 </span>
               </div>
               {/* Duration */}
-              <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
+              <div
+                className={`flex items-center justify-between border-b border-gray-200 py-4 text-gray-600 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
                   {course.duration}
                 </span>
-                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
+                <span
+                  className={`flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px] ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
                   {t("course.duration")}
-                  {isRTL ? <CiPlay1 className="mr-1 text-purple-500 font-bold text-md" /> : <CiPlay1 className="ml-1 text-purple-500 font-bold text-md" />}
+                  {isRTL ? (
+                    <CiPlay1 className="mr-1 text-purple-500 font-bold text-md" />
+                  ) : (
+                    <CiPlay1 className="ml-1 text-purple-500 font-bold text-md" />
+                  )}
                 </span>
               </div>
               {/* Lectures */}
-              <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
+              <div
+                className={`flex items-center justify-between border-b border-gray-200 py-4 text-gray-600 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 <span className="font-[Montserrat-Arabic] text-[#222222] font-semibold text-[14px]">
                   {course.lectures_count}
                 </span>
-                <span className="flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px]">
+                <span
+                  className={`flex items-center gap-1 font-[Montserrat-Arabic] font-light text-[16px] ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
                   {t("course.lectures")}
-                  {isRTL ? <CiPlay1 className="mr-1 text-purple-500 font-bold text-md" /> : <CiPlay1 className="ml-1 text-purple-500 font-bold text-md" />}
+                  {isRTL ? (
+                    <CiPlay1 className="mr-1 text-purple-500 font-bold text-md" />
+                  ) : (
+                    <CiPlay1 className="ml-1 text-purple-500 font-bold text-md" />
+                  )}
                 </span>
               </div>
               {/* Reviews */}
-              <div className="flex items-center justify-between border-b border-gray-200 py-4 text-gray-600">
-                <div className="flex items-center gap-1">
+              <div
+                className={`flex items-center justify-between border-b border-gray-200 py-4 text-gray-600 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
+                <div
+                  className={`flex items-center gap-1 ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
                   {[...Array(5)].map((_, i) => (
                     <FaStar key={i} className="text-yellow-400" />
                   ))}
@@ -462,10 +533,12 @@ const CourseDetails = () => {
                   onClick={handleSubscribe}
                   disabled={isSubscribing}
                   className={`w-[60%] bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded-full transition-colors duration-300 ${
-                    isSubscribing ? 'opacity-70 cursor-not-allowed' : ''
+                    isSubscribing ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
-                  {isSubscribing ? t("course.subscribing") : t("course.subscribe")}
+                  {isSubscribing
+                    ? t("course.subscribing")
+                    : t("course.subscribe")}
                 </motion.button>
               </div>
             </motion.div>
@@ -474,9 +547,15 @@ const CourseDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-6 flex justify-center items-center space-x-2 rtl:space-x-reverse text-gray-600"
+              className={`mt-6 flex justify-center items-center text-gray-600 ${
+                isRTL ? "flex-row-reverse" : ""
+              }`}
             >
-              <div className="flex items-center gap-1">
+              <div
+                className={`flex items-center ${
+                  isRTL ? "gap-1 rtl:gap-1" : "gap-1"
+                } mr-2`}
+              >
                 <a href="#" className="hover:text-blue-600 transition-colors">
                   <GrFacebookOption />
                 </a>
@@ -522,15 +601,21 @@ const CourseDetails = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
-                className="flex items-center gap-6 p-4"
+                className={`flex items-center gap-6 p-4 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
               >
-                <div className="flex items-center gap-3">
+                <div
+                  className={`flex items-center ${
+                    isRTL ? "flex-row-reverse gap-3" : "gap-3"
+                  }`}
+                >
                   <img
                     src={preview}
                     alt={t("course.instructorAlt")}
                     className="w-[70px] h-[70px] rounded-full"
                   />
-                  <div>
+                  <div className={isRTL ? "text-right" : "text-left"}>
                     <h4 className="text-[#555555] font-[Montserrat-Arabic] font-normal text-[14px]">
                       {t("course.instructor")}
                     </h4>
@@ -539,7 +624,11 @@ const CourseDetails = () => {
                     </p>
                   </div>
                 </div>
-                <div className={`border-${isRTL ? 'l' : 'r'}-2 border-gray-300 ${isRTL ? 'pe-6' : 'ps-6'}`}>
+                <div
+                  className={`border-${isRTL ? "l" : "r"}-2 border-gray-300 ${
+                    isRTL ? "pe-6" : "ps-6"
+                  }`}
+                >
                   <span className="font-[Montserrat-Arabic] font-normal text-[14px] text-[#555555]">
                     {t("course.category")}
                   </span>
@@ -556,7 +645,7 @@ const CourseDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="font-[Montserrat-Arabic] font-medium text-[24px] sm:text-[36px] leading-[36px] text-right"
+              className="font-[Montserrat-Arabic] font-medium text-[24px] sm:text-[36px] leading-[36px] "
             >
               {course.title}
             </motion.h2>
@@ -579,16 +668,26 @@ const CourseDetails = () => {
                     className={`relative flex items-center px-4 py-2 font-[Montserrat-Arabic] font-light text-[14px] leading-[32.3px] text-center align-middle transition-all duration-300 flex-1 justify-center ${
                       isActive
                         ? `bg-purple-600 text-white shadow-md transform scale-105 ${
-                            tab.id === "courses" ? "rounded-s-2xl rtl:rounded-s-none rtl:rounded-e-2xl" : "rounded-e-2xl rtl:rounded-e-none rtl:rounded-s-2xl"
+                            tab.id === "courses"
+                              ? "rounded-s-2xl rtl:rounded-s-none rtl:rounded-e-2xl"
+                              : "rounded-e-2xl rtl:rounded-e-none rtl:rounded-s-2xl"
                           }`
                         : "text-gray-600"
                     } ${
-                      isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                      isLoading
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer"
                     }`}
                   >
                     <span>{tab.label}</span>
                     {tab.badge && (
-                      <span className={`absolute top-0 ${isRTL ? 'left-1/2 transform -translate-x-1/2' : 'right-1/2 transform translate-x-1/2'} -translate-y-1/2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center`}>
+                      <span
+                        className={`absolute top-0 ${
+                          isRTL
+                            ? "left-1/2 transform -translate-x-1/2"
+                            : "right-1/2 transform translate-x-1/2"
+                        } -translate-y-1/2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center`}
+                      >
                         {tab.badge}
                       </span>
                     )}
@@ -625,7 +724,7 @@ const CourseDetails = () => {
                         transition={{ delay: 0.2 }}
                         className="space-y-6 bg-gray-50 p-6 rounded-xl shadow-sm"
                       >
-                        <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px] text-right text-[#555555]">
+                        <p className="font-[Montserrat-Arabic] font-light text-[16px] leading-[32.3px]  text-[#555555]">
                           {course.description}
                         </p>
                       </motion.div>
@@ -648,7 +747,7 @@ const CourseDetails = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="pt-6"
         >
-          <h3 className="font-[Montserrat-Arabic] font-semibold text-[20px] leading-[38px] text-right text-purple-500">
+          <h3 className="font-[Montserrat-Arabic] font-semibold text-[20px] leading-[38px] text-center  text-purple-500">
             {t("course.relatedCourses")}
           </h3>
           <CourseSlider courses={relatedCourses} />
@@ -668,22 +767,24 @@ const TrainerFiles = ({ files }) => {
   const isRTL = i18n.language === 'ar';
 
   return (
-    <div className="py-10 bg-white" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="py-10 bg-white" dir={isRTL ? "rtl" : "ltr"}>
       <div className="space-y-6">
         {files?.map((file) => (
           <motion.div
             key={file.id}
             whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.3 }}
-            className="flex gap-4 items-center shadow-md rounded-lg px-4 py-3 bg-white border border-gray-100 hover:shadow-lg transition-shadow duration-300"
+            className={`flex gap-4 items-center shadow-md rounded-lg px-4 py-3 bg-white border border-gray-100 hover:shadow-lg transition-shadow duration-300 ${
+              isRTL ? "flex-row-reverse" : ""
+            }`}
           >
             <img
               src={pdf}
               alt={t("course.pdfAlt")}
               className="w-[80px] h-[80px]"
             />
-            <div className="text-right flex-1">
-              <h3 className="font-[Montserrat-Arabic] font-medium text-[20px] leading-[20px] text-right mb-3">
+            <div className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}>
+              <h3 className="font-[Montserrat-Arabic] font-medium text-[20px] leading-[20px] mb-3">
                 {file.name}
               </h3>
               <p className="font-[Montserrat-Arabic] font-light text-[12px] text-[#000000]">
