@@ -36,6 +36,20 @@ export default function TrainerProfile() {
   const [trainerCourses, setTrainerCourses] = useState([]);
   const [trainerProducts, setTrainerProducts] = useState([]);
 
+  // Helper to resolve image URLs that may be relative paths from the API
+  const resolveImage = (src, fallback = image1) => {
+    if (!src) return fallback;
+    try {
+      // if absolute URL, return as-is
+      if (/^https?:\/\//i.test(src)) return src;
+      // otherwise prefix with backend origin
+      const base = "https://spiritual.brmjatech.uk";
+      return src.startsWith("/") ? `${base}${src}` : `${base}/${src}`;
+    } catch (e) {
+      return fallback;
+    }
+  };
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -69,8 +83,11 @@ export default function TrainerProfile() {
         const response = await axios.get(
           `https://spiritual.brmjatech.uk/api/home/trainers/${id}/courses`
         );
-        if (response.data.code === 200) {
-          setTrainerCourses(response.data.data.result);
+        if (response.data) {
+          // tolerate a few possible payload shapes
+          const payload =
+            response.data.data?.result || response.data.data || response.data.result || response.data;
+          setTrainerCourses(Array.isArray(payload) ? payload : []);
         }
       } catch (error) {
         console.error("Error fetching trainer courses:", error);
@@ -88,8 +105,10 @@ export default function TrainerProfile() {
         const response = await axios.get(
           `https://spiritual.brmjatech.uk/api/home/trainers/${id}/products`
         );
-        if (response.data.code === 200) {
-          setTrainerProducts(response.data.data.result);
+        if (response.data) {
+          const payload =
+            response.data.data?.result || response.data.data || response.data.result || response.data;
+          setTrainerProducts(Array.isArray(payload) ? payload : []);
         }
       } catch (error) {
         console.error("Error fetching trainer products:", error);
@@ -242,12 +261,10 @@ export default function TrainerProfile() {
           >
             <div className="md:w-[232px] md:h-[232px] w-20 h-20 rounded-full overflow-hidden ring-4 ring-purple-100 relative group">
               <img
-                src={
-                  trainerData?.image ||
-                  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-                }
+                src={resolveImage(trainerData?.image, user)}
                 alt={t("trainerProfile.trainerAlt")}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={(e) => { e.currentTarget.src = user; }}
               />
               <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <span className="text-white font-medium text-lg">
@@ -359,7 +376,7 @@ export default function TrainerProfile() {
               )}
               {activeTab === "courses" && (
                 <div className="space-y-6">
-                  <TrainerCourses courses={trainerCourses} />
+                  <TrainerCourses courses={trainerCourses} trainerData={trainerData} />
                 </div>
               )}
               {activeTab === "products" && (
@@ -448,71 +465,81 @@ export default function TrainerProfile() {
   );
 }
 
-const TrainerCourses = ({ courses }) => {
+const TrainerCourses = ({ courses, trainerData }) => {
   const { t } = useTranslation();
+  if (!Array.isArray(courses) || courses.length === 0) {
+    return (
+      <div className="py-10 bg-white text-center text-gray-500">
+        {t("trainerProfile.noCourses") || "لا توجد كورسات"}
+      </div>
+    );
+  }
   return (
     <div className="py-10 bg-white">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {courses.map((course) => (
-          <motion.div
-            key={course.id}
-            whileHover={{ y: -5, scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-xl shadow-md overflow-hidden relative border border-gray-100 hover:shadow-lg transition-shadow duration-300"
-          >
-            <Link to={`/courseDetails/${course.id}`} className="w-full block">
-              {/* Price Badge */}
-              <div className="absolute top-3 right-3 bg-purple-500 text-white text-sm px-4 py-1 rounded-full">
-                {course.price} {t("trainerProfile.currency")}
-              </div>
-              {/* Course Logo/Image */}
-              <div className="flex justify-center items-center bg-gray-100 h-40 overflow-hidden">
-                <motion.img
-                  src={course.logo || image1}
-                  alt={t("trainerProfile.courseLogoAlt")}
-                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                  whileHover={{ scale: 1.05 }}
-                />
-              </div>
-              {/* Course Details */}
-              <div className="p-4">
-                {/* Rating */}
-                <div className="flex items-center text-yellow-400 text-sm mb-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <AiFillStar key={i} />
-                  ))}
-                  <span className="ml-2 text-gray-600 text-sm">
-                    ({course.reviews})
-                  </span>
+        {courses.map((course) => {
+          const id = course.id || course.course_id || course._id;
+          const title = course.name || course.title || course.course_name || course.title_en || "بدون عنوان";
+          const imgSrc = course.logo || course.image || course.thumbnail || image1;
+          const price = course.price || course.final_price || course.cost || 0;
+          const reviews = course.reviews || course.review_count || 0;
+          const videos = course.videos || course.video_count || 0;
+          const files = course.files || course.file_count || 0;
+
+          return (
+            <motion.div
+              key={id || title}
+              whileHover={{ y: -5, scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-xl shadow-md overflow-hidden relative border border-gray-100 hover:shadow-lg transition-shadow duration-300"
+            >
+              <Link to={`/courseDetails/${id}`} className="w-full block">
+                {/* Price Badge */}
+                <div className="absolute top-3 right-3 bg-purple-500 text-white text-sm px-4 py-1 rounded-full">
+                  {price} {t("trainerProfile.currency")}
                 </div>
-                {/* Course Name */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {course.name}
-                </h3>
-                {/* Videos and Files */}
-                <div className="flex items-center text-sm text-gray-600 mb-3 space-x-3 rtl:space-x-reverse">
-                  <div className="flex items-center">
-                    <BiVideo className="ml-1 text-purple-500" /> {course.videos}{" "}
-                    {t("trainerProfile.videos")}
-                  </div>
-                  <div className="flex items-center">
-                    <LuFile className="ml-1 text-purple-500" /> {course.files}{" "}
-                    {t("trainerProfile.files")}
-                  </div>
-                </div>
-                {/* Instructor */}
-                <div className="flex items-center text-gray-700 text-sm font-medium">
-                  <img
-                    src={user}
-                    className="w-[50px] h-[50px] rounded-full"
-                    alt={t("trainerProfile.instructorAlt")}
+                {/* Course Logo/Image */}
+                <div className="flex justify-center items-center bg-gray-100 h-40 overflow-hidden">
+                  <motion.img
+                    src={imgSrc}
+                    alt={title}
+                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    whileHover={{ scale: 1.05 }}
+                    onError={(e) => {
+                      e.currentTarget.src = image1;
+                    }}
                   />
-                  <span className="mr-2">{course.instructor}</span>
                 </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
+                {/* Course Details */}
+                <div className="p-4">
+                  {/* Rating */}
+                  <div className="flex items-center text-yellow-400 text-sm mb-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <AiFillStar key={i} />
+                    ))}
+                    <span className="ml-2 text-gray-600 text-sm">({reviews})</span>
+                  </div>
+                  {/* Course Name */}
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+                  {/* Videos and Files */}
+                  <div className="flex items-center text-sm text-gray-600 mb-3 space-x-3 rtl:space-x-reverse">
+                    <div className="flex items-center">
+                      <BiVideo className="ml-1 text-purple-500" /> {videos} {t("trainerProfile.videos")}
+                    </div>
+                    <div className="flex items-center">
+                      <LuFile className="ml-1 text-purple-500" /> {files} {t("trainerProfile.files")}
+                    </div>
+                  </div>
+                  {/* Instructor */}
+                  <div className="flex items-center text-gray-700 text-sm font-medium">
+                    <img src={user} className="w-[50px] h-[50px] rounded-full" alt={t("trainerProfile.instructorAlt")} />
+                    <span className="mr-2">{course.instructor || trainerData?.name || ""}</span>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
